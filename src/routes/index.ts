@@ -1,9 +1,11 @@
-import express from "express";
+import usersRouter from "./user";
+import commentsRouter from "./comment";
+import postsRouter from "./post";
 
-const router = express.Router();
+const indexRouter = require("express").Router();
 
-// user routes
-// post routes
-// comment routes
+indexRouter.use("/users", usersRouter);
+indexRouter.use("/posts", postsRouter);
+indexRouter.use("/post-comments", commentsRouter);
 
-export default router;
+export default indexRouter;

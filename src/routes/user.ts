@@ -1,11 +1,10 @@
-import express from "express";
 import userController from "../controllers/user";
 
-const router = express.Router();
+const usersRouter = require("express").Router();
 
-router.post("/sign-up", userController.signUp);
-router.post("/sign-in", userController.signIn);
-router.delete("/delete", userController.deleteUser);
-router.patch("/update", userController.updateUser);
+usersRouter.post("/sign-up", userController.signUp);
+usersRouter.post("/sign-in", userController.signIn);
+usersRouter.delete("/delete", userController.deleteUser);
+usersRouter.patch("/update", userController.updateUser);
 
-export default router;
+export default usersRouter;
