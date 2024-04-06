@@ -1,12 +1,20 @@
+import { Router } from "express";
 import postController from "../controllers/post";
+import auth from "../middleware";
 
-const postsRouter = require("express").Router();
+const postsRouter = Router();
 
-postsRouter.route("/").get(postController.getPosts).post(postController.createPost);
+// authenticate & authorize particular routes
+
+postsRouter
+  .route("/")
+  .get(postController.getPosts)
+  .post(auth.authenticateJwt, auth.isAuthor, postController.createPost);
+
 postsRouter
   .route("/:id")
   .get(postController.getPostById)
-  .patch(postController.updatePost)
-  .delete(postController.deletePost);
+  .patch(auth.authenticateJwt, auth.isAuthor, postController.updatePost)
+  .delete(auth.authenticateJwt, auth.isAuthor, postController.deletePost);
 
 export default postsRouter;
