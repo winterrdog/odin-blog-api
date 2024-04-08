@@ -133,12 +133,12 @@ const userController = {
         return res.status(404).json({ message: "User not found" });
       }
 
-      // omit undefined values
-      const dataForUpdate = _.omitBy(req.body, _.isUndefined);
+      // merge data to update
+      user = _.merge(user, req.body);
 
       return res.status(200).json({
         message: "User updated",
-        user: await user.updateOne(dataForUpdate),
+        user,
       });
     } catch (err) {
       console.error(err);
