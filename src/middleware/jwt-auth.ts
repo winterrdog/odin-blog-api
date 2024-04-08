@@ -9,9 +9,7 @@ async function verifyJwtCb(payload: JwtPayload, cb: any) {
     const user = await UserModel.findById(payload.data.sub);
     if (!user) return cb(null, false);
 
-    (user as any)["data"] = {
-      ...payload.data,
-    };
+    (user as any)["data"] = payload;
     return cb(null, user);
   } catch (e) {
     console.error(`error occurred during jwt verification: ${e}`);
