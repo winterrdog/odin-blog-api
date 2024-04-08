@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import * as _ from "lodash";
+import _ from "lodash";
 import * as argon2 from "argon2";
 import { JwtPayload } from "../middleware/interfaces";
 import { UserModel } from "../models/user";
@@ -47,7 +47,6 @@ const userController = {
       });
     } catch (err) {
       console.error(err);
-
       return res.status(500).json({
         message:
           process.env.NODE_ENV === "production"
@@ -57,30 +56,40 @@ const userController = {
     }
   },
   signIn: async function (req: Request, res: Response) {
-    const { name, password } = req.body;
-    const user = await UserModel.findOne({ name });
-    if (!user) {
-      return res
-        .status(404)
-        .json({ message: `user with username: ${name} was not found.` });
-    }
+    try {
+      const { name, password } = req.body;
+      const user = await UserModel.findOne({ name });
+      if (!user) {
+        return res
+          .status(404)
+          .json({ message: `user with username: ${name} was not found.` });
+      }
 
-    const isPasswordValid = await argon2.verify(user.passwordHash, password);
-    if (!isPasswordValid) {
-      return res.status(401).json({ message: "Invalid password" });
-    }
+      const isPasswordValid = await argon2.verify(user.passwordHash, password);
+      if (!isPasswordValid) {
+        return res.status(401).json({ message: "Invalid password" });
+      }
 
-    // craft jwt and send it back
-    const jwtPayload: JwtPayload = {
-      data: {
-        sub: user.id,
-        role: user.role,
-      },
-    };
-    return res.status(200).json({
-      message: "User signed in successfully",
-      token: await Utility.generateJwtPayload(jwtPayload),
-    });
+      // craft jwt and send it back
+      const jwtPayload: JwtPayload = {
+        data: {
+          sub: user.id,
+          role: user.role,
+        },
+      };
+      return res.status(200).json({
+        message: "User signed in successfully",
+        token: await Utility.generateJwtPayload(jwtPayload),
+      });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({
+        message:
+          process.env.NODE_ENV === "production"
+            ? "Internal server error occurred. Please try again later."
+            : (err as Error).message,
+      });
+    }
   },
   deleteUser: async function (req: Request, res: Response) {
     try {
@@ -104,7 +113,6 @@ const userController = {
       });
     } catch (err) {
       console.error(err);
-
       return res.status(500).json({
         message:
           process.env.NODE_ENV === "production"
@@ -125,7 +133,7 @@ const userController = {
         return res.status(404).json({ message: "User not found" });
       }
 
-      // using lodash to omit undefined values
+      // omit undefined values
       const dataForUpdate = _.omitBy(req.body, _.isUndefined);
 
       return res.status(200).json({
@@ -134,7 +142,6 @@ const userController = {
       });
     } catch (err) {
       console.error(err);
-
       return res.status(500).json({
         message:
           process.env.NODE_ENV === "production"
