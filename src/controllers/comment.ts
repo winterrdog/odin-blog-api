@@ -26,7 +26,10 @@ const commentController = {
           message: `comment with id, ${commentId}, and post id, ${postId}, was not found.`,
         });
       }
-      return storedComment;
+      return res.status(200).json({
+        message: "comment retrieved successfully",
+        comment: storedComment,
+      });
     } catch (e) {
       console.error(`Error fetching comment by id: ${e}`);
       return res.status(500).json({
