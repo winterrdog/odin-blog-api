@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { isValidObjectId } from "mongoose";
 import { CommentModel } from "../models/comment";
+import { CommentReqBody } from "../request-bodies/comment";
+import { JwtPayload } from "../middleware/interfaces";
 
 const commentController = {
   getCommentById: async function (req: Request, res: Response) {
@@ -71,11 +73,36 @@ const commentController = {
       });
     }
   },
-
-  // POST /:postId/comments
   createComment: async function (req: Request, res: Response) {
-    // todo
-    res.send("Create a new comment");
+    try {
+      const { postId } = req.params;
+      if (!isValidObjectId(postId)) {
+        return res.status(400).json({
+          message: `Post id, ${postId}, is invalid or malformed.`,
+        });
+      }
+
+      const { data } = (req.user! as any).data as JwtPayload;
+      const { sub } = data;
+      const reqBody: CommentReqBody = {
+        user: sub,
+        post: postId,
+        ...req.body,
+      };
+      const createdComment = await CommentModel.create({ ...reqBody });
+      return res.status(201).json({
+        message: "comment created successfully",
+        comment: createdComment,
+      });
+    } catch (e) {
+      console.error(`Error creating comment: ${e}`);
+      return res.status(500).json({
+        message:
+          process.env.NODE_ENV === "production"
+            ? "Internal server error occurred. Please try again later."
+            : (e as Error).message,
+      });
+    }
   },
 
   // PATCH /:postId/comments/:id
