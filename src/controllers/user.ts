@@ -40,7 +40,6 @@ const userController = {
           role,
         },
       };
-
       return res.status(201).json({
         message: "User created successfully",
         token: await Utility.generateJwtPayload(jwtPayload),
@@ -104,10 +103,7 @@ const userController = {
           message: "User not found",
         });
       }
-
-      // delete user
       await user.deleteOne();
-
       return res.status(204).json({
         message: "User deleted successfully",
       });
@@ -135,7 +131,7 @@ const userController = {
 
       // merge data to update
       user = _.merge(user, req.body);
-
+      await user!.save();
       return res.status(200).json({
         message: "User updated",
         user,
