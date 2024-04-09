@@ -89,7 +89,7 @@ const commentController = {
         user: sub,
         post: postId,
         ...req.body,
-      };
+      } as const;
       const createdComment = await CommentModel.create({ ...reqBody });
       return res.status(201).json({
         message: "comment created successfully",
