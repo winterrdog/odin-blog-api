@@ -1,5 +1,7 @@
-import { JwtPayload } from "./middleware/interfaces";
+import { NextFunction, Request, Response } from "express";
 import * as jwt from "jsonwebtoken";
+import { validationResult } from "express-validator";
+import { JwtPayload } from "./middleware/interfaces";
 
 export default class Utility {
   static generateJwtPayload(payload: JwtPayload): Promise<string> {
@@ -16,5 +18,11 @@ export default class Utility {
         }
       );
     });
+  }
+  static validateRequest(req: Request, res: Response, next: NextFunction) {
+    const errors = validationResult(req);
+    return errors.isEmpty()
+      ? next()
+      : res.status(400).json({ errors: errors.array() });
   }
 }
