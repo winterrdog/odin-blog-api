@@ -6,8 +6,16 @@ const CommentSchema = new Schema(
   {
     body: { type: String, required: true },
     tldr: { type: String, default: "nil", maxLength: 64 },
-    user: { type: Schema.Types.ObjectId, ref: UserModelName, required: true },
-    post: { type: Schema.Types.ObjectId, ref: PostModelName, required: true },
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: UserModelName,
+      required: true,
+    },
+    post: {
+      type: Schema.Types.ObjectId,
+      ref: PostModelName,
+      required: true,
+    },
   },
   {
     timestamps: true,

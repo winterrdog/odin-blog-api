@@ -3,7 +3,11 @@ import { UserModelName } from "./user";
 
 const PostSchema = new Schema(
   {
-    author: { type: Schema.Types.ObjectId, ref: UserModelName, required: true },
+    author: {
+      type: Schema.Types.ObjectId,
+      ref: UserModelName,
+      required: true,
+    },
     title: { type: String, required: true, minLength: 4, maxLength: 56 },
     body: { type: String, required: true },
     hidden: { type: Boolean, default: false },

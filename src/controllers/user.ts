@@ -71,9 +71,9 @@ const userController = {
         const { name, pass: password } = req.body;
         const user = await UserModel.findOne({ name });
         if (!user) {
-          return res
-            .status(404)
-            .json({ message: `user with username: ${name} was not found.` });
+          return res.status(404).json({
+            message: `user with username: ${name} was not found.`,
+          });
         }
 
         const isPasswordValid = await argon2.verify(
