@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "format": "prettier -w --tab-width 2 app.ts bin controllers middleware models request-bodies routes utilities.ts validators"
   },
   "dependencies": {
     "@types/lodash": "^4.17.0",
