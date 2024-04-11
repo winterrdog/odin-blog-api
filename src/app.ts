@@ -1,15 +1,14 @@
-import express, { NextFunction, Request, Response } from "express";
-import logger from "morgan";
+import * as express from "express";
+import * as cors from "cors";
+import * as dotenv from "dotenv";
 import helmet from "helmet";
-import cors from "cors";
-import dotenv from "dotenv";
+import { NextFunction, Request, Response } from "express";
 import { rateLimit } from "express-rate-limit";
 import indexRouter from "./routes/index";
 
 dotenv.config();
 
 const app = express();
-app.use(logger("dev")); // log requests to the console
 app.use(express.json()); // parse application/json
 app.use(express.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
 app.use(cors()); // allow cross-origin requests
