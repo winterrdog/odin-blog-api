@@ -1,12 +1,15 @@
 import { Request, Response } from "express";
 import _ from "lodash";
 import { Types, isValidObjectId } from "mongoose";
+import { matchedData } from "express-validator";
 import { PostModel } from "../models/post";
 import { JwtPayload } from "../middleware/interfaces";
 import { postIdSanitizer } from "../validators/comments";
 import Utility from "../utilities";
-import { postReqBodyValidators } from "../validators/post";
-import { matchedData } from "express-validator";
+import {
+  postReqBodyValidators,
+  postUpdateReqBodyValidators,
+} from "../validators/post";
 
 function isAuthorSame(tgtAuthor: Types.ObjectId, reqAuthor: JwtPayload) {
   return tgtAuthor.toHexString() === reqAuthor.data.sub;
@@ -99,7 +102,7 @@ const postController = {
   ],
   updatePost: [
     postIdSanitizer,
-    ...postReqBodyValidators,
+    ...postUpdateReqBodyValidators,
     Utility.validateRequest,
     async function (req: Request, res: Response) {
       try {

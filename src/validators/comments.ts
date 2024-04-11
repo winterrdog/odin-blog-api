@@ -20,3 +20,10 @@ export const sanitizeTldr = body("tldr")
   .optional()
   .escape();
 export const commentBodyValidator = [sanitizeBody, sanitizeTldr];
+
+// for updating comment requests
+export const bodyUpdateValidator = body("body").optional().escape();
+export const commentUpdateReqBodyValidators = [
+  bodyUpdateValidator,
+  sanitizeTldr,
+];

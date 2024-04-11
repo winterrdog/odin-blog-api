@@ -7,6 +7,7 @@ import { CommentReqBody } from "../request-bodies/comment";
 import { JwtPayload } from "../middleware/interfaces";
 import {
   commentBodyValidator,
+  commentUpdateReqBodyValidators,
   idSanitizers,
   postIdSanitizer,
 } from "../validators/comments";
@@ -130,7 +131,7 @@ const commentController = {
   ],
   updateComment: [
     ...idSanitizers,
-    ...commentBodyValidator,
+    ...commentUpdateReqBodyValidators,
     Utility.validateRequest,
     async function (req: Request, res: Response) {
       try {

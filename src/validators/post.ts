@@ -22,3 +22,20 @@ export const postReqBodyValidators = [
   postBodyValidator,
   hiddenValidator,
 ];
+
+// for updating post requests
+export const titleUpdateValidator = body("title")
+  .optional()
+  .trim()
+  .isLength({
+    min: 4,
+    max: 56,
+  })
+  .withMessage("title should have 4 to 56 characters.")
+  .escape();
+export const postBodyUpdateValidator = body("body").optional().trim().escape();
+export const postUpdateReqBodyValidators = [
+  titleUpdateValidator,
+  postBodyUpdateValidator,
+  hiddenValidator,
+];
