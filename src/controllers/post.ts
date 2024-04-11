@@ -10,6 +10,7 @@ import {
   postReqBodyValidators,
   postUpdateReqBodyValidators,
 } from "../validators/post";
+import { PostUpdateReqBody } from "../request-bodies/post";
 
 function isAuthorSame(tgtAuthor: Types.ObjectId, reqAuthor: JwtPayload) {
   return tgtAuthor.toHexString() === reqAuthor.data.sub;
@@ -129,7 +130,7 @@ const postController = {
         }
 
         // merge data to update
-        post = _.merge(post, req.body);
+        post = _.merge(post, req.body as PostUpdateReqBody);
         await post!.save();
 
         return res.status(200).json({

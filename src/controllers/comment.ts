@@ -3,7 +3,10 @@ import _ from "lodash";
 import { isValidObjectId } from "mongoose";
 import { matchedData } from "express-validator";
 import { CommentModel } from "../models/comment";
-import { CommentReqBody } from "../request-bodies/comment";
+import {
+  CommentReqBody,
+  CommentUpdateReqBody,
+} from "../request-bodies/comment";
 import { JwtPayload } from "../middleware/interfaces";
 import {
   commentBodyValidator,
@@ -170,7 +173,10 @@ const commentController = {
           });
         }
 
-        storedComment = _.merge(storedComment, req.body);
+        storedComment = _.merge(
+          storedComment,
+          req.body as CommentUpdateReqBody
+        );
         await storedComment!.save();
         return res.status(200).json({
           message: "post comment updated successfully",

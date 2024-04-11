@@ -10,6 +10,7 @@ import {
   userReqBodyValidators,
   userUpdateReqBodyValidators,
 } from "../validators/user";
+import { UserUpdateReqBody } from "../request-bodies/user";
 
 const userController = {
   signUp: [
@@ -149,7 +150,7 @@ const userController = {
         }
 
         // merge data to update
-        user = _.merge(user, req.body);
+        user = _.merge(user, req.body as UserUpdateReqBody);
         await user!.save();
         return res.status(200).json({
           message: "User updated",
