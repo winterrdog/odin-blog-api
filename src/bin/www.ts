@@ -4,10 +4,11 @@
 
 import mongoose from "mongoose";
 import app from "../app";
-import http from "node:http";
+import * as http from "node:http";
+import * as debugMod from "debug";
 require("dotenv").config(); // env variables
 
-const debug = require("debug")("src:server");
+const debug = debugMod("blog:server");
 
 /**
  * Get port from environment and store in Express.
@@ -29,6 +30,7 @@ let conn: mongoose.Connection | null = null;
 (async function () {
   try {
     server.listen(port);
+    debug("server started on port: " + port);
 
     conn = await connectToDb();
     if (!conn) throw new Error("database didn't connect successfully");
@@ -105,7 +107,7 @@ async function connectToDb() {
     return mongoose.connection;
   } catch (e) {
     debug("Error occurred when connceting to database: ", e);
-    return null;
+    throw e;
   }
 }
 
