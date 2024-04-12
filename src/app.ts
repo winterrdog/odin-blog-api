@@ -8,6 +8,8 @@ import indexRouter from "./routes/index";
 
 dotenv.config();
 
+// todo: add logging
+
 const app = express();
 app.use(express.json()); // parse application/json
 app.use(express.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded

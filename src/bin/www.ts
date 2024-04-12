@@ -5,10 +5,12 @@
 import mongoose from "mongoose";
 import app from "../app";
 import * as http from "node:http";
-import * as debugMod from "debug";
 require("dotenv").config(); // env variables
+import { logger } from "../logging";
 
-const debug = debugMod("blog:server");
+// setting up logging for this module
+const serverLogger = logger.child({ module: "www" });
+serverLogger.info("starting server...");
 
 /**
  * Get port from environment and store in Express.
@@ -30,15 +32,14 @@ let conn: mongoose.Connection | null = null;
 (async function () {
   try {
     server.listen(port);
-    debug("server started on port: " + port);
-
+    serverLogger.info("server started on port: " + port);
     conn = await connectToDb();
     if (!conn) throw new Error("database didn't connect successfully");
-
     server.on("error", onError);
     server.on("listening", onListening);
+    process.on("uncaughtException", handleUncaughtExceptions);
   } catch (e) {
-    debug("server crashed: ", e);
+    serverLogger.error(e, "server crashed during startup...");
     if (conn) await closeDb(conn);
     process.exit(1);
   }
@@ -68,17 +69,17 @@ function onError(error: { syscall: string; code: string }) {
   if (!conn) throw new Error("database didn't connect successfully");
 
   closeDb(conn).catch((e) => {
-    debug("mongodb ran into an error during close: ", e);
+    serverLogger.error(e, "mongodb ran into an error during close...");
   });
   const bind = typeof port === "string" ? "Pipe " + port : "Port " + port;
 
   // handle specific listen errors with friendly messages
   switch (error.code) {
     case "EACCES":
-      debug(bind + " requires elevated privileges");
+      serverLogger.error(bind + " requires elevated privileges");
       return;
     case "EADDRINUSE":
-      debug(bind + " is already in use");
+      serverLogger.error(bind + " is already in use");
       return;
     default:
       throw error;
@@ -92,9 +93,8 @@ function onError(error: { syscall: string; code: string }) {
 function onListening() {
   const addr = server.address();
   if (!addr) throw new Error("server address wasn't set correctly");
-
   const bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
-  debug("Listening on " + bind);
+  serverLogger.info("server listening on " + bind);
 }
 
 /**
@@ -103,10 +103,10 @@ function onListening() {
 async function connectToDb() {
   try {
     await mongoose.connect(process.env.MONGO_URI!);
-    debug("database server was connected to successfully!");
+    serverLogger.info("database connected successfully...");
     return mongoose.connection;
   } catch (e) {
-    debug("Error occurred when connceting to database: ", e);
+    serverLogger.error(e, "database connection failed...");
     throw e;
   }
 }
@@ -119,10 +119,46 @@ async function connectToDb() {
 async function closeDb(conn: mongoose.Connection) {
   try {
     conn.on("disconnecting", () => {
-      debug("application disconnecting from mongodb...");
+      serverLogger.info("application disconnecting from mongodb...");
     });
     await conn.close();
   } catch (e) {
-    debug("error occurred after connecting to db: ", e);
+    serverLogger.error(e, "error occurred after connecting to db...");
   }
+}
+
+async function handleUncaughtExceptions(
+  err: Error,
+  origin: NodeJS.UncaughtExceptionOrigin
+) {
+  serverLogger.error(
+    err,
+    origin === "unhandledRejection"
+      ? "an unhandled rejection occurred"
+      : "an uncaught exception occurred"
+  );
+
+  // close the database connection gracefully
+  await closeDb(conn!);
+
+  const forceAnExit = () => {
+    serverLogger.fatal(
+      "server didn't close in time so forcing the process to exit..."
+    );
+    process.abort();
+  };
+  const gracefulExit = (e: Error | undefined): never => {
+    if (e) {
+      serverLogger.error(e, "server didn't close gracefully...");
+      forceAnExit();
+    }
+    serverLogger.info("server closed gracefully...");
+    process.exit(0);
+  };
+
+  server.close(gracefulExit); // close the server gracefully
+  setTimeout(forceAnExit, 3000); // force the server to close after 3 seconds
+
+  // exit the process
+  process.exit(1);
 }
