@@ -99,9 +99,6 @@ function onListening() {
   serverLogger.info("server listening on " + bind);
 }
 
-/**
- * Start the database connection
- */
 async function connectToDb() {
   try {
     await mongoose.connect(process.env.MONGO_URI!);
@@ -113,11 +110,6 @@ async function connectToDb() {
   }
 }
 
-/**
- * Closes the database connection.
- * @param conn mongoose.Connection
- * @returns void
- */
 async function closeDb(conn: mongoose.Connection) {
   try {
     conn.on("disconnecting", () => {
