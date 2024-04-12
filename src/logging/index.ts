@@ -1,2 +1,2 @@
-import logger from "./logger";
-export { logger };
+import { defaultLogger, defaultLoggingOptions, getModuleName } from "./logger";
+export { defaultLogger, defaultLoggingOptions, getModuleName };

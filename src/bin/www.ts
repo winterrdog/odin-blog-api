@@ -2,14 +2,16 @@
  * Module dependencies.
  */
 
-import mongoose from "mongoose";
-import app from "../app";
 import * as http from "node:http";
+import mongoose from "mongoose";
+import pino from "pino";
+import app from "../app";
 require("dotenv").config(); // env variables
-import { logger } from "../logging";
+import { defaultLoggingOptions, getModuleName } from "../logging";
 
 // setting up logging for this module
-const serverLogger = logger.child({ module: "www" });
+defaultLoggingOptions.msgPrefix += getModuleName(__filename);
+const serverLogger = pino(defaultLoggingOptions);
 serverLogger.info("starting server...");
 
 /**

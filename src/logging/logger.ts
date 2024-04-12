@@ -1,21 +1,18 @@
 import pino, { LoggerOptions } from "pino";
-const options: LoggerOptions = {
+export const defaultLoggingOptions: LoggerOptions = {
   level: process.env.LOG_LEVEL ?? "info",
-  formatters: {
-    level(label, number) {
-      return { level: `🎬 ${label.toUpperCase()}` };
-    },
-  },
+  msgPrefix: "blog-api:",
   transport: {
     target: "pino-pretty",
     // pino-pretty options
     options: {
       levelFirst: true,
       colorize: true,
-      timestampKey: "loggedAt",
-      translateTime: "fullDate longTime",
+      translateTime: "dd/mm/yyyy HH:MM:ss.L TT Z",
     },
   },
 };
-const logger = pino(options);
-export default logger;
+export const defaultLogger = pino(defaultLoggingOptions);
+export function getModuleName(fname: string): string {
+  return fname.split("/").at(-1)!.split(".")[0] + ": ";
+}
