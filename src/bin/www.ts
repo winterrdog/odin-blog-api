@@ -4,15 +4,13 @@
 
 import * as http from "node:http";
 import mongoose from "mongoose";
-import pino from "pino";
 import app from "../app";
 require("dotenv").config(); // env variables
-import { defaultLoggingOptions, getModuleName } from "../logging";
+import { startLogger } from "../logging";
 
 // setting up logging for this module
-defaultLoggingOptions.msgPrefix += getModuleName(__filename);
-const serverLogger = pino(defaultLoggingOptions);
-serverLogger.info("starting server...");
+const logger = startLogger(__filename);
+logger.info("starting application server...");
 
 /**
  * Get port from environment and store in Express.
@@ -34,14 +32,14 @@ let conn: mongoose.Connection | null = null;
 (async function () {
   try {
     server.listen(port);
-    serverLogger.info("server started on port: " + port);
+    logger.info("server started on port: " + port);
     conn = await connectToDb();
     if (!conn) throw new Error("database didn't connect successfully");
     server.on("error", onError);
     server.on("listening", onListening);
     process.on("uncaughtException", handleUncaughtExceptions);
   } catch (e) {
-    serverLogger.error(e, "server crashed during startup...");
+    logger.error(e, "server crashed during startup...");
     if (conn) await closeDb(conn);
     process.exit(1);
   }
@@ -71,17 +69,17 @@ function onError(error: { syscall: string; code: string }) {
   if (!conn) throw new Error("database didn't connect successfully");
 
   closeDb(conn).catch((e) => {
-    serverLogger.error(e, "mongodb ran into an error during close...");
+    logger.error(e, "mongodb ran into an error during close...");
   });
   const bind = typeof port === "string" ? "Pipe " + port : "Port " + port;
 
   // handle specific listen errors with friendly messages
   switch (error.code) {
     case "EACCES":
-      serverLogger.error(bind + " requires elevated privileges");
+      logger.error(bind + " requires elevated privileges");
       return;
     case "EADDRINUSE":
-      serverLogger.error(bind + " is already in use");
+      logger.error(bind + " is already in use");
       return;
     default:
       throw error;
@@ -96,16 +94,16 @@ function onListening() {
   const addr = server.address();
   if (!addr) throw new Error("server address wasn't set correctly");
   const bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
-  serverLogger.info("server listening on " + bind);
+  logger.info("server listening on " + bind);
 }
 
 async function connectToDb() {
   try {
     await mongoose.connect(process.env.MONGO_URI!);
-    serverLogger.info("database connected successfully...");
+    logger.info("database connected successfully...");
     return mongoose.connection;
   } catch (e) {
-    serverLogger.error(e, "database connection failed...");
+    logger.error(e, "database connection failed...");
     throw e;
   }
 }
@@ -113,11 +111,11 @@ async function connectToDb() {
 async function closeDb(conn: mongoose.Connection) {
   try {
     conn.on("disconnecting", () => {
-      serverLogger.info("application disconnecting from mongodb...");
+      logger.info("application disconnecting from mongodb...");
     });
     await conn.close();
   } catch (e) {
-    serverLogger.error(e, "error occurred after connecting to db...");
+    logger.error(e, "error occurred after connecting to db...");
   }
 }
 
@@ -125,7 +123,7 @@ async function handleUncaughtExceptions(
   err: Error,
   origin: NodeJS.UncaughtExceptionOrigin
 ) {
-  serverLogger.error(
+  logger.error(
     err,
     origin === "unhandledRejection"
       ? "an unhandled rejection occurred"
@@ -136,17 +134,17 @@ async function handleUncaughtExceptions(
   await closeDb(conn!);
 
   const forceAnExit = () => {
-    serverLogger.fatal(
+    logger.fatal(
       "server didn't close in time so forcing the process to exit..."
     );
     process.abort();
   };
   const gracefulExit = (e: Error | undefined): never => {
     if (e) {
-      serverLogger.error(e, "server didn't close gracefully...");
+      logger.error(e, "server didn't close gracefully...");
       forceAnExit();
     }
-    serverLogger.info("server closed gracefully...");
+    logger.info("server closed gracefully...");
     process.exit(0);
   };
 
