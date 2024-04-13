@@ -3,6 +3,7 @@ import * as argon from "argon2";
 import { Strategy as LocalStrategy } from "passport-local";
 import { UserModel } from "../models/user";
 import { startLogger } from "../logging";
+
 const logger = startLogger(__filename);
 const options = {
   usernameField: "name",

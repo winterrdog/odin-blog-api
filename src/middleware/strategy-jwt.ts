@@ -2,8 +2,7 @@ import { ExtractJwt, Strategy } from "passport-jwt";
 import { JwtPayload } from "./interfaces";
 import { UserModel } from "../models/user";
 import { startLogger } from "../logging";
-import * as dotenv from "dotenv";
-dotenv.config();
+require("dotenv").config();
 
 const logger = startLogger(__filename);
 async function verifyJwtCb(payload: JwtPayload, cb: any) {
