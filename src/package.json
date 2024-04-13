@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "npm run compile && node ./dist/bin/www",
-    "format": "prettier -w --tab-width 2 app.ts bin controllers middleware models request-bodies routes utilities.ts validators",
+    "format": "prettier -w --tab-width 2 app.ts bin logging controllers middleware models request-bodies routes utilities.ts validators",
     "compile": "tsc"
   },
   "dependencies": {
