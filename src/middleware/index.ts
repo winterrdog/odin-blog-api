@@ -5,6 +5,7 @@ import {
   authenticateJwt,
   initialize,
 } from "./passport-auth";
+import applyErrorHandlers from "./errors";
 const auth = {
   initialize,
   authenticateUserPass,
@@ -12,4 +13,4 @@ const auth = {
   isAuthor,
   isReader,
 };
-export { auth, applyGeneralMiddleware };
+export { auth, applyGeneralMiddleware, applyErrorHandlers };
