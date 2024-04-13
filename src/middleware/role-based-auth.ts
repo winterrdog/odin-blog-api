@@ -1,17 +1,28 @@
 import { NextFunction, Request, Response } from "express";
-
+import { startLogger } from "../logging";
+const logger = startLogger(__filename);
 export function isAuthor(req: Request, res: Response, next: NextFunction) {
-  return (req.user! as any).data.role === "author"
-    ? next()
-    : res
-        .status(403)
-        .json({ message: "only authors can access this resource" });
+  logger.info(`checking if user is an author...`);
+  if ((req.user! as any).data.role === "author") {
+    logger.info("user is an author hence proceeding to access resource");
+    return next();
+  } else {
+    logger.error(
+      "user is not an author and therefore cannot access this resource"
+    );
+    res.status(403).json({ message: "only authors can access this resource" });
+    return;
+  }
 }
-
 export function isReader(req: Request, res: Response, next: NextFunction) {
-  return (req.user! as any).data.role === "reader"
-    ? next()
-    : res
-        .status(403)
-        .json({ message: "only readers can access this resource" });
+  logger.info(`checking if user is a reader...`);
+  if ((req.user! as any).data.role === "reader") {
+    logger.info("user is a 'reader' hence proceeding to access resource");
+    return next();
+  } else {
+    logger.error(
+      "user is 'not a reader' and therefore cannot access this resource"
+    );
+    res.status(403).json({ message: "only readers can access this resource" });
+  }
 }

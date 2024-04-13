@@ -1,14 +1,19 @@
 import { ExtractJwt, Strategy } from "passport-jwt";
 import { JwtPayload } from "./interfaces";
 import { UserModel } from "../models/user";
+import { startLogger } from "../logging";
 
-require("dotenv").config();
-
+const logger = startLogger(__filename);
 async function verifyJwtCb(payload: JwtPayload, cb: any) {
   try {
+    logger.info(`verifying jwt for user: ${payload.data.sub}`);
     const user = await UserModel.findById(payload.data.sub);
-    if (!user) return cb(null, false);
+    if (!user) {
+      logger.error(`user not found for jwt: ${payload.data.sub}`);
+      return cb(null, false);
+    }
 
+    logger.info(`user found for jwt: ${payload.data.sub}`);
     (user as any)["data"] = payload;
     return cb(null, user);
   } catch (e) {
