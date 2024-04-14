@@ -15,7 +15,9 @@ import { PostUpdateReqBody } from "../request-bodies/post";
 function isAuthorSame(tgtAuthor: Types.ObjectId, reqAuthor: JwtPayload) {
   return tgtAuthor.toHexString() === reqAuthor.data.sub;
 }
+import { startLogger } from "../logging";
 
+const logger = startLogger(__filename);
 const postController = {
   getPostById: [
     postIdSanitizer,
@@ -39,7 +41,7 @@ const postController = {
           post,
         });
       } catch (e) {
-        console.error(`Error occurred during fetching post by id: ${e}`);
+        logger.error(e, "Error occurred during fetching post by id");
         return res.status(500).json({
           message:
             process.env.NODE_ENV === "production"
@@ -62,7 +64,7 @@ const postController = {
         posts,
       });
     } catch (e) {
-      console.error(`Error occurred during fetching posts: ${e}`);
+      logger.error(e, "error occurred during fetching posts");
       return res.status(500).json({
         message:
           process.env.NODE_ENV === "production"
@@ -91,7 +93,7 @@ const postController = {
           post,
         });
       } catch (e) {
-        console.error(`Error occurred during creating post: ${e}`);
+        logger.error(e, "error occurred during creating post");
         return res.status(500).json({
           message:
             process.env.NODE_ENV === "production"
@@ -138,7 +140,7 @@ const postController = {
           post,
         });
       } catch (e) {
-        console.error(`Error occurred during updating post: ${e}`);
+        logger.error(e, "error occurred during updating post");
         return res.status(500).json({
           message:
             process.env.NODE_ENV === "production"
@@ -182,7 +184,7 @@ const postController = {
           message: "Post deleted successfully",
         });
       } catch (e) {
-        console.error(`Error occurred during deleting post: ${e}`);
+        logger.error(e, "error occurred during deleting post");
         return res.status(500).json({
           message:
             process.env.NODE_ENV === "production"

@@ -11,7 +11,9 @@ import {
   userUpdateReqBodyValidators,
 } from "../validators/user";
 import { UserUpdateReqBody } from "../request-bodies/user";
+import { startLogger } from "../logging";
 
+const logger = startLogger(__filename);
 const userController = {
   signUp: [
     ...userReqBodyValidators,
@@ -52,13 +54,13 @@ const userController = {
           message: "User created successfully",
           token: await Utility.generateJwtPayload(jwtPayload),
         });
-      } catch (err) {
-        console.error(err);
+      } catch (e) {
+        logger.error(e, "error during signing up");
         return res.status(500).json({
           message:
             process.env.NODE_ENV === "production"
               ? "Internal server error occurred. Please try again later."
-              : (err as Error).message,
+              : (e as Error).message,
         });
       }
     },
@@ -96,13 +98,13 @@ const userController = {
           message: "User signed in successfully",
           token: await Utility.generateJwtPayload(jwtPayload),
         });
-      } catch (err) {
-        console.error(err);
+      } catch (e) {
+        logger.error(e, "error occurred during signing in");
         return res.status(500).json({
           message:
             process.env.NODE_ENV === "production"
               ? "Internal server error occurred. Please try again later."
-              : (err as Error).message,
+              : (e as Error).message,
         });
       }
     },
@@ -124,13 +126,13 @@ const userController = {
       return res.status(204).json({
         message: "User deleted successfully",
       });
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
+      logger.error(e, "error occurred during deletion of user");
       return res.status(500).json({
         message:
           process.env.NODE_ENV === "production"
             ? "Internal server error occurred. Please try again later."
-            : (err as Error).message,
+            : (e as Error).message,
       });
     }
   },
@@ -156,13 +158,13 @@ const userController = {
           message: "User updated",
           user,
         });
-      } catch (err) {
-        console.error(err);
+      } catch (e) {
+        logger.error(e, "error occurred during updating a user's details");
         return res.status(500).json({
           message:
             process.env.NODE_ENV === "production"
               ? "Internal server error occurred. Please try again later."
-              : (err as Error).message,
+              : (e as Error).message,
         });
       }
     },

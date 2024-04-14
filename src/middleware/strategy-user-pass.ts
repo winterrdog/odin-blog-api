@@ -1,4 +1,3 @@
-import { log } from "console";
 import * as argon from "argon2";
 import { Strategy as LocalStrategy } from "passport-local";
 import { UserModel } from "../models/user";
@@ -17,7 +16,7 @@ const isPasswordValid = async function (
   try {
     return await argon.verify(storedHash, password);
   } catch (err) {
-    log(`error occured during password verification: ${err}`);
+    logger.error(err, "error occured during password verification");
     return false;
   }
 };
@@ -50,7 +49,6 @@ const verifyUserCb = async function (
     return cb(null, user);
   } catch (err) {
     logger.error(err, `error occured during verification of user: ${username}`);
-    log(`error occured during user verification: ${err}`);
     return cb(err);
   }
 };

@@ -18,7 +18,7 @@ async function verifyJwtCb(payload: JwtPayload, cb: any) {
     (user as any)["data"] = payload;
     return cb(null, user);
   } catch (e) {
-    console.error(`error occurred during jwt verification: ${e}`);
+    logger.error(e, "error occurred during jwt verification");
     return cb(e);
   }
 }

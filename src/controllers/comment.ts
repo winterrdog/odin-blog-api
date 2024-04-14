@@ -15,7 +15,9 @@ import {
   postIdSanitizer,
 } from "../validators/comments";
 import Utility from "../utilities";
+import { startLogger } from "../logging";
 
+const logger = startLogger(__filename);
 const commentController = {
   getCommentById: [
     ...idSanitizers,
@@ -49,7 +51,7 @@ const commentController = {
           comment: storedComment,
         });
       } catch (e) {
-        console.error(`Error fetching comment by id: ${e}`);
+        logger.error(e, "Error fetching comment by id");
         return res.status(500).json({
           message:
             process.env.NODE_ENV === "production"
@@ -85,7 +87,7 @@ const commentController = {
           comments: storedComments,
         });
       } catch (e) {
-        console.error(`Error fetching comments: ${e}`);
+        logger.error(e, "error fetching comments");
         return res.status(500).json({
           message:
             process.env.NODE_ENV === "production"
@@ -124,7 +126,7 @@ const commentController = {
           comment: createdComment,
         });
       } catch (e) {
-        console.error(`Error creating comment: ${e}`);
+        logger.error(e, "error creating comment");
         return res.status(500).json({
           message:
             process.env.NODE_ENV === "production"
@@ -183,7 +185,7 @@ const commentController = {
           comment: storedComment,
         });
       } catch (e) {
-        console.error(`Error updating a comment: ${e}`);
+        logger.error(e, "error updating a comment");
         return res.status(500).json({
           message:
             process.env.NODE_ENV === "production"
@@ -234,7 +236,7 @@ const commentController = {
         await storedComment.deleteOne();
         return res.status(204).json({});
       } catch (e) {
-        console.error(`Error deleting a comment: ${e}`);
+        logger.error(e, "error deleting a comment");
         return res.status(500).json({
           message:
             process.env.NODE_ENV === "production"
