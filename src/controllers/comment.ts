@@ -26,12 +26,17 @@ const commentController = {
       try {
         const sanitizedData = matchedData(req);
         const { postId, id: commentId } = sanitizedData;
+        logger.info(
+          `fetching the comment with id, ${commentId}, for post with id, ${postId}...`
+        );
         if (!isValidObjectId(postId)) {
+          logger.error("invalid or malformed post id");
           return res.status(400).json({
             message: `Post id, ${postId}, is invalid or malformed.`,
           });
         }
         if (!isValidObjectId(commentId)) {
+          logger.error("invalid or malformed comment id");
           return res.status(400).json({
             message: `Comment id, ${commentId}, is invalid or malformed.`,
           });
@@ -42,10 +47,15 @@ const commentController = {
           post: postId,
         });
         if (!storedComment) {
+          logger.error(
+            `comment with id, ${commentId}, and post id, ${postId}, was not found.`
+          );
           return res.status(404).json({
             message: `comment with id, ${commentId}, and post id, ${postId}, was not found.`,
           });
         }
+
+        logger.info("comment retrieved successfully!");
         return res.status(200).json({
           message: "comment retrieved successfully",
           comment: storedComment,
@@ -68,7 +78,9 @@ const commentController = {
       try {
         const sanitizedData = matchedData(req);
         const { postId } = sanitizedData;
+        logger.info(`fetching comments for post with id, ${postId}...`);
         if (!isValidObjectId(postId)) {
+          logger.error("invalid or malformed post id");
           return res.status(400).json({
             message: `Post id, ${postId}, is invalid or malformed.`,
           });
@@ -78,10 +90,13 @@ const commentController = {
           post: postId,
         });
         if (storedComments.length === 0) {
+          logger.error(`No comments available for post with id, ${postId}.`);
           return res.status(200).json({
             message: `No comments available for post with id, ${postId}.`,
           });
         }
+
+        logger.info("comments fetched successfully!");
         return res.status(200).json({
           message: "post comments fetched successfully",
           comments: storedComments,
@@ -105,7 +120,9 @@ const commentController = {
       try {
         const sanitizedData = matchedData(req);
         const { postId } = sanitizedData;
+        logger.info(`creating a comment for post with id, ${postId}...`);
         if (!isValidObjectId(postId)) {
+          logger.error("invalid or malformed post id");
           return res.status(400).json({
             message: `Post id, ${postId}, is invalid or malformed.`,
           });
@@ -113,6 +130,7 @@ const commentController = {
 
         const { data } = (req.user! as any).data as JwtPayload;
         const { sub } = data;
+        logger.info(`creating a comment for user with id, ${sub}...`);
         const reqBody: CommentReqBody = {
           user: sub,
           post: postId,
@@ -121,6 +139,10 @@ const commentController = {
         const createdComment = await CommentModel.create({
           ...reqBody,
         });
+
+        logger.info(
+          `comment with id, ${createdComment.id}, created successfully!`
+        );
         return res.status(201).json({
           message: "comment created successfully",
           comment: createdComment,
@@ -144,12 +166,17 @@ const commentController = {
       try {
         const sanitizedData = matchedData(req);
         const { postId, id: commentId } = sanitizedData;
+        logger.info(
+          `updating comment with id, ${commentId}, for post with id, ${postId}...`
+        );
         if (!isValidObjectId(postId)) {
+          logger.error("invalid or malformed post id");
           return res.status(400).json({
             message: `Post id, ${postId}, is invalid or malformed.`,
           });
         }
         if (!isValidObjectId(commentId)) {
+          logger.error("invalid or malformed comment id");
           return res.status(400).json({
             message: `Comment id, ${commentId}, is invalid or malformed.`,
           });
@@ -160,6 +187,9 @@ const commentController = {
           post: postId,
         });
         if (!storedComment) {
+          logger.error(
+            `comment with id, ${commentId}, and post id, ${postId}, was not found.`
+          );
           return res.status(404).json({
             message: `comment with id, ${commentId}, and post id, ${postId}, was not found.`,
           });
@@ -168,7 +198,11 @@ const commentController = {
         // check author
         const { data } = (req.user! as any).data as JwtPayload;
         const { sub } = data;
+        logger.info(
+          `checking if user with id, ${sub}, is the author of the comment...`
+        );
         if (sub !== storedComment.user.toHexString()) {
+          logger.error("user is not the author of the comment");
           return res.status(403).json({
             message:
               "you are not the author of this post so you will not update it",
@@ -180,6 +214,9 @@ const commentController = {
           req.body as CommentUpdateReqBody
         );
         await storedComment!.save();
+        logger.info(
+          `comment with id, ${storedComment.id}, updated successfully!`
+        );
         return res.status(200).json({
           message: "post comment updated successfully",
           comment: storedComment,
@@ -202,12 +239,17 @@ const commentController = {
       try {
         const sanitizedData = matchedData(req);
         const { postId, id: commentId } = sanitizedData;
+        logger.info(
+          `deleting comment with id, ${commentId}, for post with id, ${postId}...`
+        );
         if (!isValidObjectId(postId)) {
+          logger.error("invalid or malformed post id");
           return res.status(400).json({
             message: `Post id, ${postId}, is invalid or malformed.`,
           });
         }
         if (!isValidObjectId(commentId)) {
+          logger.error("invalid or malformed comment id");
           return res.status(400).json({
             message: `Comment id, ${commentId}, is invalid or malformed.`,
           });
@@ -218,6 +260,9 @@ const commentController = {
           post: postId,
         });
         if (!storedComment) {
+          logger.error(
+            `comment with id, ${commentId}, and post id, ${postId}, was not found.`
+          );
           return res.status(404).json({
             message: `comment with id, ${commentId}, and post id, ${postId}, was not found.`,
           });
@@ -226,7 +271,11 @@ const commentController = {
         // check author
         const { data } = (req.user! as any).data as JwtPayload;
         const { sub } = data;
+        logger.info(
+          `checking if user with id, ${sub}, is the author of the comment...`
+        );
         if (sub !== storedComment.user.toHexString()) {
+          logger.error("user is not the author of the comment");
           return res.status(403).json({
             message:
               "you are not the author of this post so you will not delete it",
@@ -234,6 +283,9 @@ const commentController = {
         }
 
         await storedComment.deleteOne();
+        logger.info(
+          `comment with id, ${storedComment.id}, deleted successfully!`
+        );
         return res.status(204).json({});
       } catch (e) {
         logger.error(e, "error deleting a comment");
