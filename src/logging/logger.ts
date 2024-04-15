@@ -1,5 +1,4 @@
 import pino, { LoggerOptions } from "pino";
-import Utility from "../utilities";
 require("dotenv").config(); // env vars
 
 // transport logs to external file and console
@@ -24,7 +23,6 @@ const logTransports = pino.transport({
     },
   ],
 });
-
 const defaultLoggingOptions: LoggerOptions = {
   level: process.env.LOG_LEVEL ?? "info",
   timestamp: pino.stdTimeFunctions.isoTime,
@@ -43,6 +41,8 @@ export function startLogger(fname: string) {
 }
 async function createLogFile(f: string) {
   try {
+    // import 'Utility' into a variable to avoid circular dependency
+    const Utility = (await import("../utilities")).default;
     await Utility.createFile(f);
   } catch (err) {
     console.error("failed to create an external log file: ", err);
