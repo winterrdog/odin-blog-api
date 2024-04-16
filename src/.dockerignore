@@ -1,0 +1,16 @@
+dist
+node_modules
+.prettierrc
+.eslintrc.js
+containerize.sh
+test
+.dockerignore
+Dockerfile
+docker-compose.yml
+.env
+.env.example
+notes
+
+# Logs
+logs
+*.log

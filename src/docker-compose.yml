@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  web_app:
+    build: .
+    container_name: blog_backend
+    ports:
+      - "3000:3000"
+    networks:
+      - mongo_network
+    depends_on:
+      - blog_db
+    env_file:
+      - ./.env
+    volumes:
+      - ./:/var/log:rw
+  blog_db:
+    image: mongo:7.0.8-jammy
+    container_name: mongo_db
+    networks:
+      - mongo_network
+    volumes:
+      - mongo_data:/data/db
+
+networks:
+  mongo_network:
+    driver: bridge
+
+volumes:
+  mongo_data:
+    driver: local
