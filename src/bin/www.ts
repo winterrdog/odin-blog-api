@@ -99,7 +99,11 @@ function onListening() {
 
 async function connectToDb() {
   try {
-    await mongoose.connect(process.env.MONGO_URI!);
+    await mongoose.connect(
+      process.env.NODE_ENV === "production"
+        ? process.env.MONGO_URI!
+        : process.env.DEV_MONGO_URI!
+    );
     logger.info("database connected successfully...");
     return mongoose.connection;
   } catch (e) {
