@@ -2,7 +2,10 @@ import pino, { LoggerOptions } from "pino";
 require("dotenv").config(); // env vars
 
 // transport logs to external file and console
-const logFile = `./${process.env.LOGS_FILE ?? "app.log"}`;
+const logFile =
+  process.env.NODE_ENV === "production"
+    ? process.env.LOGS_FILE!
+    : process.env.DEV_LOGS_FILE!;
 createLogFile(logFile);
 const logTransports = pino.transport({
   targets: [
