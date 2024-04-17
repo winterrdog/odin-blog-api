@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import _ from "lodash";
+import * as _ from "lodash";
 import * as argon2 from "argon2";
 import { JwtPayload } from "../middleware/interfaces";
 import { UserModel } from "../models/user";

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import _ from "lodash";
+import * as _ from "lodash";
 import { isValidObjectId } from "mongoose";
 import { matchedData } from "express-validator";
 import { CommentModel } from "../models/comment";
