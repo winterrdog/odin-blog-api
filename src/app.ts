@@ -9,6 +9,6 @@ const app = express();
 // const logger = startLogger(__filename);
 
 applyGeneralMiddleware(app);
-app.use("/api", indexRouter); // use the index router for all routes starting with /api
+app.use("/api/v1", indexRouter); // use the index router for all routes starting with /api
 applyErrorHandlers(app);
 export default app;
