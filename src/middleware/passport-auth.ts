@@ -1,5 +1,5 @@
 import { NextFunction, Response, Request, Express } from "express";
-import passport from "passport";
+import * as passport from "passport";
 import userPassStrategy from "./strategy-user-pass";
 import jwtStrategy from "./strategy-jwt";
 

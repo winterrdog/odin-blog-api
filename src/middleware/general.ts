@@ -3,6 +3,7 @@ import { rateLimit } from "express-rate-limit";
 import * as cors from "cors";
 import helmet from "helmet";
 import { startLogger } from "../logging";
+import { initialize } from "./passport-auth";
 
 const express = require("express");
 const logger = startLogger(__filename);
@@ -21,4 +22,5 @@ export default function applyGeneralMiddleware(app: Express) {
       statusCode: 429,
     })
   ); // limit repeated requests to avoid abuse of the API
+  initialize(app); // set up passport
 }
