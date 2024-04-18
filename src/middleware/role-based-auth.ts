@@ -4,7 +4,7 @@ import { startLogger } from "../logging";
 const logger = startLogger(__filename);
 export function isAuthor(req: Request, res: Response, next: NextFunction) {
   logger.info(`checking if user is an author...`);
-  if ((req.user! as any).data.role === "author") {
+  if ((req.user! as any).data.data.role === "author") {
     logger.info("user is an author hence proceeding to access resource");
     return next();
   } else {
