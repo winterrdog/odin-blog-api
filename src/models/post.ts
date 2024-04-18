@@ -20,9 +20,13 @@ const PostSchema = new Schema(
 );
 
 PostSchema.pre(["find", "findOne"], async function (next) {
-  await this.populate("author", "name");
-  next();
+  // NOTE: make a clone of the query object since we could
+  // have executed the query multiple times already
+  this.clone().populate("author", "name");
+
+  return next();
 });
+
 // triggered by a create, update, and save
 PostSchema.pre("save", async function (next) {
   await this.populate("author", "name");
