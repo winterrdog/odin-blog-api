@@ -29,8 +29,14 @@ PostSchema.pre(["find", "findOne"], async function (next) {
 
 // triggered by a create, update, and save
 PostSchema.pre("save", async function (next) {
-  await this.populate("author", "name");
-  next();
+  try {
+    await this.populate("author", "name");
+  } catch (e) {
+    console.error(`Error occurred during population on Post: ${e}`);
+    return next(e as Error);
+  }
+
+  return next();
 });
 
 function toJsonHandler(doc: Document, ret: any) {
