@@ -4,7 +4,7 @@ import { Types, isValidObjectId } from "mongoose";
 import { matchedData } from "express-validator";
 import { PostModel } from "../models/post";
 import { JwtPayload } from "../middleware/interfaces";
-import { postIdSanitizer } from "../validators/comments";
+import { postIdSanitizer } from "../validators/post";
 import Utility from "../utilities";
 import {
   postReqBodyValidators,
