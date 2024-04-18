@@ -19,15 +19,25 @@ const PostSchema = new Schema(
   }
 );
 
-async function toJsonHandler(doc: Document, ret: any) {
+PostSchema.pre(["find", "findOne"], async function (next) {
+  await this.populate("author", "name");
+  next();
+});
+// triggered by a create, update, and save
+PostSchema.pre("save", async function (next) {
+  await this.populate("author", "name");
+  next();
+});
+
+function toJsonHandler(doc: Document, ret: any) {
   ret.id = ret._id;
   ret.dateCreated = ret.createdAt;
   ret.dateUpdated = ret.updatedAt;
 
   // populate author field
-  await doc.populate({ path: "user", select: "name" });
-
-  ret.author = ret.author.name;
+  if (ret.author && ret.author.name) {
+    ret.author = ret.author.name;
+  }
 
   delete ret.createdAt;
   delete ret.updatedAt;

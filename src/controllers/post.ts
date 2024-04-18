@@ -102,7 +102,7 @@ const postController = {
           ...req.body,
         });
 
-        logger.info(`post created successfully! post: ${post.toJSON()}`);
+        logger.info(`post created successfully! post: ${post}`);
         return res.status(201).json({
           message: "Post created successfully",
           post,
