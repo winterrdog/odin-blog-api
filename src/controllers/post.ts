@@ -143,7 +143,7 @@ const postController = {
 
         // check if user is the author of the post
         const jwtData = (req.user! as any).data as JwtPayload;
-        if (!isAuthorSame(post.author, jwtData)) {
+        if (!isAuthorSame(post.author._id, jwtData)) {
           logger.error(
             `user with id ${jwtData.data.sub} is not the author of post with id ${id} hence cannot update it`
           );
@@ -196,7 +196,7 @@ const postController = {
 
         // check if user is the author of the post
         const jwtData = (req.user! as any).data as JwtPayload;
-        if (!isAuthorSame(post.author, jwtData)) {
+        if (!isAuthorSame(post.author._id, jwtData)) {
           logger.error(
             `user with id ${jwtData.data.sub} is not the author of post with id ${id} hence cannot delete it`
           );
