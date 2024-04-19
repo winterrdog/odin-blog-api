@@ -1,4 +1,9 @@
-import { Document, Schema, model } from "mongoose";
+import {
+  CallbackWithoutResultAndOptionalError,
+  Document,
+  Schema,
+  model,
+} from "mongoose";
 import { UserModelName } from "./user";
 import { PostModelName } from "./post";
 
@@ -23,27 +28,45 @@ const CommentSchema = new Schema(
     toJSON: { transform: toJsonHandler, flattenObjectIds: true },
   }
 );
-
-async function toJsonHandler(doc: Document, ret: any) {
+CommentSchema.pre(
+  ["find", "findOne"],
+  function (next: CallbackWithoutResultAndOptionalError) {
+    this.clone().populate({
+      path: "user",
+      select: "name",
+    });
+    return next();
+  }
+);
+CommentSchema.pre("save", async function (this: Document) {
+  try {
+    await this.populate({
+      path: "user",
+      select: "name",
+    });
+  } catch (e) {
+    console.error(
+      "error during post middleware on saving a comment",
+      e as Error
+    );
+  }
+});
+function toJsonHandler(doc: Document, ret: any) {
+  // NOTE: never mark this function as 'async'
   ret.id = ret._id;
-
-  // populate user and post fields
-  await doc.populate({ path: "user", select: "name" });
-
-  // populate post's id field
-  await doc.populate({ path: "post", select: "_id" });
-
-  ret.user = ret.user.name;
-  ret.post = ret.post._id;
   ret.dateCreated = ret.createdAt;
   ret.dateUpdated = ret.updatedAt;
 
-  delete ret._id;
-  delete ret.__v;
+  // populate user name field
+  if (ret.user && ret.user.name) {
+    ret.user = ret.user.name;
+  }
+
   delete ret.createdAt;
   delete ret.updatedAt;
+  delete ret._id;
+  delete ret.__v;
 
   return ret;
 }
-
 export const CommentModel = model("Comment", CommentSchema);

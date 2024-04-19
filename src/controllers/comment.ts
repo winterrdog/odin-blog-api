@@ -201,7 +201,7 @@ const commentController = {
         logger.info(
           `checking if user with id, ${sub}, is the author of the comment...`
         );
-        if (sub !== storedComment.user.toHexString()) {
+        if (sub !== storedComment.user._id.toHexString()) {
           logger.error("user is not the author of the comment");
           return res.status(403).json({
             message:
@@ -274,7 +274,7 @@ const commentController = {
         logger.info(
           `checking if user with id, ${sub}, is the author of the comment...`
         );
-        if (sub !== storedComment.user.toHexString()) {
+        if (sub !== storedComment.user._id.toHexString()) {
           logger.error("user is not the author of the comment");
           return res.status(403).json({
             message:
