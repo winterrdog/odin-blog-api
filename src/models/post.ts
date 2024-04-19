@@ -19,7 +19,7 @@ const PostSchema = new Schema(
   }
 );
 
-PostSchema.pre(["find", "findOne"], async function (next) {
+PostSchema.pre(["find", "findOne"], function (next) {
   // NOTE: make a clone of the query object since we could
   // have executed the query multiple times already
   this.clone().populate("author", "name");
@@ -33,10 +33,7 @@ PostSchema.pre("save", async function (next) {
     await this.populate("author", "name");
   } catch (e) {
     console.error(`Error occurred during population on Post: ${e}`);
-    return next(e as Error);
   }
-
-  return next();
 });
 
 function toJsonHandler(doc: Document, ret: any) {
