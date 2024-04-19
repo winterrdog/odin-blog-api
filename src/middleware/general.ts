@@ -8,11 +8,21 @@ import { initialize as initPassport } from "./passport-auth";
 require("dotenv").config();
 
 const logger = startLogger(__filename);
+const customHeaders = (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  res.setHeader("X-Powered-By", "code-from-2000");
+  return next();
+};
 export default function applyGeneralMiddleware(app: Express) {
   logger.info("starting app middleware...");
   app.use(express.json()); // parse application/json
   app.use(express.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
+
   if (process.env.NODE_ENV === "production") {
+    app.disable("etag");
     app.use(cors()); // allow cross-origin requests
     app.use(helmet()); // set security headers
     app.use(
@@ -24,6 +34,8 @@ export default function applyGeneralMiddleware(app: Express) {
         statusCode: 429,
       })
     ); // limit repeated requests to avoid abuse of the API
+    app.use(customHeaders);
   }
+
   initPassport(app); // set up passport
 }
