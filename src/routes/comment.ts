@@ -6,15 +6,11 @@ import { startLogger } from "../logging";
 const commentsRouter = Router();
 const logger = startLogger(__filename);
 
-// authenticate all routes here
-logger.info("setting up 'jwt' authentication for 'comment' routes...");
-commentsRouter.use(auth.authenticateJwt);
-
 logger.info("attaching controllers to 'comment' route: /:postId/comments ...");
 commentsRouter
   .route("/:postId/comments")
   .get(commentController.getComments)
-  .post(commentController.createComment);
+  .post(auth.authenticateJwt, commentController.createComment);
 
 logger.info(
   "attaching controllers to 'comment' route: /:postId/comments/:id ..."
@@ -22,7 +18,7 @@ logger.info(
 commentsRouter
   .route("/:postId/comments/:id")
   .get(commentController.getCommentById)
-  .patch(commentController.updateComment)
-  .delete(commentController.deleteComment);
+  .patch(auth.authenticateJwt, commentController.updateComment)
+  .delete(auth.authenticateJwt, commentController.deleteComment);
 
 export default commentsRouter;
