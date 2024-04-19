@@ -29,14 +29,11 @@ export function authenticateUserPass(
         logger.warn(
           `something not nice happened in user-pass auth: ${info.toString()}`
         );
+      const message = "invalid or corrupted or NO user logins were provided";
       if (typeof status === "number") {
-        return res.status(status).json({
-          message: "invalid or corrupted jwt was provided",
-        });
+        return res.status(status).json({ message });
       }
-      return res.status(401).json({
-        message: "invalid or corrupted jwt was provided",
-      });
+      return res.status(401).json({ message });
     }
 
     return next();
@@ -72,14 +69,11 @@ export function authenticateJwt(
         logger.warn(
           `something not nice happened in JWT auth: ${info.toString()}`
         );
+      const message = "invalid or corrupted or NO jwt was provided";
       if (typeof status === "number") {
-        return res.status(status).json({
-          message: "invalid or corrupted jwt was provided",
-        });
+        return res.status(status).json({ message });
       }
-      return res.status(401).json({
-        message: "invalid or corrupted jwt was provided",
-      });
+      return res.status(401).json({ message });
     }
 
     return next();
