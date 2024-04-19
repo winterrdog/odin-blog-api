@@ -1,10 +1,10 @@
 import { Express } from "express";
 import * as express from "express";
-import { rateLimit } from "express-rate-limit";
 import * as cors from "cors";
+import { rateLimit } from "express-rate-limit";
 import helmet from "helmet";
 import { startLogger } from "../logging";
-import { initialize } from "./passport-auth";
+import { initialize as initPassport } from "./passport-auth";
 require("dotenv").config();
 
 const logger = startLogger(__filename);
@@ -25,5 +25,5 @@ export default function applyGeneralMiddleware(app: Express) {
       })
     ); // limit repeated requests to avoid abuse of the API
   }
-  initialize(app); // set up passport
+  initPassport(app); // set up passport
 }
