@@ -36,6 +36,7 @@ export function authenticateUserPass(
       return res.status(401).json({ message });
     }
 
+    req.user = user;
     return next();
   };
 
@@ -76,6 +77,7 @@ export function authenticateJwt(
       return res.status(401).json({ message });
     }
 
+    req.user = user;
     return next();
   };
 
