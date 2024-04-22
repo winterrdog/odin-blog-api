@@ -2,6 +2,8 @@
 
 An exercise by The Odin Project( TOP ) to create a blog. I only designed the backend as that's my speciality :). but it's worthwhile to check out the code.
 
+AUTHOR: [winterrdog](https://github.com/winterrdog)
+
 ## REQUIREMENTS
 
 Make sure you have the following installed:
@@ -77,7 +79,7 @@ It has `14` endpoints i.e.:
 
 ### User Requests
 
-- Sign up a user
+#### Sign up a user
 
 ```sh
 curl -X POST -H "Content-Type: application/json" -d '{
@@ -98,7 +100,7 @@ HTTP/1.1 201 Created
 }
 ```
 
-- Sign in a user
+#### Sign in a user
 
 ```sh
 curl -X POST -H "Content-Type: application/json" -d '{"name": "John Doe", "pass": "password"}' http://localhost:3000/api/v1/users/sign-in
@@ -115,7 +117,7 @@ HTTP/1.1 200 OK
 }
 ```
 
-- Update a user's details
+#### Update a user's details
 
 ```sh
 curl -X PATCH -H "Content-Type: application/json" -d '{"name": "Jane Doe", "role": "reader"}' http://localhost:3000/api/v1/users/update
@@ -138,11 +140,23 @@ HTTP/1.1 200 OK
 }
 ```
 
-- `DELETE /api/v1/users/delete` - No body required. The server will use the JWT( _issued at login or sign up_ ) in the Bear token to delete the user. No response will be sent except for a `204 No Content` status code.
+#### Delete a user
+
+```sh
+curl -X DELETE -H "Authorization: Bearer eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InN1YiI6IjY2MjY1NWMxYTJlMjkxYjg0NjM1ODlmZSIsInJvbGUiOiJhdXRob3IifSwiaWF0IjoxNzEzNzg4MzUzLCJleHAiOjE3MTM5NjExNTN9.8oc3DOAR6SqaWUBynMZlAvHJr202cTXbtiq80EVyO5RSXMJrdGJ-aWdZF_lfR1p4" http://localhost:3000/api/v1/users/delete
+```
+
+The server will respond with:
+
+```json
+    HTTP/1.1 204 No Content
+```
 
 ### Post Requests
 
-- Create a post. Only registered users can create posts. The JWT is required in the Authorization header.
+#### Create a post.
+
+Only registered users can create posts. The JWT is required in the Authorization header.
 
 ```sh
 curl -X POST -H "Content-Type: application/json" -H "
@@ -171,7 +185,7 @@ HTTP/1.1 201 Created
 }
 ```
 
-- Get all posts
+#### Get all posts
 
 ```sh
 curl -X GET http://localhost:3000/api/v1/posts/
@@ -207,7 +221,7 @@ HTTP/1.1 200 OK
 }
 ```
 
-- Get a post
+#### Get a post
 
 ```sh
 curl -X GET http://localhost:3000/api/v1/posts/662659aaa2e291b846358a06
@@ -232,7 +246,7 @@ HTTP/1.1 200 OK
 }
 ```
 
-- Update a post
+#### Update a post
 
 ```sh
 curl -X PATCH -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InN1YiI6IjY2MjY1NWMxYTJlMjkxYjg0NjM1ODlmZSIsInJvbGUiOiJhdXRob3IifSwiaWF0IjoxNzEzNzg4MzUzLCJleHAiOjE3MTM5NjExNTN9.8oc3DOAR6SqaWUBynMZlAvHJr202cTXbtiq80EVyO5RSXMJrdGJ-aWdZF_lfR1p4" -d '{
@@ -260,7 +274,7 @@ HTTP/1.1 200 OK
 }
 ```
 
-- Delete a post
+#### Delete a post
 
 ```sh
 curl -X DELETE -H "Authorization: Bearer eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InN1YiI6IjY2MjY1NWMxYTJlMjkxYjg0NjM1ODlmZSIsInJvbGUiOiJhdXRob3IifSwiaWF0IjoxNzEzNzg4MzUzLCJleHAiOjE3MTM5NjExNTN9.8oc3DOAR6SqaWUBynMZlAvHJr202cTXbtiq80EVyO5RSXMJrdGJ-aWdZF_lfR1p4" http://localhost:3000/api/v1/posts/662659aaa2e291b846358a06
@@ -274,7 +288,9 @@ HTTP/1.1 204 No Content
 
 ### Comment Requests
 
-- Create a comment. Only registered users can create comments. The JWT is required in the Authorization header.
+#### Create a comment.
+
+Only registered users can create comments. The JWT is required in the Authorization header.
 
 ```sh
 curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InN1YiI6IjY2MjY1NWMxYTJlMjkxYjg0NjM1ODlmZSIsInJvbGUiOiJhdXRob3IifSwiaWF0IjoxNzEzNzg4MzUzLCJleHAiOjE3MTM5NjExNTN9.8oc3DOAR6SqaWUBynMZlAvHJr202cTXbtiq80EVyO5RSXMJrdGJ-aWdZF_lfR1p4" -d '{
@@ -301,7 +317,7 @@ HTTP/1.1 201 Created
 }
 ```
 
-- Get all comments for a post
+#### Get all comments for a post
 
 ```sh
 curl -X GET http://localhost:3000/api/v1/post-comments/662659aaa2e291b846358a07/comments/
@@ -328,7 +344,7 @@ HTTP/1.1 200 OK
 }
 ```
 
-- Get a comment
+#### Get a comment
 
 ```sh
 curl -X GET http://localhost:3000/api/v1/post-comments/662659aaa2e291b846358a07/comments/66265bcda2e291b846358a17
@@ -353,7 +369,7 @@ HTTP/1.1 200 OK
 }
 ```
 
-- Update a comment
+#### Update a comment
 
 ```sh
 curl -X PATCH -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InN1YiI6IjY2MjY1NWMxYTJlMjkxYjg0NjM1ODlmZSIsInJvbGUiOiJhdXRob3IifSwiaWF0IjoxNzEzNzg4MzUzLCJleHAiOjE3MTM5NjExNTN9.8oc3DOAR6SqaWUBynMZlAvHJr202cTXbtiq80EVyO5RSXMJrdGJ-aWdZF_lfR1p4" -d '{
@@ -380,7 +396,7 @@ HTTP/1.1 200 OK
 }
 ```
 
-- Delete a comment
+#### Delete a comment
 
 ```sh
 curl -X DELETE -H "Authorization: Bearer eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InN1YiI6IjY2MjY1NWMxYTJlMjkxYjg0NjM1ODlmZSIsInJvbGUiOiJhdXRob3IifSwiaWF0IjoxNzEzNzg4MzUzLCJleHAiOjE3MTM5NjExNTN9.8oc3DOAR6SqaWUBynMZlAvHJr202cTXbtiq80EVyO5RSXMJrdGJ-aWdZF_lfR1p4" http://localhost:3000/api/v1/post-comments/662659aaa2e291b846358a07/comments/66265bcda2e291b846358a17
@@ -391,3 +407,4 @@ The server will respond with:
 ```json
 HTTP/1.1 204 No Content
 ```
+LICENSE: [Unlicense](https://unlicense.org)
