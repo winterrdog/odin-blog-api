@@ -2,7 +2,7 @@
 
 An exercise by The Odin Project( TOP ) to create a blog. I only designed the backend as that's my speciality :). but it's worthwhile to check out the code.
 
-AUTHOR: [winterrdog](https://github.com/winterrdog)
+**AUTHOR**: [_winterrdog_](https://github.com/winterrdog)
 
 ## REQUIREMENTS
 
@@ -18,16 +18,22 @@ Make sure you have the following installed:
 
 - To run the backend, run the following command:
 
-```bash
-cd ./src
-./containerize.sh
-```
+  ```bash
+  cd ./src
+  ./containerize.sh
+  ```
 
 - In case you want to run it in development mode, run the following command:
 
-```bash
-docker-compose -f ./docker-compose.dev.yml up -d
-```
+  ```bash
+  docker-compose -f ./docker-compose.dev.yml up -d
+  ```
+
+- Stop the backend by running the following command:
+
+  ```bash
+  docker-compose down
+  ```
 
 - The backend will be available at `http://localhost:3000`.
 
@@ -35,9 +41,9 @@ docker-compose -f ./docker-compose.dev.yml up -d
 
 - To view logs, run the following command:
 
-```bash
-docker-compose logs -f
-```
+  ```bash
+  docker-compose logs -f
+  ```
 
 - The container will also write logs to `./src/blog-app.log` external to the container.
 
@@ -408,4 +414,5 @@ The server will respond with:
 ```json
 HTTP/1.1 204 No Content
 ```
+
 LICENSE: [Unlicense](https://unlicense.org)
