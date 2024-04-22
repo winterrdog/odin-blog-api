@@ -8,7 +8,7 @@ An exercise by The Odin Project( TOP ) to create a blog. I only designed the bac
 
 Make sure you have the following installed:
 
-- `Postman` - _for testing the API_
+- `Postman` / `curl` - _for testing the API_
 - `Docker` - _for building the database(`mongodb`) and the application_
 - `Docker Compose` - _for deploying the application_
 
