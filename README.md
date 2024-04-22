@@ -19,6 +19,7 @@ Make sure you have the following installed:
 - To run the backend, run the following command:
 
 ```bash
+cd ./src
 ./containerize.sh
 ```
 
