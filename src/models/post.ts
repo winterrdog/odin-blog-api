@@ -11,6 +11,7 @@ const PostSchema = new Schema(
     title: { type: String, required: true, minLength: 4, maxLength: 56 },
     body: { type: String, required: true },
     hidden: { type: Boolean, default: false },
+    views: [{ type: String }],
   },
   {
     timestamps: true,
@@ -44,6 +45,11 @@ function toJsonHandler(doc: Document, ret: any) {
   // populate author field
   if (ret.author && ret.author.name) {
     ret.author = ret.author.name;
+  }
+
+  if (ret.views && Array.isArray(ret.views)) {
+    ret.numOfViewers = ret.views.length;
+    delete ret.views;
   }
 
   delete ret.createdAt;

@@ -74,4 +74,7 @@ export default class Utility {
       });
     });
   }
+  static arrayToSet(arr: Array<any>): Set<any>{
+    return new Set(arr);
+  }
 }

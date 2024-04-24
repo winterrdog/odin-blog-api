@@ -15,10 +15,11 @@ postsRouter
   .post(auth.authenticateJwt, auth.isAuthor, postController.createPost);
 
 logger.info("attaching controllers to 'post' route: /:id ...");
+postsRouter.use("/:id", auth.authenticateJwt);
 postsRouter
   .route("/:id")
   .get(postController.getPostById)
-  .patch(auth.authenticateJwt, auth.isAuthor, postController.updatePost)
-  .delete(auth.authenticateJwt, auth.isAuthor, postController.deletePost);
+  .patch(auth.isAuthor, postController.updatePost)
+  .delete(auth.isAuthor, postController.deletePost);
 
 export default postsRouter;

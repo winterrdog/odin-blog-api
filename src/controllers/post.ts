@@ -40,6 +40,23 @@ const postController = {
             .json({ message: `Post with id ${id} not found` });
         }
 
+        // track the number of viewers
+        {
+          const jwtData = (req.user! as any).data as JwtPayload;
+          const { sub } = jwtData.data;
+          logger.info(`getting user id for view tracking: ${sub}...`);
+          if (!isValidObjectId(sub)) {
+            logger.error("invalid or malformed user id");
+            return res.status(400).json({ message: "Invalid user id" });
+          }
+
+          const postViewersSet: Set<string> = Utility.arrayToSet(post.views);
+          if (!postViewersSet.has(sub)) {
+            post.views.push(sub);
+            await post.save();
+          }
+        }
+
         logger.info("post retrieved successfully!");
         return res.status(200).json({
           message: "Post retrieved successfully",
