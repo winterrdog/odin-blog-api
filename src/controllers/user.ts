@@ -143,9 +143,7 @@ const userController = {
 
       await user.deleteOne();
       logger.info(`user with id: ${sub} deleted successfully`);
-      return res.status(204).json({
-        message: "User deleted successfully",
-      });
+      return res.status(204).end();
     } catch (e) {
       logger.error(e, "error occurred during deletion of user");
       return res.status(500).json({

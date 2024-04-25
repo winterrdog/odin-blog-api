@@ -286,7 +286,7 @@ const commentController = {
         logger.info(
           `comment with id, ${storedComment.id}, deleted successfully!`
         );
-        return res.status(204).json({});
+        return res.status(204).end();
       } catch (e) {
         logger.error(e, "error deleting a comment");
         return res.status(500).json({
