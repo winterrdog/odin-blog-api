@@ -6,8 +6,6 @@ import { startLogger } from "../logging";
 const postsRouter = Router();
 const logger = startLogger(__filename);
 
-// authenticate & authorize particular routes
-
 logger.info("attaching controllers to 'post' route: / ...");
 postsRouter
   .route("/")
@@ -21,5 +19,11 @@ postsRouter
   .get(postController.getPostById)
   .patch(auth.isAuthor, postController.updatePost)
   .delete(auth.isAuthor, postController.deletePost);
+
+logger.info(
+  "attaching controllers to 'post' route: /:id/likes & /:id/dislikes ..."
+);
+postsRouter.patch("/:id/likes", postController.updateLikes);
+postsRouter.patch("/:id/dislikes", postController.updateDislikes);
 
 export default postsRouter;

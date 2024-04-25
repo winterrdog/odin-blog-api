@@ -11,7 +11,9 @@ const PostSchema = new Schema(
     title: { type: String, required: true, minLength: 4, maxLength: 56 },
     body: { type: String, required: true },
     hidden: { type: Boolean, default: false },
-    views: [{ type: String }],
+    views: [{ type: String, default: [] }], // store user ids in string format
+    likes: [{ type: String, default: [] }],
+    dislikes: [{ type: String, default: [] }],
   },
   {
     timestamps: true,
@@ -50,6 +52,14 @@ function toJsonHandler(doc: Document, ret: any) {
   if (ret.views && Array.isArray(ret.views)) {
     ret.numOfViewers = ret.views.length;
     delete ret.views;
+  }
+  if (ret.likes && Array.isArray(ret.likes)) {
+    ret.numOfLikes = ret.likes.length;
+    delete ret.likes;
+  }
+  if (ret.dislikes && Array.isArray(ret.dislikes)) {
+    ret.numOfDislikes = ret.dislikes.length;
+    delete ret.dislikes;
   }
 
   delete ret.createdAt;

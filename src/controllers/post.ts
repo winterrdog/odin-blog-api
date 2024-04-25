@@ -13,10 +13,6 @@ import {
 import { PostUpdateReqBody } from "../request-bodies/post";
 import { startLogger } from "../logging";
 
-function isAuthorSame(tgtAuthor: Types.ObjectId, reqAuthor: JwtPayload) {
-  return tgtAuthor.toHexString() === reqAuthor.data.sub;
-}
-
 const logger = startLogger(__filename);
 const postController = {
   getPostById: [
@@ -225,9 +221,7 @@ const postController = {
         // delete post
         await post.deleteOne();
         logger.info(`post with id: ${id} deleted successfully!`);
-        return res.status(204).json({
-          message: "Post deleted successfully",
-        });
+        return res.status(204).end();
       } catch (e) {
         logger.error(e, "error occurred during deleting post");
         return res.status(500).json({
@@ -239,5 +233,152 @@ const postController = {
       }
     },
   ],
+  updateLikes: [
+    postIdSanitizer,
+    Utility.validateRequest,
+    async function (req: Request, res: Response) {
+      try {
+        const { id } = req.params;
+        logger.info(`fetching post by id: ${id}...`);
+        if (isValidObjectId(id) === false) {
+          logger.error("invalid or malformed post id");
+          return res.status(400).json({ message: "Invalid post id" });
+        }
+
+        // check if post exists
+        const post = await PostModel.findById(id);
+        if (!post) {
+          logger.error(`post with id ${id} not found`);
+          return res
+            .status(404)
+            .json({ message: `Post with id ${id} not found` });
+        }
+
+        // update likes
+        logger.info(`updating user likes...`);
+        const updateOnLikes = updateUniqueSets(req, res, post.likes);
+        if (!updateOnLikes) {
+          logger.info(
+            "the currently like was already updated or user provided malformed user ID!"
+          );
+          return res.status(204).end();
+        }
+
+        // if the user disliked the post, "remove" them from dislikes
+        if (post.dislikes.length > 0) {
+          const dislikeSet = Utility.arrayToSet(post.dislikes);
+          const userId: string = ((<any>req.user!).data as JwtPayload).data.sub;
+          if (dislikeSet.has(userId)) {
+            dislikeSet.delete(userId); // remove user
+            post.dislikes = dislikeSet.size > 0 ? Array.from(dislikeSet) : [];
+          }
+        }
+
+        await post.save();
+        logger.info("likes updated successfully!");
+        return res.status(200).json({
+          message: "likes updated successfully",
+          post,
+        });
+      } catch (e) {
+        logger.error(e, "Error occurred during updating likes");
+        return res.status(500).json({
+          message:
+            process.env.NODE_ENV === "production"
+              ? "Internal server error occurred. Please try again later."
+              : (e as Error).message,
+        });
+      }
+    },
+  ],
+  updateDislikes: [
+    postIdSanitizer,
+    Utility.validateRequest,
+    async function (req: Request, res: Response) {
+      try {
+        const { id } = req.params;
+        logger.info(`fetching post by id: ${id}...`);
+        if (isValidObjectId(id) === false) {
+          logger.error("invalid or malformed post id");
+          return res.status(400).json({ message: "Invalid post id" });
+        }
+
+        // check if post exists
+        const post = await PostModel.findById(id);
+        if (!post) {
+          logger.error(`post with id ${id} not found`);
+          return res
+            .status(404)
+            .json({ message: `Post with id ${id} not found` });
+        }
+
+        // update dislikes
+        logger.info(`updating user dislikes...`);
+        const updateOnDislikes = updateUniqueSets(req, res, post.dislikes);
+        if (!updateOnDislikes) {
+          logger.info(
+            "the currently dislike was already updated or user provided malformed user ID!"
+          );
+          return res.status(204).end();
+        }
+
+        // if the user liked the post, "remove" them from likes
+        if (post.likes.length > 0) {
+          const likesSet = Utility.arrayToSet(post.likes);
+          const userId: string = ((<any>req.user!).data as JwtPayload).data.sub;
+          if (likesSet.has(userId)) {
+            likesSet.delete(userId); // remove user from likes
+            post.likes = likesSet.size > 0 ? Array.from(likesSet) : [];
+          }
+        }
+
+        await post.save();
+        logger.info("dislikes updated successfully!");
+        return res.status(200).json({
+          message: "dislikes updated successfully",
+          post,
+        });
+      } catch (e) {
+        logger.error(e, "Error occurred during updating likes");
+        return res.status(500).json({
+          message:
+            process.env.NODE_ENV === "production"
+              ? "Internal server error occurred. Please try again later."
+              : (e as Error).message,
+        });
+      }
+    },
+  ],
 };
+
+function isAuthorSame(tgtAuthor: Types.ObjectId, reqAuthor: JwtPayload) {
+  return tgtAuthor.toHexString() === reqAuthor.data.sub;
+}
+
+function updateUniqueSets(
+  req: Request,
+  res: Response,
+  arr: Array<string>
+): boolean {
+  if (!req.user) {
+    throw new Error("user's not authenticated thus user object is missing");
+  }
+
+  const jwtData = (req.user as any).data as JwtPayload;
+  const { sub } = jwtData.data;
+  if (!isValidObjectId(sub)) {
+    logger.error("invalid or malformed user id");
+    res.status(400).json({ message: "Invalid user id" });
+    return false;
+  }
+
+  const tgtSet: Set<string> = Utility.arrayToSet(arr);
+  if (!tgtSet.has(sub)) {
+    arr.push(sub);
+    return true;
+  }
+
+  return false;
+}
+
 export default postController;

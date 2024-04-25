@@ -55,7 +55,7 @@ This backend has 3 features:
 - `Posts` - _for creating, reading, updating and deleting posts_
 - `Comments` - _for creating, reading, updating and deleting comments_
 
-It has `14` endpoints i.e.:
+It has `16` endpoints i.e.:
 
 ### User Endpoints
 
@@ -71,6 +71,8 @@ It has `14` endpoints i.e.:
 - `GET /api/v1/posts/:postId` - _for getting a post_
 - `PATCH /api/v1/posts/:postId` - _for updating a post_
 - `DELETE /api/v1/posts/:postId` - _for deleting a post_
+- `PATCH /api/v1/posts/:postId/likes` - _for adding a like_
+- `PATCH /api/v1/posts/:postId/dislikes` - _for adding a dislike_
 
 ### Comment Endpoints
 
