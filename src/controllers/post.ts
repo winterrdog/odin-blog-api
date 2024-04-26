@@ -393,9 +393,7 @@ const postController = {
         await post.save();
         logger.info("like removed successfully!");
 
-        return res
-          .status(200)
-          .json({ message: "like removed successfully!", post });
+        return res.status(204).end();
       } catch (e) {
         logger.error(e, "Error occurred during removing like");
         return res.status(500).json({
@@ -451,9 +449,7 @@ const postController = {
         await post.save();
         logger.info("dislike removed successfully!");
 
-        return res
-          .status(200)
-          .json({ message: "dislike removed successfully!", post });
+        return res.status(204).end();
       } catch (e) {
         logger.error(e, "Error occurred during removing dislike");
         return res.status(500).json({
