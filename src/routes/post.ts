@@ -27,6 +27,9 @@ postsRouter
   .route("/:id/likes")
   .patch(postController.updateLikes)
   .delete(postController.removeLike);
-postsRouter.route("/:id/dislikes").patch(postController.updateDislikes);
+postsRouter
+  .route("/:id/dislikes")
+  .patch(postController.updateDislikes)
+  .delete(postController.removeDislike);
 
 export default postsRouter;

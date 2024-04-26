@@ -339,7 +339,7 @@ const postController = {
           post,
         });
       } catch (e) {
-        logger.error(e, "Error occurred during updating likes");
+        logger.error(e, "Error occurred during updating dislikes");
         return res.status(500).json({
           message:
             process.env.NODE_ENV === "production"
@@ -370,19 +370,24 @@ const postController = {
             .json({ message: `Post with id ${id} not found` });
         }
 
-        // update dislikes
+        // update likes
         logger.info(`removing user like...`);
         if (post.likes.length > 0) {
           const likesSet = Utility.arrayToSet(post.likes);
           const userId: string = ((<any>req.user!).data as JwtPayload).data.sub;
 
           if (!likesSet.has(userId)) {
-            logger.info("user already disliked post");
-            return res.status(204).end();
+            logger.info("user already unliked post");
+            return res.status(204).json({
+              message: "user already unliked post",
+            });
           }
 
           likesSet.delete(userId); // remove user from likes
           post.likes = likesSet.size > 0 ? Array.from(likesSet) : [];
+        } else {
+          logger.info("no likes to remove from");
+          return res.status(204).json({ message: "there are no likes yet" });
         }
 
         await post.save();
@@ -392,7 +397,65 @@ const postController = {
           .status(200)
           .json({ message: "like removed successfully!", post });
       } catch (e) {
-        logger.error(e, "Error occurred during updating likes");
+        logger.error(e, "Error occurred during removing like");
+        return res.status(500).json({
+          message:
+            process.env.NODE_ENV === "production"
+              ? "Internal server error occurred. Please try again later."
+              : (e as Error).message,
+        });
+      }
+    },
+  ],
+  removeDislike: [
+    postIdSanitizer,
+    Utility.validateRequest,
+    async function (req: Request, res: Response) {
+      try {
+        const { id } = req.params;
+        logger.info(`fetching post by id: ${id}...`);
+        if (isValidObjectId(id) === false) {
+          logger.error("invalid or malformed post id");
+          return res.status(400).json({ message: "Invalid post id" });
+        }
+
+        // check if post exists
+        const post = await PostModel.findById(id);
+        if (!post) {
+          logger.error(`post with id ${id} not found`);
+          return res
+            .status(404)
+            .json({ message: `Post with id ${id} not found` });
+        }
+
+        // update dislikes
+        logger.info(`removing user dislike...`);
+        if (post.dislikes.length > 0) {
+          const dislikesSet = Utility.arrayToSet(post.dislikes);
+          const userId: string = ((<any>req.user!).data as JwtPayload).data.sub;
+
+          if (!dislikesSet.has(userId)) {
+            logger.info("user already removed their dislike from post");
+            return res.status(204).json({
+              message: "user already removed their dislike from post",
+            });
+          }
+
+          dislikesSet.delete(userId); // remove user from dislikes
+          post.dislikes = dislikesSet.size > 0 ? Array.from(dislikesSet) : [];
+        } else {
+          logger.info("no dislikes to remove from");
+          return res.status(204).json({ message: "there are no dislikes yet" });
+        }
+
+        await post.save();
+        logger.info("dislike removed successfully!");
+
+        return res
+          .status(200)
+          .json({ message: "dislike removed successfully!", post });
+      } catch (e) {
+        logger.error(e, "Error occurred during removing dislike");
         return res.status(500).json({
           message:
             process.env.NODE_ENV === "production"
