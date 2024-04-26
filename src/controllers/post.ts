@@ -317,7 +317,7 @@ const postController = {
         const updateOnDislikes = updateUniqueSets(req, res, post.dislikes);
         if (!updateOnDislikes) {
           logger.info(
-            "the currently dislike was already updated or user provided malformed user ID!"
+            "the dislike was already updated or user provided malformed user ID!"
           );
           return res.status(204).end();
         }
@@ -338,6 +338,59 @@ const postController = {
           message: "dislikes updated successfully",
           post,
         });
+      } catch (e) {
+        logger.error(e, "Error occurred during updating likes");
+        return res.status(500).json({
+          message:
+            process.env.NODE_ENV === "production"
+              ? "Internal server error occurred. Please try again later."
+              : (e as Error).message,
+        });
+      }
+    },
+  ],
+  removeLike: [
+    postIdSanitizer,
+    Utility.validateRequest,
+    async function (req: Request, res: Response) {
+      try {
+        const { id } = req.params;
+        logger.info(`fetching post by id: ${id}...`);
+        if (isValidObjectId(id) === false) {
+          logger.error("invalid or malformed post id");
+          return res.status(400).json({ message: "Invalid post id" });
+        }
+
+        // check if post exists
+        const post = await PostModel.findById(id);
+        if (!post) {
+          logger.error(`post with id ${id} not found`);
+          return res
+            .status(404)
+            .json({ message: `Post with id ${id} not found` });
+        }
+
+        // update dislikes
+        logger.info(`removing user like...`);
+        if (post.likes.length > 0) {
+          const likesSet = Utility.arrayToSet(post.likes);
+          const userId: string = ((<any>req.user!).data as JwtPayload).data.sub;
+
+          if (!likesSet.has(userId)) {
+            logger.info("user already disliked post");
+            return res.status(204).end();
+          }
+
+          likesSet.delete(userId); // remove user from likes
+          post.likes = likesSet.size > 0 ? Array.from(likesSet) : [];
+        }
+
+        await post.save();
+        logger.info("like removed successfully!");
+
+        return res
+          .status(200)
+          .json({ message: "like removed successfully!", post });
       } catch (e) {
         logger.error(e, "Error occurred during updating likes");
         return res.status(500).json({

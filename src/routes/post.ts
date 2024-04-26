@@ -23,7 +23,10 @@ postsRouter
 logger.info(
   "attaching controllers to 'post' route: /:id/likes & /:id/dislikes ..."
 );
-postsRouter.patch("/:id/likes", postController.updateLikes);
-postsRouter.patch("/:id/dislikes", postController.updateDislikes);
+postsRouter
+  .route("/:id/likes")
+  .patch(postController.updateLikes)
+  .delete(postController.removeLike);
+postsRouter.route("/:id/dislikes").patch(postController.updateDislikes);
 
 export default postsRouter;
