@@ -7,6 +7,7 @@ import {
 import { UserModelName } from "./user";
 import { PostModelName } from "./post";
 
+const CommentModelName = "Comment";
 const CommentSchema = new Schema(
   {
     body: { type: String, required: true },
@@ -21,6 +22,14 @@ const CommentSchema = new Schema(
       ref: PostModelName,
       required: true,
     },
+    parentComment: {
+      type: Schema.Types.ObjectId,
+      ref: CommentModelName,
+      default: null,
+    },
+    childComments: [
+      { type: Schema.Types.ObjectId, ref: CommentModelName, default: [] },
+    ],
   },
   {
     timestamps: true,
@@ -69,4 +78,4 @@ function toJsonHandler(doc: Document, ret: any) {
 
   return ret;
 }
-export const CommentModel = model("Comment", CommentSchema);
+export const CommentModel = model(CommentModelName, CommentSchema);
