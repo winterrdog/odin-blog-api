@@ -21,6 +21,7 @@ commentsRouter
   .patch(auth.authenticateJwt, commentController.updateComment)
   .delete(auth.authenticateJwt, commentController.deleteComment);
 
+// to update a Reply, just hit the 'updateComment' endpoint above
 logger.info(
   "attaching controllers to 'comment' route: /:postId/comments/:id/replies ..."
 );
@@ -31,7 +32,6 @@ commentsRouter
   .post(commentController.createReply);
 commentsRouter
   .route("/:postId/comments/:id/replies/:replyId")
-  .patch(commentController.updateReply)
   .delete(commentController.deleteReply);
 
 export default commentsRouter;

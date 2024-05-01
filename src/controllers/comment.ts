@@ -381,6 +381,100 @@ const commentController = {
       }
     },
   ],
+  deleteReply: [
+    ...idSanitizers,
+    Utility.validateRequest,
+    async function (req: Request, res: Response) {
+      try {
+        const parentComment = await findParentComment(req, res);
+        if (!parentComment) return;
+
+        // find reply in database
+        const sanitizedData = matchedData(req);
+        const { postId, replyId } = sanitizedData;
+        logger.info(
+          `deleting comment with id, ${replyId}, for post with id, ${postId}...`
+        );
+        if (!isValidObjectId(postId)) {
+          logger.error("invalid or malformed post id");
+          return res.status(400).json({
+            message: `Post id, ${postId}, is invalid or malformed.`,
+          });
+        }
+        if (!isValidObjectId(replyId)) {
+          logger.error("invalid or malformed comment id");
+          return res.status(400).json({
+            message: `Comment id, ${replyId}, is invalid or malformed.`,
+          });
+        }
+
+        const deletedReply = await CommentModel.findOne({
+          _id: replyId,
+          post: postId,
+        });
+        if (!deletedReply) {
+          logger.error(
+            `comment with id, ${replyId}, and post id, ${postId}, was not found.`
+          );
+          return res.status(404).json({
+            message: `comment with id, ${replyId}, and post id, ${postId}, was not found.`,
+          });
+        }
+
+        {
+          // remove reply from parent's children
+          const objectIdToString = (currMongoId: Types.ObjectId): string => {
+            return currMongoId._id.toHexString();
+          };
+          const hexUserIds = parentComment.childComments.map(objectIdToString);
+          const userIdSet = Utility.arrayToSet(hexUserIds);
+          if (!userIdSet.has(replyId)) {
+            return res.status(404).json({
+              message: `the current reply with id, ${replyId}, was not found among the current comment's( ${parentComment.id} ) replies`,
+            });
+          }
+
+          userIdSet.delete(replyId);
+          parentComment.childComments = Array.from(userIdSet);
+          await parentComment.save();
+        }
+
+        {
+          // delete in database
+          const { data } = (req.user! as any).data as JwtPayload;
+          const { sub } = data;
+
+          // check author
+          logger.info(
+            `checking if user with id, ${sub}, is the author of the comment...`
+          );
+          if (sub !== deletedReply.user._id.toHexString()) {
+            logger.error("user is not the author of the comment");
+            return res.status(403).json({
+              message:
+                "you are not the author of this post so you will not delete it",
+            });
+          }
+          await deletedReply.deleteOne();
+          logger.info(
+            `comment with id, ${deletedReply.id}, deleted successfully!`
+          );
+        }
+
+        return res.status(204).end();
+      } catch (e) {
+        logger.error(e, "error deleting reply to comment");
+        return res.status(500).json({
+          message:
+            process.env.NODE_ENV === "production"
+              ? "Internal server error occurred. Please try again later."
+              : (e as Error).message,
+        });
+      }
+    },
+  ],
+};
+
 async function findParentComment(req: Request, res: Response) {
   try {
     const sanitizedData = matchedData(req);
@@ -425,4 +519,5 @@ async function findParentComment(req: Request, res: Response) {
     throw e;
   }
 }
+
 export default commentController;
