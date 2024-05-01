@@ -1,15 +1,13 @@
 import { Request, Response } from "express";
 import * as _ from "lodash";
-import { isValidObjectId } from "mongoose";
+import { Types, isValidObjectId } from "mongoose";
 import { matchedData } from "express-validator";
-import { CommentModel } from "../models/comment";
-import {
-  CommentReqBody,
-  CommentUpdateReqBody,
-} from "../request-bodies/comment";
+import { CommentModel, CommentModelShape } from "../models/comment";
+import { CommentUpdateReqBody } from "../request-bodies/comment";
 import { JwtPayload } from "../middleware/interfaces";
 import {
   commentBodyValidator,
+  commentIdSanitizer,
   commentUpdateReqBodyValidators,
   idSanitizers,
   postIdSanitizer,
@@ -131,9 +129,9 @@ const commentController = {
         const { data } = (req.user! as any).data as JwtPayload;
         const { sub } = data;
         logger.info(`creating a comment for user with id, ${sub}...`);
-        const reqBody: CommentReqBody = {
-          user: sub,
-          post: postId,
+        const reqBody: CommentModelShape = {
+          user: new Types.ObjectId(<string>sub),
+          post: new Types.ObjectId(<string>postId),
           ...req.body,
         } as const;
         const createdComment = await CommentModel.create({
@@ -378,10 +376,10 @@ const commentController = {
         logger.info(
           `creating a sub-comment for comment,${commentId}, by user with id, ${sub}...`
         );
-        const replyCommentData: CommentReqBody = {
-          user: sub,
-          post: postId,
-          parentComment: commentId, // attach parent to child/reply
+        const replyCommentData: CommentModelShape = {
+          user: new Types.ObjectId(<string>sub),
+          post: new Types.ObjectId(<string>postId),
+          parentComment: parentComment._id, // attach parent to child/reply
           ...req.body,
         } as const;
         const newReplyComment = await CommentModel.create({
