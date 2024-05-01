@@ -37,6 +37,14 @@ const CommentSchema = new Schema(
     toJSON: { transform: toJsonHandler, flattenObjectIds: true },
   }
 );
+export interface CommentModelShape {
+  body: string;
+  user: Schema.Types.ObjectId;
+  post: Schema.Types.ObjectId;
+  tldr?: string;
+  parentComment?: Schema.Types.ObjectId;
+  childComments?: Schema.Types.ObjectId[];
+}
 CommentSchema.pre(
   ["find", "findOne"],
   function (next: CallbackWithoutResultAndOptionalError) {
