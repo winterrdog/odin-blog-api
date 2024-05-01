@@ -298,6 +298,42 @@ const commentController = {
       }
     },
   ],
+  findReplies: [
+    postIdSanitizer,
+    commentIdSanitizer,
+    Utility.validateRequest,
+    async function (req: Request, res: Response) {
+      try {
+        const parentComment = await findParentComment(req, res);
+        if (!parentComment) {
+          return;
+        }
+
+        // populate child comments
+        logger.info(`populating comment's( ${parentComment.id} ) replies...`);
+        await parentComment.populate("childComments");
+        const replies = parentComment.childComments;
+        if (replies.length === 0) {
+          return res.status(404).json({
+            message: `no replies added for comment, ${parentComment.id}`,
+          });
+        }
+
+        return res.status(200).json({
+          message: "replies retrieved successfully",
+          replies,
+        });
+      } catch (e) {
+        logger.error(e, "error finding replies to comment");
+        return res.status(500).json({
+          message:
+            process.env.NODE_ENV === "production"
+              ? "Internal server error occurred. Please try again later."
+              : (e as Error).message,
+        });
+      }
+    },
+  ],
   createReply: [
     postIdSanitizer,
     commentIdSanitizer,
@@ -371,5 +407,48 @@ const commentController = {
       }
     },
   ],
-};
+async function findParentComment(req: Request, res: Response) {
+  try {
+    const sanitizedData = matchedData(req);
+    const { postId, id: parentCommentId } = sanitizedData;
+    logger.info(
+      `fetching the comment with id, ${parentCommentId}, for post with id, ${postId}...`
+    );
+    if (!isValidObjectId(postId)) {
+      logger.error("invalid or malformed post id");
+      res.status(400).json({
+        message: `Post id, ${postId}, is invalid or malformed.`,
+      });
+
+      return null;
+    }
+    if (!isValidObjectId(parentCommentId)) {
+      logger.error("invalid or malformed comment id");
+      res.status(400).json({
+        message: `Comment id, ${parentCommentId}, is invalid or malformed.`,
+      });
+
+      return null;
+    }
+
+    const parentComment = await CommentModel.findOne({
+      _id: parentCommentId,
+      post: postId,
+    });
+    if (!parentComment) {
+      logger.error(
+        `comment with id, ${parentCommentId}, and post id, ${postId}, was not found.`
+      );
+      res.status(404).json({
+        message: `comment with id, ${parentCommentId}, and post id, ${postId}, was not found.`,
+      });
+
+      return null;
+    }
+
+    return parentComment;
+  } catch (e) {
+    throw e;
+  }
+}
 export default commentController;
