@@ -340,41 +340,17 @@ const commentController = {
       try {
         // find the parent comment first
         const sanitizedData = matchedData(req);
-        const { postId, id: commentId } = sanitizedData;
-        logger.info(
-          `fetching the comment with id, ${commentId}, for post with id, ${postId}...`
-        );
-        if (!isValidObjectId(postId)) {
-          logger.error("invalid or malformed post id");
-          return res.status(400).json({
-            message: `Post id, ${postId}, is invalid or malformed.`,
-          });
-        }
-        if (!isValidObjectId(commentId)) {
-          logger.error("invalid or malformed comment id");
-          return res.status(400).json({
-            message: `Comment id, ${commentId}, is invalid or malformed.`,
-          });
-        }
-
-        const storedComment = await CommentModel.findOne({
-          _id: commentId,
-          post: postId,
-        });
-        if (!storedComment) {
-          logger.error(
-            `comment with id, ${commentId}, and post id, ${postId}, was not found.`
-          );
-          return res.status(404).json({
-            message: `comment with id, ${commentId}, and post id, ${postId}, was not found.`,
-          });
+        const { postId, id: parentCommentId } = sanitizedData;
+        const parentComment = await findParentComment(req, res);
+        if (!parentComment) {
+          return;
         }
 
         // make sub comment / reply
         const { data } = (req.user! as any).data as JwtPayload;
         const { sub } = data;
         logger.info(
-          `creating a sub-comment for comment,${commentId}, by user with id, ${sub}...`
+          `creating a sub-comment for comment,${parentCommentId}, by user with id, ${sub}...`
         );
         const replyCommentData: CommentModelShape = {
           user: new Types.ObjectId(<string>sub),
@@ -387,8 +363,8 @@ const commentController = {
         });
 
         // attach child/reply to parent
-        storedComment.childComments.push(newReplyComment._id);
-        await storedComment.save();
+        parentComment.childComments.push(newReplyComment._id);
+        await parentComment.save();
 
         return res.status(201).json({
           message: "reply created successfully",
