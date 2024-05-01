@@ -1,7 +1,11 @@
 import { Schema, model } from "mongoose";
 
 export const roles = ["author", "reader"];
-
+export interface UserModelShape {
+  name: string;
+  passwordHash: string;
+  role?: string;
+}
 const UserSchema = new Schema(
   {
     name: { type: String, required: true, maxLength: 64 },

@@ -1,6 +1,15 @@
 import { Document, Schema, model } from "mongoose";
 import { UserModelName } from "./user";
 
+export interface PostModelShape {
+  author: Schema.Types.ObjectId;
+  title: string;
+  body: string;
+  hidden?: boolean;
+  views?: string[]; // store user ids in string format
+  likes?: string[];
+  dislikes?: string[];
+}
 const PostSchema = new Schema(
   {
     author: {
@@ -22,6 +31,7 @@ const PostSchema = new Schema(
   }
 );
 
+// hooks
 PostSchema.pre(["find", "findOne"], function (next) {
   // NOTE: make a clone of the query object since we could
   // have executed the query multiple times already

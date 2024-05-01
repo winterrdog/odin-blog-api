@@ -7,6 +7,14 @@ import {
 import { UserModelName } from "./user";
 import { PostModelName } from "./post";
 
+export interface CommentModelShape {
+  body: string;
+  user: Schema.Types.ObjectId;
+  post: Schema.Types.ObjectId;
+  tldr?: string;
+  parentComment?: Schema.Types.ObjectId;
+  childComments?: Schema.Types.ObjectId[];
+}
 const CommentModelName = "Comment";
 const CommentSchema = new Schema(
   {
@@ -37,14 +45,8 @@ const CommentSchema = new Schema(
     toJSON: { transform: toJsonHandler, flattenObjectIds: true },
   }
 );
-export interface CommentModelShape {
-  body: string;
-  user: Schema.Types.ObjectId;
-  post: Schema.Types.ObjectId;
-  tldr?: string;
-  parentComment?: Schema.Types.ObjectId;
-  childComments?: Schema.Types.ObjectId[];
-}
+
+// hooks
 CommentSchema.pre(
   ["find", "findOne"],
   function (next: CallbackWithoutResultAndOptionalError) {
