@@ -8,12 +8,14 @@ import { UserModelName } from "./user";
 import { PostModelName } from "./post";
 
 export interface CommentModelShape {
-  body: string;
   user: Schema.Types.ObjectId;
   post: Schema.Types.ObjectId;
-  tldr?: string;
   parentComment?: Schema.Types.ObjectId;
   childComments?: Schema.Types.ObjectId[];
+  detachedchildComments?: Schema.Types.ObjectId[];
+  deleted?: boolean;
+  body: string;
+  tldr?: string;
 }
 const CommentModelName = "Comment";
 const CommentSchema = new Schema(
@@ -30,12 +32,16 @@ const CommentSchema = new Schema(
       ref: PostModelName,
       required: true,
     },
+    deleted: { type: Boolean, default: false },
     parentComment: {
       type: Schema.Types.ObjectId,
       ref: CommentModelName,
       default: null,
     },
     childComments: [
+      { type: Schema.Types.ObjectId, ref: CommentModelName, default: [] },
+    ],
+    detachedchildComments: [
       { type: Schema.Types.ObjectId, ref: CommentModelName, default: [] },
     ],
   },

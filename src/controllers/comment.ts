@@ -44,7 +44,8 @@ const commentController = {
           _id: commentId,
           post: postId,
         });
-        if (!storedComment) {
+        // if comment's marked as deleted or just not there!
+        if (!storedComment || storedComment.deleted) {
           logger.error(
             `comment with id, ${commentId}, and post id, ${postId}, was not found.`
           );
@@ -84,7 +85,7 @@ const commentController = {
           });
         }
 
-        const storedComments = await CommentModel.find({
+        let storedComments = await CommentModel.find({
           post: postId,
         });
         if (storedComments.length === 0) {
@@ -93,6 +94,11 @@ const commentController = {
             message: `No comments available for post with id, ${postId}.`,
           });
         }
+
+        // keep comments that are NOT deleted
+        storedComments = storedComments.filter(
+          (currComment) => !currComment.deleted
+        );
 
         logger.info("comments fetched successfully!");
         return res.status(200).json({
@@ -184,7 +190,7 @@ const commentController = {
           _id: commentId,
           post: postId,
         });
-        if (!storedComment) {
+        if (!storedComment || storedComment.deleted) {
           logger.error(
             `comment with id, ${commentId}, and post id, ${postId}, was not found.`
           );
@@ -257,7 +263,7 @@ const commentController = {
           _id: commentId,
           post: postId,
         });
-        if (!storedComment) {
+        if (!storedComment || storedComment.deleted) {
           logger.error(
             `comment with id, ${commentId}, and post id, ${postId}, was not found.`
           );
@@ -280,10 +286,11 @@ const commentController = {
           });
         }
 
-        await storedComment.deleteOne();
+        await markCommentAsDeleted(storedComment);
         logger.info(
           `comment with id, ${storedComment.id}, deleted successfully!`
         );
+
         return res.status(204).end();
       } catch (e) {
         logger.error(e, "error deleting a comment");
@@ -303,19 +310,27 @@ const commentController = {
     async function (req: Request, res: Response) {
       try {
         const parentComment = await findParentComment(req, res);
-        if (!parentComment) {
-          return;
+        if (!parentComment) return;
+
+        // is the parent comment deleted?
+        if (parentComment.deleted) {
+          return res.status(400).json({
+            message: `parent comment with id, ${parentComment.id}, is already deleted`,
+          });
         }
 
         // populate child comments
         logger.info(`populating comment's( ${parentComment.id} ) replies...`);
         await parentComment.populate("childComments");
-        const replies = parentComment.childComments;
+        let replies = parentComment.childComments;
         if (replies.length === 0) {
           return res.status(404).json({
             message: `no replies added for comment, ${parentComment.id}`,
           });
         }
+
+        // keep replies that are NOT deleted
+        replies = replies.filter((currComment) => !(<any>currComment).deleted);
 
         return res.status(200).json({
           message: "replies retrieved successfully",
@@ -342,8 +357,13 @@ const commentController = {
         const sanitizedData = matchedData(req);
         const { postId, id: parentCommentId } = sanitizedData;
         const parentComment = await findParentComment(req, res);
-        if (!parentComment) {
-          return;
+        if (!parentComment) return;
+
+        // is the parent comment deleted?
+        if (parentComment.deleted) {
+          return res.status(400).json({
+            message: `parent comment with id, ${parentComment.id}, is already deleted`,
+          });
         }
 
         // make sub comment / reply
@@ -389,6 +409,13 @@ const commentController = {
         const parentComment = await findParentComment(req, res);
         if (!parentComment) return;
 
+        // is the parent comment deleted?
+        if (parentComment.deleted) {
+          return res.status(400).json({
+            message: `parent comment with id, ${parentComment.id}, is already deleted`,
+          });
+        }
+
         // find reply in database
         const sanitizedData = matchedData(req);
         const { postId, replyId } = sanitizedData;
@@ -427,7 +454,7 @@ const commentController = {
             return currMongoId._id.toHexString();
           };
           const hexUserIds = parentComment.childComments.map(objectIdToString);
-          const userIdSet = Utility.arrayToSet(hexUserIds);
+          const userIdSet: Set<string> = Utility.arrayToSet(hexUserIds);
           if (!userIdSet.has(replyId)) {
             return res.status(404).json({
               message: `the current reply with id, ${replyId}, was not found among the current comment's( ${parentComment.id} ) replies`,
@@ -435,7 +462,9 @@ const commentController = {
           }
 
           userIdSet.delete(replyId);
-          parentComment.childComments = Array.from(userIdSet);
+          parentComment.childComments = Array.from(userIdSet).map(
+            (id) => new Types.ObjectId(id)
+          );
           await parentComment.save();
         }
 
@@ -455,7 +484,8 @@ const commentController = {
                 "you are not the author of this post so you will not delete it",
             });
           }
-          await deletedReply.deleteOne();
+
+          await markCommentAsDeleted(deletedReply);
           logger.info(
             `comment with id, ${deletedReply.id}, deleted successfully!`
           );
@@ -515,6 +545,24 @@ async function findParentComment(req: Request, res: Response) {
     }
 
     return parentComment;
+  } catch (e) {
+    throw e;
+  }
+}
+
+/**
+ * marks a comment as deleted but it sticks around
+ * @param storedComment a comment's document type
+ */
+async function markCommentAsDeleted(storedComment: any) {
+  try {
+    storedComment.deleted = true;
+    storedComment.detachedchildComments = [...storedComment.childComments];
+    storedComment.childComments = [];
+    storedComment.tldr = "";
+    storedComment.body = ""; // note: might wanna change this to sth else in the future
+
+    await storedComment.save();
   } catch (e) {
     throw e;
   }
