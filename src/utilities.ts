@@ -5,6 +5,7 @@ import { JwtPayload } from "./middleware/interfaces";
 import { PathLike } from "fs";
 import * as fs from "fs";
 import { startLogger } from "./logging";
+import { isValidObjectId } from "mongoose";
 
 const logger = startLogger(__filename);
 export default class Utility {
@@ -76,5 +77,34 @@ export default class Utility {
   }
   static arrayToSet(arr: Array<any>): Set<any> {
     return new Set(arr);
+  }
+  static updateUserReactions(
+    req: Request,
+    res: Response,
+    arr: Array<string>
+  ): boolean {
+    if (!req.user) {
+      throw new Error("user's not authenticated thus user object is missing");
+    }
+
+    const jwtData = (req.user as any).data as JwtPayload;
+    const { sub } = jwtData.data;
+    if (!isValidObjectId(sub)) {
+      logger.error("invalid or malformed user id");
+      res.status(400).json({ message: "Invalid user id" });
+
+      return false;
+    }
+
+    const tgtSet: Set<string> = Utility.arrayToSet(arr);
+    if (!tgtSet.has(sub)) {
+      arr.push(sub);
+      return true;
+    }
+
+    logger.info("the current like was already in the comment's likes");
+    res.status(400).json({ message: "user already liked the comment" });
+
+    return false;
   }
 }

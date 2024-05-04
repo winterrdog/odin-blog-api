@@ -16,6 +16,8 @@ export interface CommentModelShape {
   deleted?: boolean;
   body: string;
   tldr?: string;
+  dislikes?: string[];
+  likes?: string[];
 }
 const CommentModelName = "Comment";
 const CommentSchema = new Schema(
@@ -44,6 +46,8 @@ const CommentSchema = new Schema(
     detachedchildComments: [
       { type: Schema.Types.ObjectId, ref: CommentModelName, default: [] },
     ],
+    likes: [{ type: String, default: [] }],
+    dislikes: [{ type: String, default: [] }],
   },
   {
     timestamps: true,
@@ -85,6 +89,14 @@ function toJsonHandler(doc: Document, ret: any) {
   // populate user name field
   if (ret.user && ret.user.name) {
     ret.user = ret.user.name;
+  }
+  if (ret.likes && Array.isArray(ret.likes)) {
+    ret.numOfLikes = ret.likes.length;
+    delete ret.likes;
+  }
+  if (ret.dislikes && Array.isArray(ret.dislikes)) {
+    ret.numOfDislikes = ret.dislikes.length;
+    delete ret.dislikes;
   }
 
   delete ret.createdAt;

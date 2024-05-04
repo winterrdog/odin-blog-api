@@ -34,4 +34,18 @@ commentsRouter
   .route("/:postId/comments/:id/replies/:replyId")
   .delete(commentController.deleteReply);
 
+logger.info(
+  "attaching controllers to 'comment' route: /:postId/comments/:id/likes and /:postId/comments/:id/dislikes ..."
+);
+commentsRouter.use("/:postId/comments/:id/likes", auth.authenticateJwt);
+commentsRouter.use("/:postId/comments/:id/dislikes", auth.authenticateJwt);
+commentsRouter
+  .route("/:postId/comments/:id/likes")
+  .patch(commentController.likeComment)
+  .delete(commentController.removeLike);
+commentsRouter
+  .route("/:postId/comments/:id/dislikes")
+  .patch(commentController.dislikeComment)
+  .delete(commentController.removeDislike);
+
 export default commentsRouter;

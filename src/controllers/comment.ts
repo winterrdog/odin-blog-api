@@ -11,6 +11,7 @@ import {
   commentUpdateReqBodyValidators,
   idSanitizers,
   postIdSanitizer,
+  replyIdSanitizer,
 } from "../validators/comments";
 import Utility from "../utilities";
 import { startLogger } from "../logging";
@@ -403,6 +404,7 @@ const commentController = {
   ],
   deleteReply: [
     ...idSanitizers,
+    replyIdSanitizer,
     Utility.validateRequest,
     async function (req: Request, res: Response) {
       try {
@@ -503,8 +505,188 @@ const commentController = {
       }
     },
   ],
+  likeComment: [
+    ...idSanitizers,
+    Utility.validateRequest,
+    async function (req: Request, res: Response) {
+      try {
+        const comment = await findCommentByIdAndPostId(req, res);
+        if (!comment) return;
+
+        logger.info("updating comment likes...");
+        const updatedCommentLikes = Utility.updateUserReactions(
+          req,
+          res,
+          comment.likes
+        );
+        if (!updatedCommentLikes) return;
+
+        // if the user disliked the comment, "remove" them from dislikes
+        if (comment.dislikes.length >= 1) {
+          const dislikeSet = Utility.arrayToSet(comment.dislikes);
+          const userId: string = ((<any>req.user!).data as JwtPayload).data.sub;
+          if (dislikeSet.has(userId)) {
+            dislikeSet.delete(userId); // remove user
+            comment.dislikes =
+              dislikeSet.size > 0 ? Array.from(dislikeSet) : [];
+          }
+        }
+
+        await comment.save();
+        logger.info("comment's likes updated successfully!");
+
+        return res
+          .status(200)
+          .json({ message: "comment's likes updated successfully", comment });
+      } catch (e) {
+        logger.error(e, "error liking a comment");
+        return res.status(500).json({
+          message:
+            process.env.NODE_ENV === "production"
+              ? "Internal server error occurred. Please try again later."
+              : (e as Error).message,
+        });
+      }
+    },
+  ],
+  removeLike: [
+    ...idSanitizers,
+    Utility.validateRequest,
+    async function (req: Request, res: Response) {
+      try {
+        const comment = await findCommentByIdAndPostId(req, res);
+        if (!comment) return;
+        if (comment.likes.length <= 0) {
+          logger.info("no likes to remove from comment");
+          return res
+            .status(204)
+            .json({ message: "there are no likes on the comment yet" });
+        }
+
+        // remove like
+        const likesSet = Utility.arrayToSet(comment.likes);
+        const userId: string = ((<any>req.user!).data as JwtPayload).data.sub;
+        if (!likesSet.has(userId)) {
+          logger.info("user already removed like from comment");
+          return res.status(400).json({
+            message: "user already removed like from comment",
+          });
+        }
+
+        likesSet.delete(userId); // remove user from likes
+        comment.likes = likesSet.size > 0 ? Array.from(likesSet) : [];
+        await comment.save();
+        logger.info("like removed from the comment successfully!");
+
+        return res
+          .status(200)
+          .json({ message: "comment like removed successfully!", comment });
+      } catch (e) {
+        logger.error(e, "error removing a like from a comment");
+        return res.status(500).json({
+          message:
+            process.env.NODE_ENV === "production"
+              ? "Internal server error occurred. Please try again later."
+              : (e as Error).message,
+        });
+      }
+    },
+  ],
+  dislikeComment: [
+    ...idSanitizers,
+    Utility.validateRequest,
+    async function (req: Request, res: Response) {
+      try {
+        const comment = await findCommentByIdAndPostId(req, res);
+        if (!comment) return;
+
+        logger.info("updating comment dislikes...");
+        const updatedCommentDislikes = Utility.updateUserReactions(
+          req,
+          res,
+          comment.dislikes
+        );
+        if (!updatedCommentDislikes) return;
+
+        // if the user liked the comment, "remove" them from likes
+        if (comment.likes.length > 0) {
+          const likesSet = Utility.arrayToSet(comment.likes);
+          const userId: string = ((<any>req.user!).data as JwtPayload).data.sub;
+          if (likesSet.has(userId)) {
+            likesSet.delete(userId); // remove user
+            comment.likes = likesSet.size > 0 ? Array.from(likesSet) : [];
+          }
+        }
+
+        await comment.save();
+        logger.info("comment's dislikes updated successfully!");
+
+        return res.status(200).json({
+          message: "comment's dislikes updated successfully",
+          comment,
+        });
+      } catch (e) {
+        logger.error(e, "error disliking a comment");
+        return res.status(500).json({
+          message:
+            process.env.NODE_ENV === "production"
+              ? "Internal server error occurred. Please try again later."
+              : (e as Error).message,
+        });
+      }
+    },
+  ],
+  removeDislike: [
+    ...idSanitizers,
+    Utility.validateRequest,
+    async function (req: Request, res: Response) {
+      try {
+        const comment = await findCommentByIdAndPostId(req, res);
+        if (!comment) return;
+        if (comment.dislikes.length <= 0) {
+          logger.info("no dislikes to remove from comment");
+          return res
+            .status(204)
+            .json({ message: "there are no dislikes on the comment yet" });
+        }
+
+        // remove dislike
+        const dislikesSet = Utility.arrayToSet(comment.dislikes);
+        const userId: string = ((<any>req.user!).data as JwtPayload).data.sub;
+        if (!dislikesSet.has(userId)) {
+          logger.info("user already removed dislike from comment");
+          return res
+            .status(400)
+            .json({ message: "user already removed dislike from comment" });
+        }
+
+        dislikesSet.delete(userId); // remove user from dislikes
+        comment.dislikes = dislikesSet.size > 0 ? Array.from(dislikesSet) : [];
+        await comment.save();
+        logger.info("dislike removed from the comment successfully!");
+
+        return res
+          .status(200)
+          .json({ message: "comment dislike removed successfully!", comment });
+      } catch (e) {
+        logger.error(e, "error removing a dislike a comment");
+        return res.status(500).json({
+          message:
+            process.env.NODE_ENV === "production"
+              ? "Internal server error occurred. Please try again later."
+              : (e as Error).message,
+        });
+      }
+    },
+  ],
 };
 
+/**
+ * find a comment's parent comment
+ * @param req Request object from express
+ * @param res Response object from express
+ * @returns a comment document type or null in case of an error and a response is sent to the client
+ */
 async function findParentComment(req: Request, res: Response) {
   try {
     const sanitizedData = matchedData(req);
@@ -563,6 +745,57 @@ async function markCommentAsDeleted(storedComment: any) {
     storedComment.body = ""; // note: might wanna change this to sth else in the future
 
     await storedComment.save();
+  } catch (e) {
+    throw e;
+  }
+}
+
+/**
+ * finds a comment by its id and post id
+ * @param req Request object from express
+ * @param res Response object from express
+ * @returns a comment document type or null in case of an error and a response is sent to the client
+ */
+async function findCommentByIdAndPostId(req: Request, res: Response) {
+  try {
+    const sanitizedData = matchedData(req);
+    const { postId, id: commentId } = sanitizedData;
+    logger.info(
+      `deleting comment with id, ${commentId}, for post with id, ${postId}...`
+    );
+    if (!isValidObjectId(postId)) {
+      logger.error("invalid or malformed post id");
+      res.status(400).json({
+        message: `Post id, ${postId}, is invalid or malformed.`,
+      });
+
+      return null;
+    }
+    if (!isValidObjectId(commentId)) {
+      logger.error("invalid or malformed comment id");
+      res.status(400).json({
+        message: `Comment id, ${commentId}, is invalid or malformed.`,
+      });
+
+      return null;
+    }
+
+    const storedComment = await CommentModel.findOne({
+      _id: commentId,
+      post: postId,
+    });
+    if (!storedComment || storedComment.deleted) {
+      logger.error(
+        `comment with id, ${commentId}, and post id, ${postId}, was not found.`
+      );
+      res.status(404).json({
+        message: `comment with id, ${commentId}, and post id, ${postId}, was not found.`,
+      });
+
+      return null;
+    }
+
+    return storedComment;
   } catch (e) {
     throw e;
   }

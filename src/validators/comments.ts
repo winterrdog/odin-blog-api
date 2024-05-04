@@ -7,7 +7,6 @@ export const replyIdSanitizer = param("replyId").trim().escape();
 export const idSanitizers = [
   postIdSanitizer,
   commentIdSanitizer,
-  replyIdSanitizer,
 ];
 
 // validate body fields
