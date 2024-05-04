@@ -4,10 +4,7 @@ import { body, param } from "express-validator";
 export const postIdSanitizer = param("postId").trim().escape();
 export const commentIdSanitizer = param("id").trim().escape();
 export const replyIdSanitizer = param("replyId").trim().escape();
-export const idSanitizers = [
-  postIdSanitizer,
-  commentIdSanitizer,
-];
+export const idSanitizers = [postIdSanitizer, commentIdSanitizer];
 
 // validate body fields
 export const sanitizeBody = body("body")
