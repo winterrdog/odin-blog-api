@@ -23,27 +23,31 @@ export default class Utility {
         function (err, token) {
           if (err) {
             logger.error("failed to generate jwt token: ", err);
-            reject(err);
-          } else {
-            logger.info("JWT generated successfully!");
-            resolve(token as string);
+            return reject(err);
           }
-          return;
+          logger.info("JWT generated successfully!");
+          resolve(token as string);
         }
       );
     });
   }
-  static validateRequest(req: Request, res: Response, next: NextFunction) {
+  static validateRequest(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): void {
     logger.info("validating and sanitizing request body, query, and params...");
 
     const errors = validationResult(req);
-    if (errors.isEmpty()) {
-      logger.info("request validated successfully!");
-      next();
-    } else {
+    if (!errors.isEmpty()) {
       logger.error("request validation failed: ", errors.array());
       res.status(400).json({ errors: errors.array() });
+
+      return;
     }
+
+    logger.info("request validated successfully!");
+    return next();
   }
   static createFile(fname: PathLike): Promise<void> {
     // create a file if it doesn't exist
@@ -57,7 +61,6 @@ export default class Utility {
             logger.info("log file already exists. skipping creation...");
             return resolve();
           }
-
           logger.error("failed to create log file: ", err);
           return reject(err);
         }
@@ -68,7 +71,6 @@ export default class Utility {
             logger.error(err, `failed to close file: ${fname}`);
             return reject(err);
           }
-
           logger.info(`log file was already created: ${fname} thus closed it.`);
           return resolve();
         });
