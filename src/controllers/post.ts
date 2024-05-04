@@ -256,13 +256,8 @@ const postController = {
 
         // update likes
         logger.info(`updating user likes...`);
-        const updateOnLikes = updateUniqueSets(req, res, post.likes);
-        if (!updateOnLikes) {
-          logger.info(
-            "the currently like was already updated or user provided malformed user ID!"
-          );
-          return res.status(204).end();
-        }
+        const updateOnLikes = Utility.updateUserReactions(req, res, post.likes);
+        if (!updateOnLikes) return;
 
         // if the user disliked the post, "remove" them from dislikes
         if (post.dislikes.length > 0) {
@@ -314,13 +309,12 @@ const postController = {
 
         // update dislikes
         logger.info(`updating user dislikes...`);
-        const updateOnDislikes = updateUniqueSets(req, res, post.dislikes);
-        if (!updateOnDislikes) {
-          logger.info(
-            "the dislike was already updated or user provided malformed user ID!"
-          );
-          return res.status(204).end();
-        }
+        const updateOnDislikes = Utility.updateUserReactions(
+          req,
+          res,
+          post.dislikes
+        );
+        if (!updateOnDislikes) return;
 
         // if the user liked the post, "remove" them from likes
         if (post.likes.length > 0) {
@@ -370,30 +364,30 @@ const postController = {
             .json({ message: `Post with id ${id} not found` });
         }
 
-        // update likes
-        logger.info(`removing user like...`);
-        if (post.likes.length > 0) {
-          const likesSet = Utility.arrayToSet(post.likes);
-          const userId: string = ((<any>req.user!).data as JwtPayload).data.sub;
-
-          if (!likesSet.has(userId)) {
-            logger.info("user already unliked post");
-            return res.status(204).json({
-              message: "user already unliked post",
-            });
-          }
-
-          likesSet.delete(userId); // remove user from likes
-          post.likes = likesSet.size > 0 ? Array.from(likesSet) : [];
-        } else {
+        if (post.likes.length <= 0) {
           logger.info("no likes to remove from");
-          return res.status(204).json({ message: "there are no likes yet" });
+          return res.status(400).json({ message: "there are no likes yet" });
         }
+
+        logger.info(`removing user like...`);
+        const likesSet = Utility.arrayToSet(post.likes);
+        const userId: string = ((<any>req.user!).data as JwtPayload).data.sub;
+        if (!likesSet.has(userId)) {
+          logger.info("user already unliked post");
+          return res.status(400).json({
+            message: "user already unliked post",
+          });
+        }
+
+        likesSet.delete(userId); // remove user from likes
+        post.likes = likesSet.size > 0 ? Array.from(likesSet) : [];
 
         await post.save();
         logger.info("like removed successfully!");
 
-        return res.status(204).end();
+        return res
+          .status(200)
+          .json({ message: "post like removed successfully!", post });
       } catch (e) {
         logger.error(e, "Error occurred during removing like");
         return res.status(500).json({
@@ -427,25 +421,23 @@ const postController = {
         }
 
         // update dislikes
-        logger.info(`removing user dislike...`);
-        if (post.dislikes.length > 0) {
-          const dislikesSet = Utility.arrayToSet(post.dislikes);
-          const userId: string = ((<any>req.user!).data as JwtPayload).data.sub;
-
-          if (!dislikesSet.has(userId)) {
-            logger.info("user already removed their dislike from post");
-            return res.status(204).json({
-              message: "user already removed their dislike from post",
-            });
-          }
-
-          dislikesSet.delete(userId); // remove user from dislikes
-          post.dislikes = dislikesSet.size > 0 ? Array.from(dislikesSet) : [];
-        } else {
+        if (post.dislikes.length <= 0) {
           logger.info("no dislikes to remove from");
-          return res.status(204).json({ message: "there are no dislikes yet" });
+          return res.status(400).json({ message: "there are no dislikes yet" });
         }
 
+        logger.info(`removing user dislike...`);
+        const dislikesSet = Utility.arrayToSet(post.dislikes);
+        const userId: string = ((<any>req.user!).data as JwtPayload).data.sub;
+        if (!dislikesSet.has(userId)) {
+          logger.info("user already removed their dislike from post");
+          return res.status(204).json({
+            message: "user already removed their dislike from post",
+          });
+        }
+
+        dislikesSet.delete(userId); // remove user from dislikes
+        post.dislikes = dislikesSet.size > 0 ? Array.from(dislikesSet) : [];
         await post.save();
         logger.info("dislike removed successfully!");
 
@@ -465,32 +457,6 @@ const postController = {
 
 function isAuthorSame(tgtAuthor: Types.ObjectId, reqAuthor: JwtPayload) {
   return tgtAuthor.toHexString() === reqAuthor.data.sub;
-}
-
-function updateUniqueSets(
-  req: Request,
-  res: Response,
-  arr: Array<string>
-): boolean {
-  if (!req.user) {
-    throw new Error("user's not authenticated thus user object is missing");
-  }
-
-  const jwtData = (req.user as any).data as JwtPayload;
-  const { sub } = jwtData.data;
-  if (!isValidObjectId(sub)) {
-    logger.error("invalid or malformed user id");
-    res.status(400).json({ message: "Invalid user id" });
-    return false;
-  }
-
-  const tgtSet: Set<string> = Utility.arrayToSet(arr);
-  if (!tgtSet.has(sub)) {
-    arr.push(sub);
-    return true;
-  }
-
-  return false;
 }
 
 export default postController;
