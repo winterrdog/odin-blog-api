@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import * as _ from "lodash";
 import * as jwt from "jsonwebtoken";
 import { validationResult } from "express-validator";
 import { JwtPayload } from "./middleware/interfaces";
@@ -12,7 +13,6 @@ export default class Utility {
   static generateJwtPayload(payload: JwtPayload): Promise<string> {
     return new Promise((resolve, reject) => {
       logger.info("generating JWT...");
-
       jwt.sign(
         payload,
         process.env.JWT_SECRET as string,
@@ -45,7 +45,6 @@ export default class Utility {
 
       return;
     }
-
     logger.info("request validated successfully!");
     return next();
   }
@@ -79,6 +78,34 @@ export default class Utility {
   }
   static arrayToSet(arr: Array<any>): Set<any> {
     return new Set(arr);
+  }
+  static validateObjectId(id: string, res: Response): boolean {
+    if (!isValidObjectId(id)) {
+      logger.error("invalid or malformed object id");
+      res.status(400).json({ message: "Invalid id was provided, " + id });
+
+      return false;
+    }
+    return true;
+  }
+  static async updateDoc(docToUpdate: any, newData: any) {
+    try {
+      _.merge(docToUpdate, newData);
+      await docToUpdate.save();
+
+      // note: no need to return doc because Objects are passed by ref in JS.
+      // so any changes made to the doc are propagated to the original doc
+    } catch (e) {
+      throw e;
+    }
+  }
+  static handle500Status(res: Response, err: Error): void {
+    res.status(500).json({
+      message:
+        process.env.NODE_ENV === "production"
+          ? "Internal server error occurred. Please try again later."
+          : (err as Error).message,
+    });
   }
   static updateUserReactions(
     req: Request,
