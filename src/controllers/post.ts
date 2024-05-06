@@ -18,7 +18,7 @@ const postController = {
   getPostById: [
     postIdSanitizer,
     Utility.validateRequest,
-    async function (req: Request, res: Response) {
+    async function (req: Request, res: Response): Promise<any> {
       try {
         const { id } = req.params;
         logger.info(`fetching post by id: ${id}...`);
@@ -60,16 +60,11 @@ const postController = {
         });
       } catch (e) {
         logger.error(e, "Error occurred during fetching post by id");
-        return res.status(500).json({
-          message:
-            process.env.NODE_ENV === "production"
-              ? "Internal server error occurred. Please try again later."
-              : (e as Error).message,
-        });
+        Utility.handle500Status(res, <Error>e);
       }
     },
   ],
-  getPosts: async function (_req: Request, res: Response) {
+  getPosts: async function (_req: Request, res: Response): Promise<any> {
     try {
       logger.info("fetching all posts...");
       const posts = await PostModel.find({});
@@ -87,18 +82,13 @@ const postController = {
       });
     } catch (e) {
       logger.error(e, "error occurred during fetching posts");
-      return res.status(500).json({
-        message:
-          process.env.NODE_ENV === "production"
-            ? "Internal server error occurred. Please try again later."
-            : (e as Error).message,
-      });
+      Utility.handle500Status(res, <Error>e);
     }
   },
   createPost: [
     ...postReqBodyValidators,
     Utility.validateRequest,
-    async function (req: Request, res: Response) {
+    async function (req: Request, res: Response): Promise<any> {
       try {
         // grab user id from jwt
         const jwtData = (req.user! as any).data as JwtPayload;
@@ -122,12 +112,7 @@ const postController = {
         });
       } catch (e) {
         logger.error(e, "error occurred during creating post");
-        return res.status(500).json({
-          message:
-            process.env.NODE_ENV === "production"
-              ? "Internal server error occurred. Please try again later."
-              : (e as Error).message,
-        });
+        Utility.handle500Status(res, <Error>e);
       }
     },
   ],
@@ -135,7 +120,7 @@ const postController = {
     postIdSanitizer,
     ...postUpdateReqBodyValidators,
     Utility.validateRequest,
-    async function (req: Request, res: Response) {
+    async function (req: Request, res: Response): Promise<any> {
       try {
         // grab post id from sanitized request params
         const sanitizedData = matchedData(req);
@@ -176,19 +161,14 @@ const postController = {
         });
       } catch (e) {
         logger.error(e, "error occurred during updating post");
-        return res.status(500).json({
-          message:
-            process.env.NODE_ENV === "production"
-              ? "Internal server error occurred. Please try again later."
-              : (e as Error).message,
-        });
+        Utility.handle500Status(res, <Error>e);
       }
     },
   ],
   deletePost: [
     postIdSanitizer,
     Utility.validateRequest,
-    async function (req: Request, res: Response) {
+    async function (req: Request, res: Response): Promise<any> {
       try {
         const sanitizedData = matchedData(req);
         const { id } = sanitizedData;
@@ -224,19 +204,14 @@ const postController = {
         return res.status(204).end();
       } catch (e) {
         logger.error(e, "error occurred during deleting post");
-        return res.status(500).json({
-          message:
-            process.env.NODE_ENV === "production"
-              ? "Internal server error occurred. Please try again later."
-              : (e as Error).message,
-        });
+        Utility.handle500Status(res, <Error>e);
       }
     },
   ],
   updateLikes: [
     postIdSanitizer,
     Utility.validateRequest,
-    async function (req: Request, res: Response) {
+    async function (req: Request, res: Response): Promise<any> {
       try {
         const { id } = req.params;
         logger.info(`fetching post by id: ${id}...`);
@@ -277,19 +252,14 @@ const postController = {
         });
       } catch (e) {
         logger.error(e, "Error occurred during updating likes");
-        return res.status(500).json({
-          message:
-            process.env.NODE_ENV === "production"
-              ? "Internal server error occurred. Please try again later."
-              : (e as Error).message,
-        });
+        Utility.handle500Status(res, <Error>e);
       }
     },
   ],
   updateDislikes: [
     postIdSanitizer,
     Utility.validateRequest,
-    async function (req: Request, res: Response) {
+    async function (req: Request, res: Response): Promise<any> {
       try {
         const { id } = req.params;
         logger.info(`fetching post by id: ${id}...`);
@@ -334,19 +304,14 @@ const postController = {
         });
       } catch (e) {
         logger.error(e, "Error occurred during updating dislikes");
-        return res.status(500).json({
-          message:
-            process.env.NODE_ENV === "production"
-              ? "Internal server error occurred. Please try again later."
-              : (e as Error).message,
-        });
+        Utility.handle500Status(res, <Error>e);
       }
     },
   ],
   removeLike: [
     postIdSanitizer,
     Utility.validateRequest,
-    async function (req: Request, res: Response) {
+    async function (req: Request, res: Response): Promise<any> {
       try {
         const { id } = req.params;
         logger.info(`fetching post by id: ${id}...`);
@@ -390,19 +355,14 @@ const postController = {
           .json({ message: "post like removed successfully!", post });
       } catch (e) {
         logger.error(e, "Error occurred during removing like");
-        return res.status(500).json({
-          message:
-            process.env.NODE_ENV === "production"
-              ? "Internal server error occurred. Please try again later."
-              : (e as Error).message,
-        });
+        Utility.handle500Status(res, <Error>e);
       }
     },
   ],
   removeDislike: [
     postIdSanitizer,
     Utility.validateRequest,
-    async function (req: Request, res: Response) {
+    async function (req: Request, res: Response): Promise<any> {
       try {
         const { id } = req.params;
         logger.info(`fetching post by id: ${id}...`);
@@ -444,12 +404,7 @@ const postController = {
         return res.status(204).end();
       } catch (e) {
         logger.error(e, "Error occurred during removing dislike");
-        return res.status(500).json({
-          message:
-            process.env.NODE_ENV === "production"
-              ? "Internal server error occurred. Please try again later."
-              : (e as Error).message,
-        });
+        Utility.handle500Status(res, <Error>e);
       }
     },
   ],

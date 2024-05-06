@@ -18,7 +18,7 @@ const userController = {
   signUp: [
     ...userReqBodyValidators,
     Utility.validateRequest,
-    async function (req: Request, res: Response) {
+    async function (req: Request, res: Response): Promise<any> {
       try {
         // collect details
         const { name, pass: password, role } = req.body;
@@ -63,12 +63,7 @@ const userController = {
         });
       } catch (e) {
         logger.error(e, "error during signing up");
-        return res.status(500).json({
-          message:
-            process.env.NODE_ENV === "production"
-              ? "Internal server error occurred. Please try again later."
-              : (e as Error).message,
-        });
+        Utility.handle500Status(res, <Error>e);
       }
     },
   ],
@@ -76,7 +71,7 @@ const userController = {
     unameValidator,
     passwordValidator,
     Utility.validateRequest,
-    async function (req: Request, res: Response) {
+    async function (req: Request, res: Response): Promise<any> {
       try {
         const { name, pass: password } = req.body;
         logger.info(`signing in user with name: ${name}...`);
@@ -116,16 +111,11 @@ const userController = {
         });
       } catch (e) {
         logger.error(e, "error occurred during signing in");
-        return res.status(500).json({
-          message:
-            process.env.NODE_ENV === "production"
-              ? "Internal server error occurred. Please try again later."
-              : (e as Error).message,
-        });
+        Utility.handle500Status(res, <Error>e);
       }
     },
   ],
-  deleteUser: async function (req: Request, res: Response) {
+  deleteUser: async function (req: Request, res: Response): Promise<any> {
     try {
       // grab their user id from jwt
       const { data } = (req.user! as any).data as JwtPayload;
@@ -146,18 +136,13 @@ const userController = {
       return res.status(204).end();
     } catch (e) {
       logger.error(e, "error occurred during deletion of user");
-      return res.status(500).json({
-        message:
-          process.env.NODE_ENV === "production"
-            ? "Internal server error occurred. Please try again later."
-            : (e as Error).message,
-      });
+      Utility.handle500Status(res, <Error>e);
     }
   },
   updateUser: [
     ...userUpdateReqBodyValidators,
     Utility.validateRequest,
-    async function (req: Request, res: Response) {
+    async function (req: Request, res: Response): Promise<any> {
       try {
         // grab their user id from jwt
         const { data } = (req.user! as any).data as JwtPayload;
@@ -183,12 +168,7 @@ const userController = {
         });
       } catch (e) {
         logger.error(e, "error occurred during updating a user's details");
-        return res.status(500).json({
-          message:
-            process.env.NODE_ENV === "production"
-              ? "Internal server error occurred. Please try again later."
-              : (e as Error).message,
-        });
+        Utility.handle500Status(res, <Error>e);
       }
     },
   ],
