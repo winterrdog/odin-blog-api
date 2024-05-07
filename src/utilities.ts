@@ -1,33 +1,35 @@
 import { NextFunction, Request, Response } from "express";
+import * as fs from "fs";
 import * as _ from "lodash";
 import * as jwt from "jsonwebtoken";
-import { validationResult } from "express-validator";
-import { JwtPayload } from "./middleware/interfaces";
-import { PathLike } from "fs";
-import * as fs from "fs";
-import { startLogger } from "./logging";
 import { isValidObjectId } from "mongoose";
+import { validationResult } from "express-validator";
+import { PathLike } from "fs";
+import { JwtPayload } from "./middleware/interfaces";
+import { startLogger } from "./logging";
 
 const logger = startLogger(__filename);
 export default class Utility {
   static generateJwtPayload(payload: JwtPayload): Promise<string> {
     return new Promise((resolve, reject) => {
       logger.info("generating JWT...");
+      const jwtSignCb: jwt.SignCallback = (err, token) => {
+        if (err) {
+          logger.error("failed to generate JWT: ", err);
+          return reject(err);
+        }
+        logger.info("JWT generated successfully!");
+        return resolve(token!);
+      };
+      const jwtSignOptions: jwt.SignOptions = {
+        expiresIn: "2d",
+        algorithm: "HS384",
+      };
       jwt.sign(
         payload,
-        process.env.JWT_SECRET as string,
-        {
-          expiresIn: "2d",
-          algorithm: "HS384",
-        },
-        function (err, token) {
-          if (err) {
-            logger.error("failed to generate jwt token: ", err);
-            return reject(err);
-          }
-          logger.info("JWT generated successfully!");
-          resolve(token as string);
-        }
+        <string>process.env.JWT_SECRET,
+        jwtSignOptions,
+        jwtSignCb
       );
     });
   }
@@ -37,12 +39,10 @@ export default class Utility {
     next: NextFunction
   ): void {
     logger.info("validating and sanitizing request body, query, and params...");
-
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       logger.error("request validation failed: ", errors.array());
-      res.status(400).json({ errors: errors.array() });
-
+      res.status(400).json({ message: errors.array() });
       return;
     }
     logger.info("request validated successfully!");
@@ -83,7 +83,6 @@ export default class Utility {
     if (!isValidObjectId(id)) {
       logger.error("invalid or malformed object id");
       res.status(400).json({ message: "Invalid id was provided, " + id });
-
       return false;
     }
     return true;
@@ -104,8 +103,11 @@ export default class Utility {
       message:
         process.env.NODE_ENV === "production"
           ? "Internal server error occurred. Please try again later."
-          : (err as Error).message,
+          : err.message,
     });
+  }
+  static extractUserIdFromToken(req: Request): string {
+    return ((<any>req.user!).data as JwtPayload).data.sub;
   }
   static updateUserReactions(
     req: Request,
@@ -115,25 +117,14 @@ export default class Utility {
     if (!req.user) {
       throw new Error("user's not authenticated thus user object is missing");
     }
-
-    const jwtData = (req.user as any).data as JwtPayload;
-    const { sub } = jwtData.data;
-    if (!isValidObjectId(sub)) {
-      logger.error("invalid or malformed user id");
-      res.status(400).json({ message: "Invalid user id" });
-
-      return false;
-    }
-
-    const tgtSet: Set<string> = Utility.arrayToSet(arr);
-    if (!tgtSet.has(sub)) {
-      arr.push(sub);
+    const currUserId = Utility.extractUserIdFromToken(req);
+    const uniqueUsersReactions: Set<string> = Utility.arrayToSet(arr);
+    if (!uniqueUsersReactions.has(currUserId)) {
+      arr.push(currUserId);
       return true;
     }
-
-    logger.info("the current like was already in the comment's likes");
-    res.status(400).json({ message: "user already liked the comment" });
-
+    logger.info("the current reaction was already updated by the user");
+    res.status(400).json({ message: "user reaction already updated" });
     return false;
   }
 }
