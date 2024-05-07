@@ -3,8 +3,6 @@ import * as _ from "lodash";
 import { Types, isValidObjectId } from "mongoose";
 import { matchedData } from "express-validator";
 import { CommentModel, CommentModelShape } from "../models/comment";
-import { CommentUpdateReqBody } from "../request-bodies/comment";
-import { JwtPayload } from "../middleware/interfaces";
 import {
   commentBodyValidator,
   commentIdSanitizer,
@@ -16,45 +14,17 @@ import {
 import Utility from "../utilities";
 import { startLogger } from "../logging";
 
+// todo: test new routes
+
 const logger = startLogger(__filename);
 const commentController = {
   getCommentById: [
     ...idSanitizers,
     Utility.validateRequest,
-    async function (req: Request, res: Response) {
+    async function (req: Request, res: Response): Promise<any> {
       try {
-        const sanitizedData = matchedData(req);
-        const { postId, id: commentId } = sanitizedData;
-        logger.info(
-          `fetching the comment with id, ${commentId}, for post with id, ${postId}...`
-        );
-        if (!isValidObjectId(postId)) {
-          logger.error("invalid or malformed post id");
-          return res.status(400).json({
-            message: `Post id, ${postId}, is invalid or malformed.`,
-          });
-        }
-        if (!isValidObjectId(commentId)) {
-          logger.error("invalid or malformed comment id");
-          return res.status(400).json({
-            message: `Comment id, ${commentId}, is invalid or malformed.`,
-          });
-        }
-
-        const storedComment = await CommentModel.findOne({
-          _id: commentId,
-          post: postId,
-        });
-        // if comment's marked as deleted or just not there!
-        if (!storedComment || storedComment.deleted) {
-          logger.error(
-            `comment with id, ${commentId}, and post id, ${postId}, was not found.`
-          );
-          return res.status(404).json({
-            message: `comment with id, ${commentId}, and post id, ${postId}, was not found.`,
-          });
-        }
-
+        const storedComment = await findCommentByIdAndPostId(req, res);
+        if (!storedComment) return;
         logger.info("comment retrieved successfully!");
         return res.status(200).json({
           message: "comment retrieved successfully",
@@ -62,45 +32,17 @@ const commentController = {
         });
       } catch (e) {
         logger.error(e, "Error fetching comment by id");
-        return res.status(500).json({
-          message:
-            process.env.NODE_ENV === "production"
-              ? "Internal server error occurred. Please try again later."
-              : (e as Error).message,
-        });
+        Utility.handle500Status(res, <Error>e);
       }
     },
   ],
   getComments: [
     postIdSanitizer,
     Utility.validateRequest,
-    async function (req: Request, res: Response) {
+    async function (req: Request, res: Response): Promise<any> {
       try {
-        const sanitizedData = matchedData(req);
-        const { postId } = sanitizedData;
-        logger.info(`fetching comments for post with id, ${postId}...`);
-        if (!isValidObjectId(postId)) {
-          logger.error("invalid or malformed post id");
-          return res.status(400).json({
-            message: `Post id, ${postId}, is invalid or malformed.`,
-          });
-        }
-
-        let storedComments = await CommentModel.find({
-          post: postId,
-        });
-        if (storedComments.length === 0) {
-          logger.error(`No comments available for post with id, ${postId}.`);
-          return res.status(200).json({
-            message: `No comments available for post with id, ${postId}.`,
-          });
-        }
-
-        // keep comments that are NOT deleted
-        storedComments = storedComments.filter(
-          (currComment) => !currComment.deleted
-        );
-
+        const storedComments = await findCommentsForPost(req, res);
+        if (!storedComments) return;
         logger.info("comments fetched successfully!");
         return res.status(200).json({
           message: "post comments fetched successfully",
@@ -108,12 +50,7 @@ const commentController = {
         });
       } catch (e) {
         logger.error(e, "error fetching comments");
-        return res.status(500).json({
-          message:
-            process.env.NODE_ENV === "production"
-              ? "Internal server error occurred. Please try again later."
-              : (e as Error).message,
-        });
+        Utility.handle500Status(res, <Error>e);
       }
     },
   ],
@@ -121,30 +58,23 @@ const commentController = {
     postIdSanitizer,
     ...commentBodyValidator,
     Utility.validateRequest,
-    async function (req: Request, res: Response) {
+    async function (req: Request, res: Response): Promise<any> {
       try {
         const sanitizedData = matchedData(req);
         const { postId } = sanitizedData;
-        logger.info(`creating a comment for post with id, ${postId}...`);
-        if (!isValidObjectId(postId)) {
-          logger.error("invalid or malformed post id");
-          return res.status(400).json({
-            message: `Post id, ${postId}, is invalid or malformed.`,
-          });
-        }
-
-        const { data } = (req.user! as any).data as JwtPayload;
-        const { sub } = data;
-        logger.info(`creating a comment for user with id, ${sub}...`);
+        if (!Utility.validateObjectId(postId, res)) return;
+        const currUserId = Utility.extractUserIdFromToken(req);
         const reqBody: CommentModelShape = {
-          user: new Types.ObjectId(<string>sub),
+          user: new Types.ObjectId(<string>currUserId),
           post: new Types.ObjectId(<string>postId),
           ...req.body,
         } as const;
+        logger.info(
+          `creating a comment for user with id, ${currUserId} and post id, ${postId}...`
+        );
         const createdComment = await CommentModel.create({
           ...reqBody,
         });
-
         logger.info(
           `comment with id, ${createdComment.id}, created successfully!`
         );
@@ -154,12 +84,7 @@ const commentController = {
         });
       } catch (e) {
         logger.error(e, "error creating comment");
-        return res.status(500).json({
-          message:
-            process.env.NODE_ENV === "production"
-              ? "Internal server error occurred. Please try again later."
-              : (e as Error).message,
-        });
+        Utility.handle500Status(res, <Error>e);
       }
     },
   ],
@@ -167,58 +92,20 @@ const commentController = {
     ...idSanitizers,
     ...commentUpdateReqBodyValidators,
     Utility.validateRequest,
-    async function (req: Request, res: Response) {
+    async function (req: Request, res: Response): Promise<any> {
       try {
-        const sanitizedData = matchedData(req);
-        const { postId, id: commentId } = sanitizedData;
-        logger.info(
-          `updating comment with id, ${commentId}, for post with id, ${postId}...`
-        );
-        if (!isValidObjectId(postId)) {
-          logger.error("invalid or malformed post id");
-          return res.status(400).json({
-            message: `Post id, ${postId}, is invalid or malformed.`,
-          });
+        const storedComment = await findCommentByIdAndPostId(req, res);
+        if (!storedComment) return;
+        if (
+          !isCurrUserSameAsCreator(
+            req,
+            res,
+            storedComment.user._id.toHexString()
+          )
+        ) {
+          return;
         }
-        if (!isValidObjectId(commentId)) {
-          logger.error("invalid or malformed comment id");
-          return res.status(400).json({
-            message: `Comment id, ${commentId}, is invalid or malformed.`,
-          });
-        }
-
-        let storedComment = await CommentModel.findOne({
-          _id: commentId,
-          post: postId,
-        });
-        if (!storedComment || storedComment.deleted) {
-          logger.error(
-            `comment with id, ${commentId}, and post id, ${postId}, was not found.`
-          );
-          return res.status(404).json({
-            message: `comment with id, ${commentId}, and post id, ${postId}, was not found.`,
-          });
-        }
-
-        // check author
-        const { data } = (req.user! as any).data as JwtPayload;
-        const { sub } = data;
-        logger.info(
-          `checking if user with id, ${sub}, is the author of the comment...`
-        );
-        if (sub !== storedComment.user._id.toHexString()) {
-          logger.error("user is not the author of the comment");
-          return res.status(403).json({
-            message:
-              "you are not the author of this post so you will not update it",
-          });
-        }
-
-        storedComment = _.merge(
-          storedComment,
-          req.body as CommentUpdateReqBody
-        );
-        await storedComment!.save();
+        await Utility.updateDoc(storedComment, req.body);
         logger.info(
           `comment with id, ${storedComment.id}, updated successfully!`
         );
@@ -228,79 +115,34 @@ const commentController = {
         });
       } catch (e) {
         logger.error(e, "error updating a comment");
-        return res.status(500).json({
-          message:
-            process.env.NODE_ENV === "production"
-              ? "Internal server error occurred. Please try again later."
-              : (e as Error).message,
-        });
+        Utility.handle500Status(res, <Error>e);
       }
     },
   ],
   deleteComment: [
     ...idSanitizers,
     Utility.validateRequest,
-    async function (req: Request, res: Response) {
+    async function (req: Request, res: Response): Promise<any> {
       try {
-        const sanitizedData = matchedData(req);
-        const { postId, id: commentId } = sanitizedData;
-        logger.info(
-          `deleting comment with id, ${commentId}, for post with id, ${postId}...`
-        );
-        if (!isValidObjectId(postId)) {
-          logger.error("invalid or malformed post id");
-          return res.status(400).json({
-            message: `Post id, ${postId}, is invalid or malformed.`,
-          });
+        const storedComment = await findCommentByIdAndPostId(req, res);
+        if (!storedComment) return;
+        if (
+          !isCurrUserSameAsCreator(
+            req,
+            res,
+            storedComment!.user._id.toHexString()
+          )
+        ) {
+          return;
         }
-        if (!isValidObjectId(commentId)) {
-          logger.error("invalid or malformed comment id");
-          return res.status(400).json({
-            message: `Comment id, ${commentId}, is invalid or malformed.`,
-          });
-        }
-
-        const storedComment = await CommentModel.findOne({
-          _id: commentId,
-          post: postId,
-        });
-        if (!storedComment || storedComment.deleted) {
-          logger.error(
-            `comment with id, ${commentId}, and post id, ${postId}, was not found.`
-          );
-          return res.status(404).json({
-            message: `comment with id, ${commentId}, and post id, ${postId}, was not found.`,
-          });
-        }
-
-        // check author
-        const { data } = (req.user! as any).data as JwtPayload;
-        const { sub } = data;
-        logger.info(
-          `checking if user with id, ${sub}, is the author of the comment...`
-        );
-        if (sub !== storedComment.user._id.toHexString()) {
-          logger.error("user is not the author of the comment");
-          return res.status(403).json({
-            message:
-              "you are not the author of this post so you will not delete it",
-          });
-        }
-
         await markCommentAsDeleted(storedComment);
         logger.info(
           `comment with id, ${storedComment.id}, deleted successfully!`
         );
-
         return res.status(204).end();
       } catch (e) {
         logger.error(e, "error deleting a comment");
-        return res.status(500).json({
-          message:
-            process.env.NODE_ENV === "production"
-              ? "Internal server error occurred. Please try again later."
-              : (e as Error).message,
-        });
+        Utility.handle500Status(res, <Error>e);
       }
     },
   ],
@@ -308,7 +150,7 @@ const commentController = {
     postIdSanitizer,
     commentIdSanitizer,
     Utility.validateRequest,
-    async function (req: Request, res: Response) {
+    async function (req: Request, res: Response): Promise<any> {
       try {
         const parentComment = await findParentComment(req, res);
         if (!parentComment) return;
@@ -324,7 +166,7 @@ const commentController = {
         logger.info(`populating comment's( ${parentComment.id} ) replies...`);
         await parentComment.populate("childComments");
         let replies = parentComment.childComments;
-        if (replies.length === 0) {
+        if (replies.length <= 0) {
           return res.status(404).json({
             message: `no replies added for comment, ${parentComment.id}`,
           });
@@ -339,12 +181,7 @@ const commentController = {
         });
       } catch (e) {
         logger.error(e, "error finding replies to comment");
-        return res.status(500).json({
-          message:
-            process.env.NODE_ENV === "production"
-              ? "Internal server error occurred. Please try again later."
-              : (e as Error).message,
-        });
+        Utility.handle500Status(res, <Error>e);
       }
     },
   ],
@@ -352,7 +189,7 @@ const commentController = {
     postIdSanitizer,
     commentIdSanitizer,
     Utility.validateRequest,
-    async function (req: Request, res: Response) {
+    async function (req: Request, res: Response): Promise<any> {
       try {
         // find the parent comment first
         const sanitizedData = matchedData(req);
@@ -368,13 +205,12 @@ const commentController = {
         }
 
         // make sub comment / reply
-        const { data } = (req.user! as any).data as JwtPayload;
-        const { sub } = data;
+        const currUserId = Utility.extractUserIdFromToken(req);
         logger.info(
-          `creating a sub-comment for comment,${parentCommentId}, by user with id, ${sub}...`
+          `creating a sub-comment for comment,${parentCommentId}, by user with id, ${currUserId}...`
         );
         const replyCommentData: CommentModelShape = {
-          user: new Types.ObjectId(<string>sub),
+          user: new Types.ObjectId(<string>currUserId),
           post: new Types.ObjectId(<string>postId),
           parentComment: parentComment._id, // attach parent to child/reply
           ...req.body,
@@ -393,12 +229,7 @@ const commentController = {
         });
       } catch (e) {
         logger.error(e, "error creating reply to comment");
-        return res.status(500).json({
-          message:
-            process.env.NODE_ENV === "production"
-              ? "Internal server error occurred. Please try again later."
-              : (e as Error).message,
-        });
+        Utility.handle500Status(res, <Error>e);
       }
     },
   ],
@@ -406,7 +237,7 @@ const commentController = {
     ...idSanitizers,
     replyIdSanitizer,
     Utility.validateRequest,
-    async function (req: Request, res: Response) {
+    async function (req: Request, res: Response): Promise<any> {
       try {
         const parentComment = await findParentComment(req, res);
         if (!parentComment) return;
@@ -418,40 +249,12 @@ const commentController = {
           });
         }
 
-        // find reply in database
-        const sanitizedData = matchedData(req);
-        const { postId, replyId } = sanitizedData;
-        logger.info(
-          `deleting comment with id, ${replyId}, for post with id, ${postId}...`
-        );
-        if (!isValidObjectId(postId)) {
-          logger.error("invalid or malformed post id");
-          return res.status(400).json({
-            message: `Post id, ${postId}, is invalid or malformed.`,
-          });
-        }
-        if (!isValidObjectId(replyId)) {
-          logger.error("invalid or malformed comment id");
-          return res.status(400).json({
-            message: `Comment id, ${replyId}, is invalid or malformed.`,
-          });
-        }
+        const deletedReply = await findCommentByIdAndPostId(req, res);
+        if (!deletedReply) return;
+        const replyId = deletedReply.id;
 
-        const deletedReply = await CommentModel.findOne({
-          _id: replyId,
-          post: postId,
-        });
-        if (!deletedReply) {
-          logger.error(
-            `comment with id, ${replyId}, and post id, ${postId}, was not found.`
-          );
-          return res.status(404).json({
-            message: `comment with id, ${replyId}, and post id, ${postId}, was not found.`,
-          });
-        }
-
+        // remove reply from parent's children
         {
-          // remove reply from parent's children
           const objectIdToString = (currMongoId: Types.ObjectId): string => {
             return currMongoId._id.toHexString();
           };
@@ -462,7 +265,6 @@ const commentController = {
               message: `the current reply with id, ${replyId}, was not found among the current comment's( ${parentComment.id} ) replies`,
             });
           }
-
           userIdSet.delete(replyId);
           parentComment.childComments = Array.from(userIdSet).map(
             (id) => new Types.ObjectId(id)
@@ -470,23 +272,9 @@ const commentController = {
           await parentComment.save();
         }
 
+        // delete in database
         {
-          // delete in database
-          const { data } = (req.user! as any).data as JwtPayload;
-          const { sub } = data;
-
-          // check author
-          logger.info(
-            `checking if user with id, ${sub}, is the author of the comment...`
-          );
-          if (sub !== deletedReply.user._id.toHexString()) {
-            logger.error("user is not the author of the comment");
-            return res.status(403).json({
-              message:
-                "you are not the author of this post so you will not delete it",
-            });
-          }
-
+          if (!isCurrUserSameAsCreator(req, res, replyId)) return;
           await markCommentAsDeleted(deletedReply);
           logger.info(
             `comment with id, ${deletedReply.id}, deleted successfully!`
@@ -496,23 +284,17 @@ const commentController = {
         return res.status(204).end();
       } catch (e) {
         logger.error(e, "error deleting reply to comment");
-        return res.status(500).json({
-          message:
-            process.env.NODE_ENV === "production"
-              ? "Internal server error occurred. Please try again later."
-              : (e as Error).message,
-        });
+        Utility.handle500Status(res, <Error>e);
       }
     },
   ],
   likeComment: [
     ...idSanitizers,
     Utility.validateRequest,
-    async function (req: Request, res: Response) {
+    async function (req: Request, res: Response): Promise<any> {
       try {
         const comment = await findCommentByIdAndPostId(req, res);
         if (!comment) return;
-
         logger.info("updating comment likes...");
         const updatedCommentLikes = Utility.updateUserReactions(
           req,
@@ -524,82 +306,72 @@ const commentController = {
         // if the user disliked the comment, "remove" them from dislikes
         if (comment.dislikes.length >= 1) {
           const dislikeSet = Utility.arrayToSet(comment.dislikes);
-          const userId: string = ((<any>req.user!).data as JwtPayload).data.sub;
+          const userId: string = Utility.extractUserIdFromToken(req);
           if (dislikeSet.has(userId)) {
             dislikeSet.delete(userId); // remove user
             comment.dislikes =
               dislikeSet.size > 0 ? Array.from(dislikeSet) : [];
           }
         }
-
         await comment.save();
         logger.info("comment's likes updated successfully!");
-
-        return res
-          .status(200)
-          .json({ message: "comment's likes updated successfully", comment });
+        return res.status(200).json({
+          message: "comment's likes updated successfully",
+          comment,
+        });
       } catch (e) {
         logger.error(e, "error liking a comment");
-        return res.status(500).json({
-          message:
-            process.env.NODE_ENV === "production"
-              ? "Internal server error occurred. Please try again later."
-              : (e as Error).message,
-        });
+        Utility.handle500Status(res, <Error>e);
       }
     },
   ],
   removeLike: [
     ...idSanitizers,
     Utility.validateRequest,
-    async function (req: Request, res: Response) {
+    async function (req: Request, res: Response): Promise<any> {
       try {
         const comment = await findCommentByIdAndPostId(req, res);
         if (!comment) return;
         if (comment.likes.length <= 0) {
           logger.info("no likes to remove from comment");
-          return res
-            .status(204)
-            .json({ message: "there are no likes on the comment yet" });
-        }
-
-        // remove like
-        const likesSet = Utility.arrayToSet(comment.likes);
-        const userId: string = ((<any>req.user!).data as JwtPayload).data.sub;
-        if (!likesSet.has(userId)) {
-          logger.info("user already removed like from comment");
-          return res.status(400).json({
-            message: "user already removed like from comment",
+          return res.status(204).json({
+            message: "there are no likes on the comment yet",
           });
         }
 
-        likesSet.delete(userId); // remove user from likes
-        comment.likes = likesSet.size > 0 ? Array.from(likesSet) : [];
-        await comment.save();
-        logger.info("like removed from the comment successfully!");
+        // remove like
+        {
+          const likesSet = Utility.arrayToSet(comment.likes);
+          const userId: string = Utility.extractUserIdFromToken(req);
+          if (!likesSet.has(userId)) {
+            logger.info("user already removed like from comment");
+            return res.status(400).json({
+              message: "user already removed like from comment",
+            });
+          }
+          likesSet.delete(userId); // remove user from likes
+          comment.likes = likesSet.size > 0 ? Array.from(likesSet) : [];
+          await comment.save();
+          logger.info("like removed from the comment successfully!");
+        }
 
-        return res
-          .status(200)
-          .json({ message: "comment like removed successfully!", comment });
+        return res.status(200).json({
+          message: "comment like removed successfully!",
+          comment,
+        });
       } catch (e) {
         logger.error(e, "error removing a like from a comment");
-        return res.status(500).json({
-          message:
-            process.env.NODE_ENV === "production"
-              ? "Internal server error occurred. Please try again later."
-              : (e as Error).message,
-        });
+        Utility.handle500Status(res, <Error>e);
       }
     },
   ],
   dislikeComment: [
     ...idSanitizers,
     Utility.validateRequest,
-    async function (req: Request, res: Response) {
+    async function (req: Request, res: Response): Promise<any> {
       try {
         const comment = await findCommentByIdAndPostId(req, res);
         if (!comment) return;
-
         logger.info("updating comment dislikes...");
         const updatedCommentDislikes = Utility.updateUserReactions(
           req,
@@ -611,35 +383,28 @@ const commentController = {
         // if the user liked the comment, "remove" them from likes
         if (comment.likes.length > 0) {
           const likesSet = Utility.arrayToSet(comment.likes);
-          const userId: string = ((<any>req.user!).data as JwtPayload).data.sub;
+          const userId: string = Utility.extractUserIdFromToken(req);
           if (likesSet.has(userId)) {
             likesSet.delete(userId); // remove user
             comment.likes = likesSet.size > 0 ? Array.from(likesSet) : [];
           }
         }
-
         await comment.save();
         logger.info("comment's dislikes updated successfully!");
-
         return res.status(200).json({
           message: "comment's dislikes updated successfully",
           comment,
         });
       } catch (e) {
         logger.error(e, "error disliking a comment");
-        return res.status(500).json({
-          message:
-            process.env.NODE_ENV === "production"
-              ? "Internal server error occurred. Please try again later."
-              : (e as Error).message,
-        });
+        Utility.handle500Status(res, <Error>e);
       }
     },
   ],
   removeDislike: [
     ...idSanitizers,
     Utility.validateRequest,
-    async function (req: Request, res: Response) {
+    async function (req: Request, res: Response): Promise<any> {
       try {
         const comment = await findCommentByIdAndPostId(req, res);
         if (!comment) return;
@@ -651,31 +416,28 @@ const commentController = {
         }
 
         // remove dislike
-        const dislikesSet = Utility.arrayToSet(comment.dislikes);
-        const userId: string = ((<any>req.user!).data as JwtPayload).data.sub;
-        if (!dislikesSet.has(userId)) {
-          logger.info("user already removed dislike from comment");
-          return res
-            .status(400)
-            .json({ message: "user already removed dislike from comment" });
+        {
+          const dislikesSet = Utility.arrayToSet(comment.dislikes);
+          const userId: string = Utility.extractUserIdFromToken(req);
+          if (!dislikesSet.has(userId)) {
+            logger.info("user already removed dislike from comment");
+            return res.status(400).json({
+              message: "user already removed dislike from comment",
+            });
+          }
+          dislikesSet.delete(userId); // remove user from dislikes
+          comment.dislikes =
+            dislikesSet.size > 0 ? Array.from(dislikesSet) : [];
+          await comment.save();
+          logger.info("dislike removed from the comment successfully!");
         }
-
-        dislikesSet.delete(userId); // remove user from dislikes
-        comment.dislikes = dislikesSet.size > 0 ? Array.from(dislikesSet) : [];
-        await comment.save();
-        logger.info("dislike removed from the comment successfully!");
-
-        return res
-          .status(200)
-          .json({ message: "comment dislike removed successfully!", comment });
+        return res.status(200).json({
+          message: "comment dislike removed successfully!",
+          comment,
+        });
       } catch (e) {
         logger.error(e, "error removing a dislike a comment");
-        return res.status(500).json({
-          message:
-            process.env.NODE_ENV === "production"
-              ? "Internal server error occurred. Please try again later."
-              : (e as Error).message,
-        });
+        Utility.handle500Status(res, <Error>e);
       }
     },
   ],
@@ -689,44 +451,8 @@ const commentController = {
  */
 async function findParentComment(req: Request, res: Response) {
   try {
-    const sanitizedData = matchedData(req);
-    const { postId, id: parentCommentId } = sanitizedData;
-    logger.info(
-      `fetching the comment with id, ${parentCommentId}, for post with id, ${postId}...`
-    );
-    if (!isValidObjectId(postId)) {
-      logger.error("invalid or malformed post id");
-      res.status(400).json({
-        message: `Post id, ${postId}, is invalid or malformed.`,
-      });
-
-      return null;
-    }
-    if (!isValidObjectId(parentCommentId)) {
-      logger.error("invalid or malformed comment id");
-      res.status(400).json({
-        message: `Comment id, ${parentCommentId}, is invalid or malformed.`,
-      });
-
-      return null;
-    }
-
-    const parentComment = await CommentModel.findOne({
-      _id: parentCommentId,
-      post: postId,
-    });
-    if (!parentComment) {
-      logger.error(
-        `comment with id, ${parentCommentId}, and post id, ${postId}, was not found.`
-      );
-      res.status(404).json({
-        message: `comment with id, ${parentCommentId}, and post id, ${postId}, was not found.`,
-      });
-
-      return null;
-    }
-
-    return parentComment;
+    const parentComment = await findCommentByIdAndPostId(req, res);
+    return parentComment ? parentComment : null;
   } catch (e) {
     throw e;
   }
@@ -743,7 +469,6 @@ async function markCommentAsDeleted(storedComment: any) {
     storedComment.childComments = [];
     storedComment.tldr = "";
     storedComment.body = ""; // note: might wanna change this to sth else in the future
-
     await storedComment.save();
   } catch (e) {
     throw e;
@@ -761,8 +486,29 @@ async function findCommentByIdAndPostId(req: Request, res: Response) {
     const sanitizedData = matchedData(req);
     const { postId, id: commentId } = sanitizedData;
     logger.info(
-      `deleting comment with id, ${commentId}, for post with id, ${postId}...`
+      `searching for comment with id, ${commentId}, for post with id, ${postId}...`
     );
+    if (
+      !Utility.validateObjectId(postId, res) ||
+      !Utility.validateObjectId(commentId, res)
+    ) {
+      return null;
+    }
+    const storedComment = await CommentModel.findOne({
+      _id: commentId,
+      post: postId,
+    });
+    return validateCommentFromDb(storedComment, res) ? storedComment : null;
+  } catch (e) {
+    throw e;
+  }
+}
+
+async function findCommentsForPost(req: Request, res: Response) {
+  try {
+    const sanitizedData = matchedData(req);
+    const { postId } = sanitizedData;
+    logger.info(`fetching comments for post with id, ${postId}...`);
     if (!isValidObjectId(postId)) {
       logger.error("invalid or malformed post id");
       res.status(400).json({
@@ -771,34 +517,72 @@ async function findCommentByIdAndPostId(req: Request, res: Response) {
 
       return null;
     }
-    if (!isValidObjectId(commentId)) {
-      logger.error("invalid or malformed comment id");
-      res.status(400).json({
-        message: `Comment id, ${commentId}, is invalid or malformed.`,
-      });
-
-      return null;
-    }
-
-    const storedComment = await CommentModel.findOne({
-      _id: commentId,
+    let storedComments = await CommentModel.find({
       post: postId,
     });
-    if (!storedComment || storedComment.deleted) {
-      logger.error(
-        `comment with id, ${commentId}, and post id, ${postId}, was not found.`
-      );
-      res.status(404).json({
-        message: `comment with id, ${commentId}, and post id, ${postId}, was not found.`,
+    if (storedComments.length <= 0) {
+      logger.error(`No comments available for post with id, ${postId}.`);
+      res.status(200).json({
+        message: `No comments available for post with id, ${postId}.`,
       });
 
       return null;
     }
 
-    return storedComment;
+    // keep comments that are NOT deleted
+    storedComments = storedComments.filter(
+      (currComment) => !currComment.deleted
+    );
+
+    return storedComments;
   } catch (e) {
     throw e;
   }
+}
+
+/**
+ * validates a comment from the database
+ * @param comment a comment document type
+ * @param res Response object from express
+ * @returns a boolean representing the validity of the comment
+ */
+function validateCommentFromDb(comment: any | null, res: Response) {
+  if (!comment) {
+    logger.error("comment not found");
+    res.status(404).json({ message: "comment not found" });
+  } else if (comment.deleted) {
+    logger.error("comment already deleted");
+    res.status(400).json({ message: "comment already deleted" });
+  } else return true;
+  return false;
+}
+
+/**
+ * checks if the current user is the "original" author of the comment
+ * @param req Request object from express
+ * @param res Response object from express
+ * @param dbUserId a string representing the user's id from the database
+ * @returns a boolean representing the validity of the user
+ * and a response is sent to the client if the user is not the author
+ * of the comment
+ */
+function isCurrUserSameAsCreator(
+  req: Request,
+  res: Response,
+  dbUserId: string
+): boolean {
+  const currUserId = Utility.extractUserIdFromToken(req);
+  logger.info(
+    `checking if user with id, ${currUserId}, is the author of the comment...`
+  );
+  if (currUserId !== dbUserId) {
+    logger.error(`user( ${currUserId} ) is not the author of the comment`);
+    res.status(403).json({
+      message: "you are not the author of this post so you will not update it",
+    });
+    return false;
+  }
+  return true;
 }
 
 export default commentController;
