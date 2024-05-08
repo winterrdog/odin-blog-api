@@ -23,7 +23,6 @@ export function authenticateUserPass(
         logger.error(`error happened in user-pass auth: ${info.toString()}`);
       return next(err);
     }
-
     if (!user) {
       info &&
         logger.warn(
@@ -35,7 +34,6 @@ export function authenticateUserPass(
       }
       return res.status(401).json({ message });
     }
-
     req.user = user;
     return next();
   };
@@ -64,7 +62,6 @@ export function authenticateJwt(
       info && logger.error(`error happened in JWT auth: ${info.toString()}`);
       return next(err);
     }
-
     if (!user) {
       info &&
         logger.warn(
@@ -76,7 +73,6 @@ export function authenticateJwt(
       }
       return res.status(401).json({ message });
     }
-
     req.user = user;
     return next();
   };

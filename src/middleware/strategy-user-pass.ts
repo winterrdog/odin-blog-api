@@ -44,7 +44,6 @@ const verifyUserCb = async function (
         message: `password, ${password}, is incorrect`,
       });
     }
-
     logger.info(`user: ${username} verified successfully!`);
     return cb(null, user);
   } catch (err) {
@@ -52,7 +51,6 @@ const verifyUserCb = async function (
     return cb(err);
   }
 };
-
 logger.info("setting up user-password passport strategy...");
 const userPassStrategy = new LocalStrategy(options, verifyUserCb);
 export default userPassStrategy;

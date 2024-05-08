@@ -85,8 +85,6 @@ function toJsonHandler(doc: Document, ret: any) {
   ret.id = ret._id;
   ret.dateCreated = ret.createdAt;
   ret.dateUpdated = ret.updatedAt;
-
-  // populate user name field
   if (ret.user && ret.user.name) {
     ret.user = ret.user.name;
   }

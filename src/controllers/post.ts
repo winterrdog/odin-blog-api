@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import * as _ from "lodash";
-import { Types, isValidObjectId } from "mongoose";
 import { matchedData } from "express-validator";
 import { PostModel } from "../models/post";
 import { JwtPayload } from "../middleware/interfaces";
@@ -20,35 +19,19 @@ const postController = {
     Utility.validateRequest,
     async function (req: Request, res: Response): Promise<any> {
       try {
-        const { id } = req.params;
+        const id = extractPostIdFromReq(req, res);
+        if (!id) return;
         logger.info(`fetching post by id: ${id}...`);
-        if (isValidObjectId(id) === false) {
-          logger.error("invalid or malformed post id");
-          return res.status(400).json({ message: "Invalid post id" });
-        }
-
-        // check if post exists
-        const post = await PostModel.findById(id);
-        if (!post) {
-          logger.error(`post with id ${id} not found`);
-          return res
-            .status(404)
-            .json({ message: `Post with id ${id} not found` });
-        }
+        const post = await findPostById(id, res);
+        if (!post) return;
 
         // track the number of viewers
         {
-          const jwtData = (req.user! as any).data as JwtPayload;
-          const { sub } = jwtData.data;
-          logger.info(`getting user id for view tracking: ${sub}...`);
-          if (!isValidObjectId(sub)) {
-            logger.error("invalid or malformed user id");
-            return res.status(400).json({ message: "Invalid user id" });
-          }
-
+          const currUserId = Utility.extractUserIdFromToken(req);
+          logger.info(`getting user id for view tracking: ${currUserId}...`);
           const postViewersSet: Set<string> = Utility.arrayToSet(post.views);
-          if (!postViewersSet.has(sub)) {
-            post.views.push(sub);
+          if (!postViewersSet.has(currUserId)) {
+            post.views.push(currUserId);
             await post.save();
           }
         }
@@ -74,7 +57,6 @@ const postController = {
           message: "No posts found",
         });
       }
-
       logger.info("all posts retrieved successfully!");
       return res.status(200).json({
         message: "Posts retrieved successfully",
@@ -91,20 +73,14 @@ const postController = {
     async function (req: Request, res: Response): Promise<any> {
       try {
         // grab user id from jwt
-        const jwtData = (req.user! as any).data as JwtPayload;
-        const { sub } = jwtData.data;
-        logger.info(`creating post for user with id: ${sub}...`);
-        if (isValidObjectId(sub) === false) {
-          logger.error("invalid or malformed user id");
-          return res.status(400).json({ message: "Invalid user id" });
-        }
+        const currUserId = Utility.extractUserIdFromToken(req);
+        logger.info(`creating post for user with id: ${currUserId}...`);
 
         // create post
         const post = await PostModel.create({
-          author: sub,
+          author: currUserId,
           ...req.body,
         });
-
         logger.info(`post created successfully! post: ${post}`);
         return res.status(201).json({
           message: "Post created successfully",
@@ -122,38 +98,23 @@ const postController = {
     Utility.validateRequest,
     async function (req: Request, res: Response): Promise<any> {
       try {
-        // grab post id from sanitized request params
-        const sanitizedData = matchedData(req);
-        const { id } = sanitizedData;
+        const id = extractPostIdFromReq(req, res);
+        if (!id) return;
         logger.info(`updating post with id: ${id}...`);
-        if (isValidObjectId(id) === false) {
-          logger.error("invalid or malformed post id");
-          return res.status(400).json({ message: "Invalid post id" });
-        }
-
-        let post = await PostModel.findById(id);
-        if (!post) {
-          logger.error(`post with id ${id} not found`);
-          return res
-            .status(404)
-            .json({ message: `Post with id ${id} not found` });
-        }
+        const post = await findPostById(id, res);
+        if (!post) return;
 
         // check if user is the author of the post
-        const jwtData = (req.user! as any).data as JwtPayload;
-        if (!isAuthorSame(post.author._id, jwtData)) {
-          logger.error(
-            `user with id ${jwtData.data.sub} is not the author of post with id ${id} hence cannot update it`
-          );
-          return res.status(403).json({
-            message: "You are not authorized to update this post",
-          });
+        if (
+          Utility.isCurrUserSameAsCreator(
+            req,
+            res,
+            post.author._id.toHexString()
+          ) === false
+        ) {
+          return;
         }
-
-        // merge data to update
-        post = _.merge(post, req.body as PostUpdateReqBody);
-        await post!.save();
-
+        await Utility.updateDoc(post, req.body as PostUpdateReqBody);
         logger.info(`post updated successfully! post: ${post.toJSON()}`);
         return res.status(200).json({
           message: "Post updated",
@@ -170,35 +131,24 @@ const postController = {
     Utility.validateRequest,
     async function (req: Request, res: Response): Promise<any> {
       try {
-        const sanitizedData = matchedData(req);
-        const { id } = sanitizedData;
+        const id = extractPostIdFromReq(req, res);
+        if (!id) return;
         logger.info(`deleting post with id: ${id}...`);
-        if (isValidObjectId(id) === false) {
-          logger.error("invalid or malformed post id");
-          return res.status(400).json({ message: "Invalid post id" });
-        }
 
         // check if post exists
-        const post = await PostModel.findById(id);
-        if (!post) {
-          logger.error(`post with id ${id} not found`);
-          return res
-            .status(404)
-            .json({ message: `Post with id ${id} not found` });
-        }
+        const post = await findPostById(id, res);
+        if (!post) return;
 
         // check if user is the author of the post
-        const jwtData = (req.user! as any).data as JwtPayload;
-        if (!isAuthorSame(post.author._id, jwtData)) {
-          logger.error(
-            `user with id ${jwtData.data.sub} is not the author of post with id ${id} hence cannot delete it`
-          );
-          return res.status(403).json({
-            message: "You are not authorized to update this post",
-          });
+        if (
+          Utility.isCurrUserSameAsCreator(
+            req,
+            res,
+            post.author._id.toHexString()
+          ) === false
+        ) {
+          return;
         }
-
-        // delete post
         await post.deleteOne();
         logger.info(`post with id: ${id} deleted successfully!`);
         return res.status(204).end();
@@ -213,21 +163,11 @@ const postController = {
     Utility.validateRequest,
     async function (req: Request, res: Response): Promise<any> {
       try {
-        const { id } = req.params;
+        const id = extractPostIdFromReq(req, res);
+        if (!id) return;
         logger.info(`fetching post by id: ${id}...`);
-        if (isValidObjectId(id) === false) {
-          logger.error("invalid or malformed post id");
-          return res.status(400).json({ message: "Invalid post id" });
-        }
-
-        // check if post exists
-        const post = await PostModel.findById(id);
-        if (!post) {
-          logger.error(`post with id ${id} not found`);
-          return res
-            .status(404)
-            .json({ message: `Post with id ${id} not found` });
-        }
+        const post = await findPostById(id, res);
+        if (!post) return;
 
         // update likes
         logger.info(`updating user likes...`);
@@ -243,7 +183,6 @@ const postController = {
             post.dislikes = dislikeSet.size > 0 ? Array.from(dislikeSet) : [];
           }
         }
-
         await post.save();
         logger.info("likes updated successfully!");
         return res.status(200).json({
@@ -261,21 +200,11 @@ const postController = {
     Utility.validateRequest,
     async function (req: Request, res: Response): Promise<any> {
       try {
-        const { id } = req.params;
+        const id = extractPostIdFromReq(req, res);
+        if (!id) return;
         logger.info(`fetching post by id: ${id}...`);
-        if (isValidObjectId(id) === false) {
-          logger.error("invalid or malformed post id");
-          return res.status(400).json({ message: "Invalid post id" });
-        }
-
-        // check if post exists
-        const post = await PostModel.findById(id);
-        if (!post) {
-          logger.error(`post with id ${id} not found`);
-          return res
-            .status(404)
-            .json({ message: `Post with id ${id} not found` });
-        }
+        const post = await findPostById(id, res);
+        if (!post) return;
 
         // update dislikes
         logger.info(`updating user dislikes...`);
@@ -295,7 +224,6 @@ const postController = {
             post.likes = likesSet.size > 0 ? Array.from(likesSet) : [];
           }
         }
-
         await post.save();
         logger.info("dislikes updated successfully!");
         return res.status(200).json({
@@ -313,27 +241,18 @@ const postController = {
     Utility.validateRequest,
     async function (req: Request, res: Response): Promise<any> {
       try {
-        const { id } = req.params;
+        const id = extractPostIdFromReq(req, res);
+        if (!id) return;
         logger.info(`fetching post by id: ${id}...`);
-        if (isValidObjectId(id) === false) {
-          logger.error("invalid or malformed post id");
-          return res.status(400).json({ message: "Invalid post id" });
-        }
 
         // check if post exists
-        const post = await PostModel.findById(id);
-        if (!post) {
-          logger.error(`post with id ${id} not found`);
-          return res
-            .status(404)
-            .json({ message: `Post with id ${id} not found` });
-        }
+        const post = await findPostById(id, res);
+        if (!post) return;
 
         if (post.likes.length <= 0) {
           logger.info("no likes to remove from");
           return res.status(400).json({ message: "there are no likes yet" });
         }
-
         logger.info(`removing user like...`);
         const likesSet = Utility.arrayToSet(post.likes);
         const userId: string = ((<any>req.user!).data as JwtPayload).data.sub;
@@ -343,16 +262,14 @@ const postController = {
             message: "user already unliked post",
           });
         }
-
         likesSet.delete(userId); // remove user from likes
         post.likes = likesSet.size > 0 ? Array.from(likesSet) : [];
-
         await post.save();
         logger.info("like removed successfully!");
-
-        return res
-          .status(200)
-          .json({ message: "post like removed successfully!", post });
+        return res.status(200).json({
+          message: "post like removed successfully!",
+          post,
+        });
       } catch (e) {
         logger.error(e, "Error occurred during removing like");
         Utility.handle500Status(res, <Error>e);
@@ -364,21 +281,13 @@ const postController = {
     Utility.validateRequest,
     async function (req: Request, res: Response): Promise<any> {
       try {
-        const { id } = req.params;
+        const id = extractPostIdFromReq(req, res);
+        if (!id) return;
         logger.info(`fetching post by id: ${id}...`);
-        if (isValidObjectId(id) === false) {
-          logger.error("invalid or malformed post id");
-          return res.status(400).json({ message: "Invalid post id" });
-        }
 
         // check if post exists
-        const post = await PostModel.findById(id);
-        if (!post) {
-          logger.error(`post with id ${id} not found`);
-          return res
-            .status(404)
-            .json({ message: `Post with id ${id} not found` });
-        }
+        const post = await findPostById(id, res);
+        if (!post) return;
 
         // update dislikes
         if (post.dislikes.length <= 0) {
@@ -395,12 +304,10 @@ const postController = {
             message: "user already removed their dislike from post",
           });
         }
-
         dislikesSet.delete(userId); // remove user from dislikes
         post.dislikes = dislikesSet.size > 0 ? Array.from(dislikesSet) : [];
         await post.save();
         logger.info("dislike removed successfully!");
-
         return res.status(204).end();
       } catch (e) {
         logger.error(e, "Error occurred during removing dislike");
@@ -410,8 +317,24 @@ const postController = {
   ],
 };
 
-function isAuthorSame(tgtAuthor: Types.ObjectId, reqAuthor: JwtPayload) {
-  return tgtAuthor.toHexString() === reqAuthor.data.sub;
+async function findPostById(id: string, res: Response) {
+  try {
+    const post = await PostModel.findById(id);
+    if (!post) {
+      logger.error(`post with id ${id} not found`);
+      res.status(404).json({ message: `Post with id ${id} not found` });
+      return null;
+    }
+    return post;
+  } catch (e) {
+    throw e;
+  }
+}
+
+function extractPostIdFromReq(req: Request, res: Response): string {
+  const sanitizedData = matchedData(req);
+  const { id } = sanitizedData;
+  return Utility.validateObjectId(id, res) ? id : "";
 }
 
 export default postController;

@@ -9,7 +9,6 @@ export default function applyErrorHandlers(app: Express) {
     (err as any)["status"] = 404;
     return next(err);
   });
-
   logger.info("setting up the global error handler...");
   app.use(function (
     err: any,

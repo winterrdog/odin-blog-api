@@ -97,11 +97,11 @@ const commentController = {
         const storedComment = await findCommentByIdAndPostId(req, res);
         if (!storedComment) return;
         if (
-          !isCurrUserSameAsCreator(
+          Utility.isCurrUserSameAsCreator(
             req,
             res,
             storedComment.user._id.toHexString()
-          )
+          ) === false
         ) {
           return;
         }
@@ -127,11 +127,11 @@ const commentController = {
         const storedComment = await findCommentByIdAndPostId(req, res);
         if (!storedComment) return;
         if (
-          !isCurrUserSameAsCreator(
+          Utility.isCurrUserSameAsCreator(
             req,
             res,
             storedComment!.user._id.toHexString()
-          )
+          ) === false
         ) {
           return;
         }
@@ -249,9 +249,23 @@ const commentController = {
           });
         }
 
-        const deletedReply = await findCommentByIdAndPostId(req, res);
+        const sanitizedData = matchedData(req);
+        const { replyId } = sanitizedData;
+        const deletedReply = await findCommentByIdAndParentId(
+          replyId,
+          parentComment.id,
+          res
+        );
         if (!deletedReply) return;
-        const replyId = deletedReply.id;
+        if (
+          Utility.isCurrUserSameAsCreator(
+            req,
+            res,
+            deletedReply.user._id.toHexString()
+          ) === false
+        ) {
+          return;
+        }
 
         // remove reply from parent's children
         {
@@ -266,20 +280,18 @@ const commentController = {
             });
           }
           userIdSet.delete(replyId);
-          parentComment.childComments = Array.from(userIdSet).map(
-            (id) => new Types.ObjectId(id)
-          );
+          parentComment.childComments =
+            userIdSet.size > 0
+              ? Array.from(userIdSet).map((id) => new Types.ObjectId(id))
+              : [];
           await parentComment.save();
         }
 
         // delete in database
-        {
-          if (!isCurrUserSameAsCreator(req, res, replyId)) return;
-          await markCommentAsDeleted(deletedReply);
-          logger.info(
-            `comment with id, ${deletedReply.id}, deleted successfully!`
-          );
-        }
+        await markCommentAsDeleted(deletedReply);
+        logger.info(
+          `comment with id, ${deletedReply.id}, deleted successfully!`
+        );
 
         return res.status(204).end();
       } catch (e) {
@@ -465,11 +477,30 @@ async function findParentComment(req: Request, res: Response) {
 async function markCommentAsDeleted(storedComment: any) {
   try {
     storedComment.deleted = true;
-    storedComment.detachedchildComments = [...storedComment.childComments];
+    storedComment.detachedchildComments =
+      storedComment.childComments.length > 0
+        ? [...storedComment.childComments]
+        : [];
     storedComment.childComments = [];
     storedComment.tldr = "";
-    storedComment.body = ""; // note: might wanna change this to sth else in the future
+    storedComment.body = "deleted comment"; // note: might wanna change this to sth else in the future
     await storedComment.save();
+  } catch (e) {
+    throw e;
+  }
+}
+
+async function findCommentByIdAndParentId(
+  id: string,
+  parentId: string,
+  res: Response
+) {
+  try {
+    const storedComment = await CommentModel.findOne({
+      _id: id,
+      parentComment: parentId,
+    });
+    return validateCommentFromDb(storedComment, res) ? storedComment : null;
   } catch (e) {
     throw e;
   }
@@ -555,34 +586,6 @@ function validateCommentFromDb(comment: any | null, res: Response) {
     res.status(400).json({ message: "comment already deleted" });
   } else return true;
   return false;
-}
-
-/**
- * checks if the current user is the "original" author of the comment
- * @param req Request object from express
- * @param res Response object from express
- * @param dbUserId a string representing the user's id from the database
- * @returns a boolean representing the validity of the user
- * and a response is sent to the client if the user is not the author
- * of the comment
- */
-function isCurrUserSameAsCreator(
-  req: Request,
-  res: Response,
-  dbUserId: string
-): boolean {
-  const currUserId = Utility.extractUserIdFromToken(req);
-  logger.info(
-    `checking if user with id, ${currUserId}, is the author of the comment...`
-  );
-  if (currUserId !== dbUserId) {
-    logger.error(`user( ${currUserId} ) is not the author of the comment`);
-    res.status(403).json({
-      message: "you are not the author of this post so you will not update it",
-    });
-    return false;
-  }
-  return true;
 }
 
 export default commentController;

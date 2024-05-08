@@ -53,12 +53,9 @@ function toJsonHandler(doc: Document, ret: any) {
   ret.id = ret._id;
   ret.dateCreated = ret.createdAt;
   ret.dateUpdated = ret.updatedAt;
-
-  // populate author field
   if (ret.author && ret.author.name) {
     ret.author = ret.author.name;
   }
-
   if (ret.views && Array.isArray(ret.views)) {
     ret.numOfViewers = ret.views.length;
     delete ret.views;

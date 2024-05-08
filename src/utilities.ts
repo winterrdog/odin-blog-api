@@ -109,6 +109,25 @@ export default class Utility {
   static extractUserIdFromToken(req: Request): string {
     return ((<any>req.user!).data as JwtPayload).data.sub;
   }
+  static isCurrUserSameAsCreator(
+    req: Request,
+    res: Response,
+    dbUserId: string
+  ): boolean {
+    const currUserId = Utility.extractUserIdFromToken(req);
+    logger.info(
+      `checking if user with id, ${currUserId}, is the author of the resource...`
+    );
+    if (currUserId !== dbUserId) {
+      logger.error(`user( ${currUserId} ) is not the author of the resource`);
+      res.status(403).json({
+        message:
+          "you are not the author of this resource so you will not update it",
+      });
+      return false;
+    }
+    return true;
+  }
   static updateUserReactions(
     req: Request,
     res: Response,

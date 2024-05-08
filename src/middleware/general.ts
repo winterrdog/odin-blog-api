@@ -13,14 +13,13 @@ const customHeaders = (
   res: express.Response,
   next: express.NextFunction
 ) => {
-  res.setHeader("X-Powered-By", "code-from-2000");
+  res.setHeader("X-Powered-By", "utopia");
   return next();
 };
 export default function applyGeneralMiddleware(app: Express) {
   logger.info("starting app middleware...");
   app.use(express.json()); // parse application/json
   app.use(express.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
-
   if (process.env.NODE_ENV === "production") {
     app.disable("etag");
     app.use(cors()); // allow cross-origin requests
@@ -36,6 +35,5 @@ export default function applyGeneralMiddleware(app: Express) {
     ); // limit repeated requests to avoid abuse of the API
     app.use(customHeaders);
   }
-
   initPassport(app); // set up passport
 }

@@ -38,7 +38,7 @@ const userController = {
         }
 
         // store details in db
-        const passwordHash = await argon2.hash(password as string);
+        const passwordHash = await argon2.hash(<string>password);
         const createdUser = await UserModel.create({
           name,
           passwordHash,
@@ -75,7 +75,6 @@ const userController = {
       try {
         const { name, pass: password } = req.body;
         logger.info(`signing in user with name: ${name}...`);
-
         const user = await UserModel.findOne({ name });
         if (!user) {
           logger.error(`user with name: ${name} not found`);
@@ -83,7 +82,6 @@ const userController = {
             message: `user with username: ${name} was not found.`,
           });
         }
-
         logger.info(`user with name: ${name} found. verifying password...`);
         const isPasswordValid = await argon2.verify(
           user.passwordHash,
@@ -117,22 +115,21 @@ const userController = {
   ],
   deleteUser: async function (req: Request, res: Response): Promise<any> {
     try {
-      // grab their user id from jwt
-      const { data } = (req.user! as any).data as JwtPayload;
-      const { sub } = data;
-      logger.info(`deleting user with id: ${sub}...`);
+      const currUserId = Utility.extractUserIdFromToken(req);
+      logger.info(`deleting user with id: ${currUserId}...`);
 
       // check if user with id exists
-      const user = await UserModel.findById(sub);
+      const user = await UserModel.findById(currUserId);
       if (!user) {
-        logger.error(`user with id: ${sub} not found hence cannot be deleted`);
+        logger.error(
+          `user with id: ${currUserId} not found hence cannot be deleted`
+        );
         return res.status(404).json({
           message: "User not found",
         });
       }
-
       await user.deleteOne();
-      logger.info(`user with id: ${sub} deleted successfully`);
+      logger.info(`user with id: ${currUserId} deleted successfully`);
       return res.status(204).end();
     } catch (e) {
       logger.error(e, "error occurred during deletion of user");
@@ -144,24 +141,19 @@ const userController = {
     Utility.validateRequest,
     async function (req: Request, res: Response): Promise<any> {
       try {
-        // grab their user id from jwt
-        const { data } = (req.user! as any).data as JwtPayload;
-        const { sub } = data;
-        logger.info(`updating user with id: ${sub}...`);
+        const currUserId = Utility.extractUserIdFromToken(req);
+        logger.info(`updating user with id: ${currUserId}...`);
 
         // check if user with id exists
-        let user = await UserModel.findById(sub);
+        let user = await UserModel.findById(currUserId);
         if (!user) {
           logger.error(
-            `user with id: ${sub} not found hence cannot be updated`
+            `user with id: ${currUserId} not found hence cannot be updated`
           );
           return res.status(404).json({ message: "User not found" });
         }
-
-        // merge data to update
-        user = _.merge(user, req.body as UserUpdateReqBody);
-        await user!.save();
-        logger.info(`user with id: ${sub} updated successfully!`);
+        await Utility.updateDoc(user, req.body as UserUpdateReqBody);
+        logger.info(`user with id: ${currUserId} updated successfully!`);
         return res.status(200).json({
           message: "User updated",
           user,
