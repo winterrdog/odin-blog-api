@@ -155,10 +155,19 @@ const commentController = {
         const parentComment = await findParentComment(req, res);
         if (!parentComment) return;
 
-        // is the parent comment deleted?
+        // is the parent comment deleted? if so it'll hv no children
+        // but it'll have detached children
         if (parentComment.deleted) {
-          return res.status(400).json({
-            message: `parent comment with id, ${parentComment.id}, is already deleted`,
+          await parentComment.populate("detachedchildComments");
+          const detachedReplies = parentComment.detachedchildComments;
+          if (detachedReplies.length <= 0) {
+            return res.status(404).json({
+              message: `no replies added for comment, ${parentComment.id}`,
+            });
+          }
+          return res.status(200).json({
+            message: "replies retrieved successfully",
+            replies: detachedReplies,
           });
         }
 
@@ -171,10 +180,6 @@ const commentController = {
             message: `no replies added for comment, ${parentComment.id}`,
           });
         }
-
-        // keep replies that are NOT deleted
-        replies = replies.filter((currComment) => !(<any>currComment).deleted);
-
         return res.status(200).json({
           message: "replies retrieved successfully",
           replies,
