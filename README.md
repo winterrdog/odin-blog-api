@@ -428,4 +428,70 @@ The server will respond with:
 HTTP/1.1 204 No Content
 ```
 
+#### Add a like to a comment
+
+```sh
+curl -X PATCH
+-H "Authorization
+: Bearer eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InN1YiI6IjY2MjY1NWMxYTJlMjkxYjg0NjM1ODlmZSIsInJvbGUiOiJhdXRob3IifSwiaWF0IjoxNzEzNzg4MzUzLCJleHAiOjE3MTM5NjExNTN9.8oc3DOAR6SqaWUBynMZlAvHJr202cTXbtiq80EVyO5RSXMJrdGJ-aWdZF_lfR1p4" http://localhost:3000/api/v1/post-comments/662659aaa2e291b846358a07/comments/66265bcda2e291b846358a17/likes
+```
+
+The server will respond with:
+
+```json
+HTTP/1.1 200 OK
+
+{
+    "message": "like added successfully",
+    "comment": {
+        "body": "This is a great post. I love it. I have updated it.",
+        "tldr": "great post",
+        "user": "John Doe",
+        "post": "662659aaa2e291b846358a07",
+        "id": "66265bcda2e291b846358a17",
+        "dateCreated": "2024-04-22T12:45:01.875Z",
+        "dateUpdated": "2024-04-22T12:45:01.875Z",
+        "likes": 1,
+        "dislikes": 0
+    }
+}
+```
+
+#### Remove a like from a comment
+
+```sh
+curl -X DELETE
+-H "Authorization
+: Bearer eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InN1YiI6IjY2MjY1NWMxYTJlMjkxYjg0NjM1ODlmZSIsInJvbGUiOiJhdXRob3IifSwiaWF0IjoxNzEzNzg4MzUzLCJleHAiOjE3MTM5NjExNTN9.8oc3DOAR6SqaWUBynMZlAvHJr202cTXbtiq80EVyO5RSXMJrdGJ-aWdZF_lfR1p4" http://localhost:3000/api/v1/post-comments/662659aaa2e291b846358a07/comments/66265bcda2e291b846358a17/likes
+```
+
+The server will respond with:
+
+```json
+HTTP/1.1 200 OK
+
+{
+    "message": "like removed successfully",
+    "comment": {
+        "body": "This is a great post. I love it. I have updated it.",
+        "tldr": "great post",
+        "user": "John Doe",
+        "post": "662659aaa2e291b846358a07",
+        "id": "66265bcda2e291b846358a17",
+        "dateCreated": "2024-04-22T12:45:01.875Z",
+        "dateUpdated": "2024-04-22T12:45:01.875Z",
+        "likes": 0,
+        "dislikes": 0
+    }
+}
+```
+
+#### DISLIKES
+
+They follow the same pattern as likes. The only difference is that they are for disliking a comment. The endpoints change from `likes` to `dislikes` but the method remains the same.
+
+#### REPLIES
+
+They follow the same pattern as comments. The only difference is that they are nested under comments.
+
 LICENSE: [Unlicense](https://unlicense.org)
