@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import * as _ from "lodash";
-import { Types, isValidObjectId } from "mongoose";
+import { Types } from "mongoose";
 import { matchedData } from "express-validator";
 import { CommentModel, CommentModelShape } from "../models/comment";
 import {
@@ -13,8 +13,6 @@ import {
 } from "../validators/comments";
 import Utility from "../utilities";
 import { startLogger } from "../logging";
-
-// todo: test new routes
 
 const logger = startLogger(__filename);
 const commentController = {
@@ -545,14 +543,7 @@ async function findCommentsForPost(req: Request, res: Response) {
     const sanitizedData = matchedData(req);
     const { postId } = sanitizedData;
     logger.info(`fetching comments for post with id, ${postId}...`);
-    if (!isValidObjectId(postId)) {
-      logger.error("invalid or malformed post id");
-      res.status(400).json({
-        message: `Post id, ${postId}, is invalid or malformed.`,
-      });
-
-      return null;
-    }
+    if (!Utility.validateObjectId(postId, res)) return null;
     let storedComments = await CommentModel.find({
       post: postId,
     });
@@ -561,7 +552,6 @@ async function findCommentsForPost(req: Request, res: Response) {
       res.status(200).json({
         message: `No comments available for post with id, ${postId}.`,
       });
-
       return null;
     }
 
