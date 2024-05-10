@@ -479,6 +479,8 @@ async function findParentComment(req: Request, res: Response) {
  */
 async function markCommentAsDeleted(storedComment: any) {
   try {
+    // NOTE: Mongoose will automatically set all children's
+    // parent to null since he's gone
     storedComment.deleted = true;
     storedComment.detachedchildComments =
       storedComment.childComments.length > 0
@@ -486,7 +488,7 @@ async function markCommentAsDeleted(storedComment: any) {
         : [];
     storedComment.childComments = [];
     storedComment.tldr = "";
-    storedComment.body = "deleted comment"; // note: might wanna change this to sth else in the future
+    storedComment.body = "deleted comment";
     await storedComment.save();
   } catch (e) {
     throw e;
@@ -554,12 +556,6 @@ async function findCommentsForPost(req: Request, res: Response) {
       });
       return null;
     }
-
-    // keep comments that are NOT deleted
-    storedComments = storedComments.filter(
-      (currComment) => !currComment.deleted
-    );
-
     return storedComments;
   } catch (e) {
     throw e;
@@ -576,9 +572,6 @@ function validateCommentFromDb(comment: any | null, res: Response) {
   if (!comment) {
     logger.error("comment not found");
     res.status(404).json({ message: "comment not found" });
-  } else if (comment.deleted) {
-    logger.error("comment already deleted");
-    res.status(400).json({ message: "comment already deleted" });
   } else return true;
   return false;
 }
