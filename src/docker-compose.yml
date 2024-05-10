@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   web_app:
-    image: winterrdog/blog-api:1.2.0
+    image: winterrdog/blog-api:1.3.3
     container_name: blog_backend
     ports:
       - "3000:3000"
