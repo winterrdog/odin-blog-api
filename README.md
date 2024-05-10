@@ -55,7 +55,7 @@ This backend has 3 features:
 - `Posts` - _for creating, reading, updating and deleting posts_
 - `Comments` - _for creating, reading, updating and deleting comments_
 
-It has `16` endpoints i.e.:
+It has `16+` endpoints i.e.:
 
 ### User Endpoints
 
@@ -81,6 +81,17 @@ It has `16` endpoints i.e.:
 - `GET /api/v1/post-comments/:postId/comments/:commentId` - _for getting a comment_
 - `PATCH /api/v1/post-comments/:postId/comments/:commentId` - _for updating a comment_
 - `DELETE /api/v1/post-comments/:postId/comments/:commentId` - _for deleting a comment_
+- `PATCH /api/v1/post-comments/:postId/comments/:commentId/likes` - _for adding a like_
+- `DELETE /api/v1/post-comments/:postId/comments/:commentId/likes` - _for removing a like_
+- `PATCH /api/v1/post-comments/:postId/comments/:commentId/dislikes` - _for adding a dislike_
+- `DELETE /api/v1/post-comments/:postId/comments/:commentId/dislikes` - _for removing a dislike_
+- `POST /api/v1/post-comments/:postId/comments/:commentId/replies` - _for creating a reply_
+- `PATCH /api/v1/post-comments/:postId/comments/:commentId/replies` - _for adding a reply_
+- `DELETE /api/v1/post-comments/:postId/comments/:commentId/replies/:replyId` - _for deleting a reply_
+
+### AUTHENTICATION
+
+- The API uses `JWT` for authentication. The JWT is required in the `Authorization` header for **all** requests except for `sign-up` and `sign-in` requests and for user actions that only require reading data from the server i.e `GET` requests.
 
 ## SAMPLE REQUESTS
 
