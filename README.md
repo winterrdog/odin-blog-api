@@ -23,10 +23,10 @@ Make sure you have the following installed:
   ./containerize.sh
   ```
 
-- In case you want to run it in development mode, run the following command:
+- In case you want to run it in development mode, run the following command( for backend dev only ):
 
   ```bash
-  docker-compose -f ./docker-compose.dev.yml up -d
+  docker-compose -f ./docker-compose-dev.yml up -d
   ```
 
 - Stop the backend by running the following command:
