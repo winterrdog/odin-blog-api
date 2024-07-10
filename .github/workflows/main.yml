@@ -5,7 +5,8 @@ on:
   # Runs on pushes targeting the default branch
   push:
     branches: ['main']
-
+    paths:
+      - './src/frontend/**'
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -30,23 +31,33 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        working-directory: ./src/frontend
+        
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
+
+      - name: Change directory to front end folder
+        run: cd ./src/frontend
+          
       - name: Install dependencies
         run: npm ci
+        working-directory: ./src/frontend
+        
       - name: Build
         run: npm run build
+        working-directory: ./src/frontend
+        
       - name: Setup Pages
         uses: actions/configure-pages@v4
+        
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           # Upload dist folder
-          path: './dist'
+          path: './src/frontend/dist'
+          
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
