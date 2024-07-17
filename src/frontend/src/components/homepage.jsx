@@ -1,16 +1,50 @@
 import homepagestyles from '../styles/homepage.module.css';
 import Logo from './logo';
 import bkgimg from '../assets/bird.png'
+import Signinup from './sign-in-up';
+import { useState } from 'react';
 
 export default function Homepage() {
+  const [showDialog, setShowDialog] = useState(false);
+  const [source, setSource] = useState('');
+
+  function handleGetStarted() {
+    setSource('up');
+    setShowDialog(true);
+  }
+
+  function handleClose() {
+    setShowDialog(false);
+  }
+
+  function handleSignIn() {
+    setSource('in');
+    setShowDialog(true);
+  }
+
   return (
     <div className={homepagestyles.hp}>
+
+      {
+        showDialog ? 
+        (
+          <>
+            <div className={homepagestyles.dialoghelp}></div>
+            <div className={homepagestyles.signinup}>
+              <Signinup source={source} handleClose={handleClose} />
+            </div>
+          </>
+        )
+        :
+        null
+      }
+      
       <header className={homepagestyles.header}>
         <Logo />
         <nav>
           <span>About</span>
-          <span>Sign in</span>
-          <button>Get Started</button>
+          <span onClick={handleSignIn}>Sign in</span>
+          <button onClick={handleGetStarted}>Get Started</button>
         </nav>
       </header>
       <div className={homepagestyles.art}>

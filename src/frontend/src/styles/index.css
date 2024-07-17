@@ -25,3 +25,11 @@ body {
 #root {
   height: inherit;
 }
+
+.medcolor {
+  color: rgb(26, 137, 23);
+}
+
+button:hover, a:hover {
+  cursor: pointer;
+}

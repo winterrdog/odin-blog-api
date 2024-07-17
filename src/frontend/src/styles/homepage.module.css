@@ -10,6 +10,45 @@
   user-select: none;
 }
 
+.hp > .dialoghelp {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1;
+
+  height: 100%;
+  width: 100%;
+
+  background-color: white;
+  opacity: 0.9;
+
+  animation: onnopen 300ms ease 1  ;
+}
+
+@keyframes onnopen {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 0.9;
+  }
+}
+
+.hp > .signinup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2;
+
+  height: 100%;
+  width: 100%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .hp > .header {
   max-width: 1200px;
   display: flex;
@@ -91,6 +130,8 @@
   justify-content: center;
   flex-direction: column;
 
+  position: relative;
+
 }
 
 .hp > main > :nth-child(1) {
@@ -130,9 +171,24 @@
   height: 60vh;
   width: auto;
   
-  right: 0vw;
+  right: -350px;
 }
 
+@media (max-width: 1900px) {
+  .hp > main > img {
+    right: -200px;
+  }
+}
+@media (max-width: 1600px) {
+  .hp > main > img {
+    right: 0px;
+  }
+}
+@media (max-width: 1280px) {
+  .hp > main > img {
+    display: none;
+  }
+}
 
 .hp > .bottomborder {
   height: 0;
