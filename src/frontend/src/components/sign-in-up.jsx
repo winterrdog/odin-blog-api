@@ -36,7 +36,10 @@ export default function Signinup({handleClose, source}) {
         }
         console.log(response);
         setOutput(data);
+      }).catch((error) => {
+        console.log(error);
       });
+;
 
     } else {
       if (e.target['1'].value != e.target['2'].value) {
@@ -66,6 +69,8 @@ export default function Signinup({handleClose, source}) {
           status: response.status,
         }
         setOutput(data);
+      }).catch((error) => {
+        console.log(error);
       });
 
 
