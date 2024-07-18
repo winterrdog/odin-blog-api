@@ -9,6 +9,7 @@
   align-items: center;
 
   width: 450px;
+  height: 654px;
   box-sizing: content-box;
   text-align: center;
 
@@ -97,6 +98,11 @@
   background-color: rgb(250, 250, 250);
 }
 
+.main form input:invalid {
+  border: 1px solid red;
+}
+
+
 .main form button {
   width: 60%;
   background-color: #242424;
@@ -136,4 +142,32 @@
 
 .main .underline {
   text-decoration: underline;
+}
+
+.main h4 {
+  font-weight: 400;
+  font-family: 'Inter Tight';
+  margin: 0;
+}
+
+.main .output button {
+  width: 100px;
+  background-color: #242424;
+  color: white;
+  padding: 10px;
+  border: 0;
+  border-radius: 30px;
+  font-size: 16px;
+  font-family: 'Inter';
+
+  margin: 20px 0;
+}
+
+.main .output {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
