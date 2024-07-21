@@ -8,6 +8,17 @@
 
   position: relative;
   user-select: none;
+
+  background-color: rgb(255, 253, 241);
+}
+
+.SIhp {
+  height: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  user-select: none;
 }
 
 .hp > .dialoghelp {
@@ -60,10 +71,57 @@
   padding: 15px 0;
 }
 
+.SIheader {
+  max-width: 1920px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  width: 100%;
+  padding: 5px 30px;
+  box-sizing: border-box;
+}
+
 .hp > .header nav {
   font-size: 1em;
   user-select: none;
 }
+
+.SIheader > nav {
+  display: flex;
+}
+
+.SIheader > nav > span {
+  display: flex;
+  align-items: center;
+  margin-right: 40px;
+  cursor: pointer;
+}
+
+.SIheader > nav > span > svg {
+  margin-right: 5px;
+}
+
+.SIheader > nav > .account {
+  text-transform: capitalize;
+  background-color: var(--iconic-medium-color);
+  width: 40px;
+  height: 40px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-weight: 900;
+  font-family: 'Titillium Web';
+  font-size: 1.5em;
+
+  color: #FFFFFF;
+
+  border-radius: 50%;
+
+}
+
 
 .hp > .header nav > :nth-child(n) {
   font-family: 'Inter', sans-serif;
@@ -80,7 +138,7 @@
   font-size: 1em;
 }
 
-.hp > .art {
+.art {
   height: 5vh;
   width: 100%;
 
@@ -98,7 +156,7 @@
   position: relative;
 }
 
-.hp > .art > .messageboard {
+.art > .messageboard {
   position: absolute;
   top: 0;
   left: 0;
@@ -119,6 +177,10 @@
 
   mix-blend-mode: darken;
   /* filter: contrast(10000000000000000000%)  brightness(0%); */
+}
+
+.SIhp > .art {
+  border: 0;
 }
 
 .hp > main {

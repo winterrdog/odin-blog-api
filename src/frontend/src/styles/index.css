@@ -4,12 +4,13 @@
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   
   color: #242424;
-  background-color: rgb(255, 253, 241);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --iconic-medium-color: rgb(26, 137, 23);
 }
 
 body {

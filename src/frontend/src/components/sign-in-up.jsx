@@ -3,7 +3,7 @@ import styles from '../styles/signinup.module.css';
 import PropTypes from 'prop-types';
 import { baseURL } from './comsWithbackEnd';
 
-export default function Signinup({handleClose, source}) {
+export default function Signinup({handleClose, source, login}) {
 
   // signin -> 1 ||| signup -> 0
   const [src, setSrc] = useState(source == 'up' ? 0 : 1);
@@ -30,16 +30,16 @@ export default function Signinup({handleClose, source}) {
         },
         body: JSON.stringify(data),
       }).then((response) => {
-        let data = {
+        let datax = {
           ok: response.ok,
           status: response.status,
+          name: String(data.name),
         }
-        console.log(response);
-        setOutput(data);
+        setOutput(datax);
       }).catch((error) => {
         console.log(error);
       });
-;
+
 
     } else {
       if (e.target['1'].value != e.target['2'].value) {
@@ -119,7 +119,13 @@ export default function Signinup({handleClose, source}) {
               <h1>Success.</h1>
               <h4>You have been succesfully logged in!</h4>
               <button onClick={() => {
-                handleClose()
+                console.log(output);
+                login(
+                  {
+                    name: String(output.name),
+                  }
+                );
+                handleClose();
               }}>Ok</button>
             </>
             :
@@ -208,4 +214,5 @@ export default function Signinup({handleClose, source}) {
 Signinup.propTypes = {
   handleClose: PropTypes.func,
   source: PropTypes.string,
+  login: PropTypes.func,
 };
