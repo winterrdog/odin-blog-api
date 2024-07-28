@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import styles from '../styles/signinup.module.css';
 import PropTypes from 'prop-types';
-import { baseURL } from './comsWithbackEnd';
+import { baseURL, setToken } from './comsWithbackEnd';
 
 export default function Signinup({handleClose, source, login}) {
 
@@ -20,8 +20,6 @@ export default function Signinup({handleClose, source, login}) {
         pass: passwordRef.current.value,
       };
 
-      // TODO:: what to do with the token returned by the server
-
       fetch(`${baseURL}/api/v1/users/sign-in`, {
         method: 'POST',
         mode: 'cors',
@@ -36,6 +34,9 @@ export default function Signinup({handleClose, source, login}) {
           name: String(data.name),
         }
         setOutput(datax);
+        return response.json();
+      }).then((res)=> {
+        if (res.token) setToken(res.token);
       }).catch((error) => {
         console.log(error);
       });
@@ -69,6 +70,9 @@ export default function Signinup({handleClose, source, login}) {
           status: response.status,
         }
         setOutput(data);
+        return response.json();
+      }).then((res) => {
+        if (res.token) setToken(res.token);
       }).catch((error) => {
         console.log(error);
       });
