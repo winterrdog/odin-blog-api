@@ -1,0 +1,29 @@
+.errorelem {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;  
+  font-family: 'Inter Tight', sans-serif;
+  user-select: none;
+}
+
+.errorelem > :nth-child(1) {
+  font-size: 5em;
+}
+
+.errorelem > :nth-child(2) {
+  font-size: 5em;
+  margin: 0;
+  color: rgb(189, 189, 189);
+}
+
+.errorelem > :nth-child(3) {
+  font-size: 2em;
+  font-weight: 200;
+}
+
+.errorelem > :nth-child(3) a {
+  text-decoration: none;
+}
