@@ -1,13 +1,13 @@
 import styles from '../styles/about.module.css';
 import Logo from './logo';
-import { Link } from 'react-router-dom';
+import { PropTypes } from 'prop-types';
 
-export default function About() {
+export default function About({ cb, cbToOpenDialog }) {
   return (
     <div className={styles.about}>
       <header>
         <Logo />
-        <Link to='/' ><button>Back to homepage</button></Link>
+        <button onClick={() => {cb(false)}}>Back to homepage</button>
       </header>
       <main>
         <h1>All the boys have a story to tell.</h1>
@@ -23,9 +23,32 @@ export default function About() {
           <p>Aenean eleifend viverra lectus. In rhoncus mi sit amet ultricies viverra. In hendrerit arcu sem, vel tempus lorem dictum a. Aenean consectetur risus sed aliquam pharetra. Duis ac laoreet mi, a scelerisque neque. Maecenas pellentesque molestie pellentesque. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec eu arcu nisl. Sed et viverra erat. Integer vel placerat tortor, sed bibendum quam. Sed venenatis ex pellentesque, iaculis magna ac, luctus ipsum. </p>
         </article>
       </main>
+      <button onClick={() => {
+        cb(false);
+        cbToOpenDialog();
+      }}>
+        <span>Start reading</span>
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed">
+          <path d="M647-440H160v-80h487L423-744l57-56 320 320-320 320-57-56 224-224Z"/>
+        </svg>
+      </button>
+      <button onClick={() => {
+        cb(false);
+        cbToOpenDialog();
+      }}>
+        <span>Start writing</span>
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed">
+          <path d="M647-440H160v-80h487L423-744l57-56 320 320-320 320-57-56 224-224Z"/>
+        </svg>
+      </button>
       <footer>
         <Logo/>
       </footer>
     </div>
   );
+}
+
+About.propTypes = {
+  cb: PropTypes.func,
+  cbToOpenDialog: PropTypes.func,
 }

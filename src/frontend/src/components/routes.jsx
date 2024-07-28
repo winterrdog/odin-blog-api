@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import Homepage from "./homepage";
-import About from "./about";
 import ErrorElement from "./errorElement";
+import Write from "./write";
 
 const routes = createBrowserRouter([
     {
@@ -10,10 +10,9 @@ const routes = createBrowserRouter([
       element: <Homepage />,
     },
     {
-      path: '/about',
-      errorElement: <ErrorElement />,
-      element: <About />,
-    }
+      path: '/write',
+      element: <Write />
+    },
   ], 
   {
     basename: '/odin-blog-api',

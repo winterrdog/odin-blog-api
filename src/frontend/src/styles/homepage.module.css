@@ -98,6 +98,11 @@
   cursor: pointer;
 }
 
+.SIheader > nav > span a {
+  text-decoration: none;
+  color: inherit;
+}
+
 .SIheader > nav > span > svg {
   margin-right: 5px;
 }
