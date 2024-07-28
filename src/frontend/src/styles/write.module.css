@@ -88,7 +88,7 @@
 
   border-left: 1px solid grey;
   padding-left: 10px;
-  
+
   margin-top: 20px;
 }
 
@@ -120,4 +120,25 @@
   font-size: 2em;
   font-family: 'Titillium Web', sans-serif;
   font-weight: 400;
+}
+
+.write > div {
+  font-size: 3em;
+  font-family: 'Inter Tight', sans-serif;
+  margin-top: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.write > div button {
+  border: 0;
+  font-size: 0.6em;
+  font-family: 'Inter tight', sans-serif;
+  background-color: var(--iconic-medium-color);
+  color: white;
+  padding: 10px 30px;
+  border-radius: 40px;
+  margin-top: 30px;
 }

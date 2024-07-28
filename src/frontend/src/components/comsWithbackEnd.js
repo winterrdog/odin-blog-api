@@ -2,7 +2,7 @@ const baseURL = 'http://localhost:3000';
 
 function checkIfLoggedIn() {
   const accname = localStorage.getItem('accname');
-  console.log(accname);
+  console.log(accname, 'checking');
   if (accname) return true;
   else return false;
 }
@@ -24,7 +24,7 @@ function getLogInfo() {
 
   if (checkIfLoggedIn()) {
     obj.name = localStorage.getItem('accname');
-    obj.name = localStorage.getItem('token');
+    obj.token = localStorage.getItem('token');
     console.log(obj);
   }
 
@@ -35,6 +35,6 @@ function clearMemory() {
   localStorage.clear();
 }
 
-clearMemory();
+// clearMemory();
 
 export {baseURL, setLoggedIn, checkIfLoggedIn, clearMemory, getLogInfo, setToken, getToken};
