@@ -123,7 +123,6 @@ export default function Signinup({handleClose, source, login}) {
               <h1>Success.</h1>
               <h4>You have been succesfully logged in!</h4>
               <button onClick={() => {
-                console.log(output);
                 login(
                   {
                     name: String(output.name),

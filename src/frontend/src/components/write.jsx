@@ -1,4 +1,3 @@
-import { useLocation } from 'react-router-dom';
 import styles from '../styles/write.module.css';
 
 import { baseURL, getLogInfo } from './comsWithbackEnd';
@@ -9,13 +8,10 @@ import { useRef, useState } from 'react';
 const acc = getLogInfo();
 
 export default function Write() {
-  const location = useLocation();
   const buttonRef = useRef();
   const [content, setContent] = useState([]);
   const formRef = useRef();
   const [published, setPublished] = useState({message: null, status: false});
-
-  console.log(location);  
 
   function publish() {
     let data = {};

@@ -13,7 +13,6 @@
 }
 
 .SIhp {
-  height: inherit;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -293,5 +292,63 @@
   .hp > .header, .hp > main {
     max-width: 900px;
   }
+
+}
+
+.posterror {
+  font-size: 1em;
+  margin: 0;
+  color: rgb(189, 189, 189);
+  font-family: 'Inter Tight', sans-serif;
+}
+
+.posts {
+  flex: 1 1 auto;
+  border-right: 1px solid var(--border-color);
+  padding-right: 50px;
+  padding-top: 50px;
+}
+
+.post {
+  border-top: 1px solid var(--border-color);
+  max-width: 680px;
+  padding: 32px 0;
+}
+
+.post > :nth-child(1) {
+  text-transform: capitalize;
+}
+
+.post > h3 {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 2em;
+  margin: 10px 0;
+}
+
+.post > p {
+  font-family: 'Titillium Web';
+  font-size: 1.5em;
+  margin: 0;
+  margin-bottom: 30px;
+}
+
+.post > div {
+  display: flex;
+}
+
+.post > div > :nth-child(n) {
+  margin-right: 20px;  
+}
+
+.post > div > div {
+  display: flex;
+  align-items: center;
+}
+
+.post > div svg {
+  fill: #606060;
+  height: 18px;
+  width: 18px;
+  margin-left: 2px;
 
 }
