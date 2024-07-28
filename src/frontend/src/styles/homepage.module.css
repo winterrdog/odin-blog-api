@@ -138,6 +138,11 @@
   font-size: 1em;
 }
 
+.header nav > :nth-child(1) {
+  color: #242424;
+  text-decoration: none;
+}
+
 .art {
   height: 5vh;
   width: 100%;
@@ -276,4 +281,12 @@
 
 .header > nav > :nth-child(n) {
   margin: 10px;
+}
+
+@media (max-width: 1279px) {
+
+  .hp > .header, .hp > main {
+    max-width: 900px;
+  }
+
 }

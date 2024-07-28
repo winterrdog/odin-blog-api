@@ -4,6 +4,7 @@ import bkgimg from '../assets/bird.png'
 import Signinup from './sign-in-up';
 import { useEffect, useState } from 'react';
 import { baseURL } from './comsWithbackEnd';
+import { Link } from 'react-router-dom';
 
 export default function Homepage() {
   const [showDialog, setShowDialog] = useState(false);
@@ -88,7 +89,7 @@ export default function Homepage() {
           :
           <>
             <nav>
-              <span>About</span>
+              <Link to='/about' ><span>About</span></Link>
               <span onClick={handleSignIn}>Sign in</span>
               <button onClick={handleGetStarted}>Get Started</button>
             </nav>  
@@ -111,7 +112,7 @@ export default function Homepage() {
             <div>Human</div>
             <div>stories &amp; ideas</div>
             <div>A place to write, read and deepen your understanding</div>
-            <button>Start reading</button>
+            <button onClick={handleGetStarted}>Start reading</button>
             <img src={bkgimg} alt="bird painting" />
           </main>
           <div className={homepagestyles.bottomborder}></div>
