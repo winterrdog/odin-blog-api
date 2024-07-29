@@ -29,7 +29,7 @@
   margin-right: 5px;
 }
 
-.post header > nav > .account {
+.post .account {
   text-transform: capitalize;
   background-color: var(--iconic-medium-color);
   width: 40px;
@@ -90,4 +90,99 @@
 .post header > a {
   color: inherit;
   text-decoration: none;
+}
+
+.post main {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  padding: 50px 0;
+}
+
+.post main > div {
+  max-width: 720px;
+}
+
+.post main > div > h3 {
+  font-family: 'Playfair display';
+  font-weight: 600;
+  font-size: 3em;
+  margin: 0;
+  margin-bottom: 10px;
+}
+
+.post main > div > h6 {
+  margin: 0;
+  font-size: 1.5em;
+  color: rgb(161, 161, 161);
+  font-family: 'Inter tight';
+  font-weight: 400;
+
+  margin-bottom: 10px;
+
+}
+
+
+.post main > div > p {
+  font-family: 'Titillium Web';
+  font-size: 1.5em;
+}
+
+.post main > div > :nth-child(3) {
+  display: flex;
+  font-family: 'Inter tight';
+
+  margin-bottom: 10px;
+}
+
+.post main > div > :nth-child(3) > div {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.post main > div > :nth-child(3) > :nth-child(2) {
+  margin-left: 10px;
+}
+
+.post main > div > :nth-child(3) > div > :nth-child(1) {
+  font-weight: 500;
+} 
+
+.post main > div > :nth-child(3) > div > :nth-child(2) {
+  font-size: 0.8em;
+  color: rgb(161, 161, 161);
+} 
+
+.post .likesgoa {
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  padding: 10px 0;
+  display: flex;
+  align-items: center;
+  user-select: none;
+}
+
+.likesgoa svg {
+  fill: #808080;
+  margin-right: 10px;
+}
+
+.likesgoa > :nth-child(n) {
+  margin-right: 20px;
+}
+
+.likesgoa button {
+  border: 0;
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.likesgoa > div {
+  display: flex;
+  align-items: center;
+  font-size: 1.2em;
+  color: #808080;
 }
