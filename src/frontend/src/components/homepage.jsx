@@ -5,7 +5,7 @@ import Signinup from './sign-in-up';
 import { useEffect, useState } from 'react';
 import { baseURL, checkIfLoggedIn, setLoggedIn, getLogInfo } from './comsWithbackEnd';
 import About from './about';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function Homepage() {
   const [showDialog, setShowDialog] = useState(false);
@@ -14,6 +14,7 @@ export default function Homepage() {
   const [account, setAccount] = useState(getLogInfo());
   const [isOnAbout, setIsOnAbout] = useState(false);
   const [posts, setPosts] = useState(null);
+  const navigate = useNavigate();
 
   function handleGetStarted() {
     setSource('up');
@@ -134,7 +135,10 @@ export default function Homepage() {
                 {
                   posts.posts.map((obj, i) => {
                     return (
-                      <div key={i} className={homepagestyles.post}>
+                      <div key={i} className={homepagestyles.post} onClick={() => {navigate('/post', {
+                        state: {id: obj.id},
+                        replace: false,
+                      })}}>
                         <span>{obj.author}</span>
                         <h3>{obj.title}</h3>
                         <p dangerouslySetInnerHTML={{__html: obj.sample}}></p>

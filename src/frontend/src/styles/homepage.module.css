@@ -313,6 +313,8 @@
   border-top: 1px solid var(--border-color);
   max-width: 680px;
   padding: 32px 0;
+
+  cursor: pointer;
 }
 
 .post > :nth-child(1) {
@@ -320,14 +322,15 @@
 }
 
 .post > h3 {
-  font-family: 'Inter Tight', sans-serif;
-  font-size: 2em;
-  margin: 10px 0;
+  font-family: 'Playfair display', serif;
+  font-size: 2.5em;
+  margin: 5px 0;
+  font-weight: 200;
 }
 
 .post > p {
   font-family: 'Titillium Web';
-  font-size: 1.5em;
+  font-size: 1.3em;
   margin: 0;
   margin-bottom: 30px;
 }

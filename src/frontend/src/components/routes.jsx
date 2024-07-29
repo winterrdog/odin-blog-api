@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import Homepage from "./homepage";
 import ErrorElement from "./errorElement";
 import Write from "./write";
+import Post from "./post";
 
 const routes = createBrowserRouter([
     {
@@ -12,6 +13,10 @@ const routes = createBrowserRouter([
     {
       path: '/write',
       element: <Write />
+    },
+    {
+      path: '/post',
+      element: <Post />
     },
   ], 
   {
