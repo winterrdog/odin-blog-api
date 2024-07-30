@@ -29,21 +29,30 @@ let conn: mongoose.Connection | null = null;
 /**
  * Listen on provided port, on all network interfaces.
  */
-(async function () {
+const main = async function () {
   try {
     server.listen(port);
     logger.info("server started on port: " + port);
+
     conn = await connectToDb();
-    if (!conn) throw new Error("database didn't connect successfully");
+    if (!conn) {
+      throw new Error("database didn't connect successfully");
+    }
+
     server.on("error", onError);
     server.on("listening", onListening);
     process.on("uncaughtException", handleUncaughtExceptions);
   } catch (e) {
     logger.error(e, "server crashed during startup...");
-    if (conn) await closeDb(conn);
+
+    if (conn) {
+      await closeDb(conn);
+    }
+
     process.exit(1);
   }
-})();
+};
+main();
 
 /**
  * Normalize a port into a number, string, or false.
@@ -66,12 +75,20 @@ function normalizePort(val: string) {
  */
 function onError(error: { syscall: string; code: string }) {
   if (error.syscall !== "listen") throw error;
-  if (!conn) throw new Error("database didn't connect successfully");
+  if (!conn) {
+    throw new Error("database didn't connect successfully");
+  }
 
   closeDb(conn).catch((e) => {
     logger.error(e, "mongodb ran into an error during close...");
   });
-  const bind = typeof port === "string" ? "Pipe " + port : "Port " + port;
+
+  let bind: string;
+  if (typeof port === "string") {
+    bind = "Pipe " + port;
+  } else {
+    bind = "Port " + port;
+  }
 
   // handle specific listen errors with friendly messages
   switch (error.code) {
@@ -92,8 +109,17 @@ function onError(error: { syscall: string; code: string }) {
 
 function onListening() {
   const addr = server.address();
-  if (!addr) throw new Error("server address wasn't set correctly");
-  const bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
+  if (!addr) {
+    throw new Error("server address wasn't set correctly");
+  }
+
+  let bind: string;
+  if (typeof addr === "string") {
+    bind = "pipe " + addr;
+  } else {
+    bind = "port " + addr.port;
+  }
+
   logger.info("server listening on " + bind);
 }
 
@@ -143,11 +169,13 @@ async function handleUncaughtExceptions(
     );
     process.abort();
   };
+
   const gracefulExit = (e: Error | undefined): never => {
     if (e) {
       logger.error(e, "server didn't close gracefully...");
       forceAnExit();
     }
+
     logger.info("server closed gracefully...");
     process.exit(0);
   };

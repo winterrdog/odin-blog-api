@@ -8,7 +8,7 @@ export default function applyErrorHandlers(app: Express) {
   const handle404Error = function (
     _req: Request,
     _res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) {
     const err = new Error("Not Found");
     err["status"] = 404;
@@ -19,7 +19,7 @@ export default function applyErrorHandlers(app: Express) {
     err: any,
     _req: Request,
     res: Response,
-    _next: NextFunction
+    _next: NextFunction,
   ) {
     res.status(err.status ?? 500);
     res.json({

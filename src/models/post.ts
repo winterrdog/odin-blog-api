@@ -28,7 +28,7 @@ const PostSchema = new Schema(
     timestamps: true,
     strictQuery: "throw",
     toJSON: { transform: toJsonHandler, flattenObjectIds: true },
-  }
+  },
 );
 
 // hooks

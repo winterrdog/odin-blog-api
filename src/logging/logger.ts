@@ -2,11 +2,15 @@ import pino, { LoggerOptions } from "pino";
 require("dotenv").config(); // env vars
 
 // transport logs to external file and console
-const logFile =
-  process.env.NODE_ENV === "production"
-    ? process.env.LOGS_FILE!
-    : process.env.DEV_LOGS_FILE!;
+let logFile: string;
+if (process.env.NODE_ENV === "production") {
+  logFile = process.env.LOGS_FILE!;
+} else {
+  logFile = process.env.DEV_LOGS_FILE!;
+}
+
 createLogFile(logFile);
+
 const logTransports = pino.transport({
   targets: [
     {
@@ -26,22 +30,26 @@ const logTransports = pino.transport({
     },
   ],
 });
+
 const defaultLoggingOptions: LoggerOptions = {
   level: process.env.LOG_LEVEL ?? "info",
   timestamp: pino.stdTimeFunctions.isoTime,
 };
+
 function getModuleName(fname: string): string {
   return fname.split("/").at(-1)!.split(".")[0] + ": ";
 }
+
 export function startLogger(fname: string) {
   return pino(
     {
       ...defaultLoggingOptions,
       msgPrefix: "blog-api:" + getModuleName(fname),
     },
-    logTransports
+    logTransports,
   );
 }
+
 async function createLogFile(f: string) {
   try {
     // import 'Utility' into a variable to avoid circular dependency

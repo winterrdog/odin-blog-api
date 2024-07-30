@@ -5,10 +5,7 @@ export const postIdSanitizer = param("id").trim().escape();
 // validate and sanitize body
 export const titleValidator = body("title")
   .trim()
-  .isLength({
-    min: 4,
-    max: 56,
-  })
+  .isLength({ min: 4, max: 56 })
   .withMessage("title should have 4 to 56 characters.")
   .escape();
 export const postBodyValidator = body("body")
@@ -27,10 +24,7 @@ export const postReqBodyValidators = [
 export const titleUpdateValidator = body("title")
   .optional()
   .trim()
-  .isLength({
-    min: 4,
-    max: 56,
-  })
+  .isLength({ min: 4, max: 56 })
   .withMessage("title should have 4 to 56 characters.")
   .escape();
 export const postBodyUpdateValidator = body("body").optional().trim().escape();

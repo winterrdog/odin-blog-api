@@ -21,7 +21,7 @@ postsRouter
   .delete(auth.isAuthor, postController.deletePost);
 
 logger.info(
-  "attaching controllers to 'post' route: /:id/likes & /:id/dislikes ..."
+  "attaching controllers to 'post' route: /:id/likes & /:id/dislikes ...",
 );
 postsRouter
   .route("/:id/likes")

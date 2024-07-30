@@ -9,10 +9,12 @@ const verifyJwtCb = async (payload: JwtPayload, cb: any) => {
   try {
     logger.info(`verifying jwt for user: ${payload.data.sub}`);
     const user = await UserModel.findById(payload.data.sub);
+
     if (!user) {
       logger.error(`user not found for jwt: ${payload.data.sub}`);
       return cb(null, false);
     }
+
     logger.info(`user found for jwt: ${payload.data.sub}`);
     (user as any)["data"] = payload;
     return cb(null, user);
@@ -28,4 +30,5 @@ const options = {
 };
 logger.info("setting up jwt strategy...");
 const jwtStrategy = new Strategy(options, verifyJwtCb);
+
 export default jwtStrategy;

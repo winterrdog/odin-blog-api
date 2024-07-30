@@ -20,7 +20,7 @@ const UserSchema = new Schema(
     timestamps: true,
     strictQuery: "throw",
     toJSON: { transform: toJsonHandler },
-  }
+  },
 );
 
 function toJsonHandler(_doc: any, ret: any) {

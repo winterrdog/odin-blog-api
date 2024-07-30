@@ -13,9 +13,7 @@ export const sanitizeBody = body("body")
   .withMessage("body has to be filled in")
   .escape();
 export const sanitizeTldr = body("tldr")
-  .isLength({
-    max: 64,
-  })
+  .isLength({ max: 64 })
   .withMessage("tldr allows for maximum of 64 characters")
   .trim()
   .optional()

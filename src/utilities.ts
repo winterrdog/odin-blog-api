@@ -32,14 +32,14 @@ export default class Utility {
         payload,
         <string>process.env.JWT_SECRET,
         jwtSignOptions,
-        jwtSignCb
+        jwtSignCb,
       );
     });
   }
   static validateRequest(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): void {
     logger.info("validating and sanitizing request body, query, and params...");
     const errors = validationResult(req);
@@ -113,11 +113,11 @@ export default class Utility {
   static isCurrUserSameAsCreator(
     req: Request,
     res: Response,
-    dbUserId: string
+    dbUserId: string,
   ): boolean {
     const currUserId = Utility.extractUserIdFromToken(req);
     logger.info(
-      `checking if user with id, ${currUserId}, is the author of the resource...`
+      `checking if user with id, ${currUserId}, is the author of the resource...`,
     );
     if (currUserId !== dbUserId) {
       logger.error(`user( ${currUserId} ) is not the author of the resource`);
@@ -132,7 +132,7 @@ export default class Utility {
   static updateUserReactions(
     req: Request,
     res: Response,
-    arr: Array<string>
+    arr: Array<string>,
   ): boolean {
     if (!req.user) {
       throw new Error("user's not authenticated thus user object is missing");
