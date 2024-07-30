@@ -94,7 +94,7 @@ export default function Write() {
                   formRef.current.reset();
                 }
                 e.target.style.height = '';
-                e.target.style.height = Math.min(500, e.target.scrollHeight) + 'px';
+                e.target.style.height = e.target.scrollHeight + 'px';
               }
             }></textarea>
           </form>

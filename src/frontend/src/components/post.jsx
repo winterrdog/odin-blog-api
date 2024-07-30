@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Logo from "./logo";
 import { baseURL, getLogInfo } from "./comsWithbackEnd";
 import { Link } from "react-router-dom";
+import Comments from "./comments";
 
 const account = getLogInfo();
 
@@ -40,7 +41,11 @@ export default function Post() {
       <div className={styles.comments} ref={commentRef} onClick={() => {
         commentRef.current.classList.remove(styles.active);
       }}>
-        <div className={styles.actualcomments} onClick={(e) => {e.stopPropagation()}}></div>
+        <div className={styles.actualcomments} onClick={(e) => {e.stopPropagation()}}>
+          {
+            data ? <Comments id={data.id} cbToClose={() => {commentRef.current.classList.remove(styles.active);}}/> : null 
+          }
+        </div>
       </div>
       <header>
         <Link to='/'>
