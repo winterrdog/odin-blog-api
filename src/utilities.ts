@@ -13,6 +13,7 @@ export default class Utility {
   static generateJwtPayload(payload: JwtPayload): Promise<string> {
     return new Promise((resolve, reject) => {
       logger.info("generating JWT...");
+
       const jwtSignCb: jwt.SignCallback = (err, token) => {
         if (err) {
           logger.error("failed to generate JWT: ", err);
@@ -21,10 +22,12 @@ export default class Utility {
         logger.info("JWT generated successfully!");
         return resolve(token!);
       };
+
       const jwtSignOptions: jwt.SignOptions = {
         expiresIn: "2d",
         algorithm: "HS384",
       };
+
       jwt.sign(
         payload,
         <string>process.env.JWT_SECRET,
@@ -45,6 +48,7 @@ export default class Utility {
       res.status(400).json({ message: errors.array() });
       return;
     }
+
     logger.info("request validated successfully!");
     return next();
   }
@@ -54,13 +58,10 @@ export default class Utility {
     return new Promise((resolve, reject) => {
       // "wx" flag creates a file if it doesn't exist
       logger.info(`creating log file: ${fname}...`);
-      fs.open(fname, "wx", (err, fd) => {
+
+      fs.open(fname, "a", (err, fd) => {
         if (err) {
-          if (err.code === "EEXIST") {
-            logger.info("log file already exists. skipping creation...");
-            return resolve();
-          }
-          logger.error("failed to create log file: ", err);
+          logger.error(err, `failed to append to file: ${fname}`);
           return reject(err);
         }
 
