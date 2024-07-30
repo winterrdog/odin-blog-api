@@ -1,6 +1,6 @@
 # odin-blog-api
 
-An exercise by The Odin Project( TOP ) to create a blog. I only designed the backend as that's my speciality :). but it's worthwhile to check out the code.
+An exercise by The Odin Project( TOP ) to create a blog. I only designed the backend as that's my speciality :), then [_@muchubatactics_](https://github.com/muchubatactics) did the frontend. The backend is a `REST`ful API built with `Node.js`, `Express.js`, `MongoDB`, and `JWT` for authorization. It has `16+` endpoints for creating, reading, updating, and deleting users, posts, comments, and replies.
 
 **AUTHORS**: [_winterrdog_](https://github.com/winterrdog) & [_muchubatactics_](https://github.com/muchubatactics)
 
