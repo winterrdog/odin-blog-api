@@ -1,5 +1,6 @@
 import { Express } from "express";
 import * as express from "express";
+import { URL } from "url";
 import * as cors from "cors";
 import { rateLimit } from "express-rate-limit";
 import helmet from "helmet";
@@ -13,27 +14,56 @@ const customHeaders = (
   res: express.Response,
   next: express.NextFunction
 ) => {
-  res.setHeader("X-Powered-By", "utopia");
+  res.setHeader("X-Powered-By", "some-shxt");
   return next();
 };
 export default function applyGeneralMiddleware(app: Express) {
   logger.info("starting app middleware...");
+  app.use(customHeaders);
   app.use(express.json()); // parse application/json
   app.use(express.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
+
   if (process.env.NODE_ENV === "production") {
+    const validateCORSOrigin = (
+      origin: string | undefined,
+      callback: (
+        err: Error | null,
+        origin?: string | boolean | RegExp | (string | boolean | RegExp)[]
+      ) => void
+    ): void => {
+      // allow mobile apps to access the API
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      const originHost = new URL(origin).hostname;
+      const allowedHosts = new Set([
+        "muchubatactics.github.io",
+        "localhost",
+        "127.0.0.1",
+      ]);
+
+      if (allowedHosts.has(originHost)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("not allowed by CORS"));
+    };
+
+    // allow cross-origin requests
+    app.use(cors({ origin: validateCORSOrigin, credentials: true }));
     app.disable("etag");
-    app.use(cors()); // allow cross-origin requests
     app.use(helmet()); // set security headers
     app.use(
       rateLimit({
         windowMs: 20 * 60 * 1000, // 20 minutes
         max: 100, // limit each IP to 100 requests per windowMs
         message:
-          "Too many requests from this IP, please try again after 20 minutes",
+          "Too many requests from this IP, please try again after 20 minutes. Like for real, chill out a bit.",
         statusCode: 429,
       })
     ); // limit repeated requests to avoid abuse of the API
-    app.use(customHeaders);
   }
+
   initPassport(app); // set up passport
 }
