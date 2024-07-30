@@ -5,13 +5,13 @@ import { Link } from 'react-router-dom';
 import Logo from './logo.jsx';
 import { useRef, useState } from 'react';
 
-const acc = getLogInfo();
-
 export default function Write() {
   const buttonRef = useRef();
   const [content, setContent] = useState([]);
   const formRef = useRef();
   const [published, setPublished] = useState({message: null, status: false});
+  
+  const acc = getLogInfo();
 
   function publish() {
     let data = {};

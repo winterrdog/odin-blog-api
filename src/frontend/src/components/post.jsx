@@ -1,6 +1,6 @@
 import { useLocation } from "react-router-dom";
 import styles from '../styles/post.module.css';
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Logo from "./logo";
 import { baseURL, getLogInfo } from "./comsWithbackEnd";
 import { Link } from "react-router-dom";
@@ -10,6 +10,7 @@ const account = getLogInfo();
 export default function Post() {
   const [data, setData] = useState(null);
   const location = useLocation();
+  const commentRef = useRef();
 
   useEffect(() => {
     
@@ -36,6 +37,11 @@ export default function Post() {
 
   return (
     <div className={styles.post}>
+      <div className={styles.comments} ref={commentRef} onClick={() => {
+        commentRef.current.classList.remove(styles.active);
+      }}>
+        <div className={styles.actualcomments} onClick={(e) => {e.stopPropagation()}}></div>
+      </div>
       <header>
         <Link to='/'>
           <Logo />
@@ -88,7 +94,9 @@ export default function Post() {
               </svg>
               <span>{data.numOfViewers}</span>
             </div>
-            <button>
+            <button onClick={() => {
+              commentRef.current.classList.add(styles.active);
+            }}>
               <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed">
                 <path d="M240-400h480v-80H240v80Zm0-120h480v-80H240v80Zm0-120h480v-80H240v80ZM880-80 720-240H160q-33 0-56.5-23.5T80-320v-480q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v720ZM160-320h594l46 45v-525H160v480Zm0 0v-480 480Z"/>
               </svg>
@@ -118,7 +126,9 @@ export default function Post() {
               </svg>
               <span>{data.numOfViewers}</span>
             </div>
-            <button>
+            <button onClick={() => {
+              commentRef.current.classList.add(styles.active);
+            }}>
               <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed">
                 <path d="M240-400h480v-80H240v80Zm0-120h480v-80H240v80Zm0-120h480v-80H240v80ZM880-80 720-240H160q-33 0-56.5-23.5T80-320v-480q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v720ZM160-320h594l46 45v-525H160v480Zm0 0v-480 480Z"/>
               </svg>
