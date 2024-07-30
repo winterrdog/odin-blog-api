@@ -1,0 +1,242 @@
+.post {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+
+  position: relative;
+  overflow-x: hidden;
+  height: 100%;
+}
+
+.comments {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.08);
+  
+  height: 100%;
+  min-height: 100vh;
+  width: 100%;
+
+  z-index: 2;
+
+  right: 0;
+
+  opacity: 1;
+  visibility: hidden;
+
+  cursor: pointer;
+}
+
+.actualcomments {
+  position: absolute;
+  right: 0;
+
+  height: 100%;
+  width: 25vw;
+
+  background-color: white;
+
+  transform: translateX(25vw);
+
+  transition: transform 300ms ease-in-out;
+  cursor: default;
+
+  box-shadow: 0 0 30px #d4d4d4;
+}
+
+.active {
+  visibility: visible;
+}
+
+.active > .actualcomments {
+  transform: translateX(0);
+}
+
+.post header {
+  max-width: 1920px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  width: 100%;
+  padding: 5px 30px;
+  box-sizing: border-box;
+}
+
+.post header > nav {
+  display: flex;
+}
+
+.post header > nav > span {
+  display: flex;
+  align-items: center;
+  margin-right: 40px;
+  cursor: pointer;
+}
+
+.post header > nav > span a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.post header > nav > span > svg {
+  margin-right: 5px;
+}
+
+.post .account {
+  text-transform: capitalize;
+  background-color: var(--iconic-medium-color);
+  width: 40px;
+  height: 40px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-weight: 900;
+  font-family: 'Titillium Web';
+  font-size: 1.5em;
+
+  color: #FFFFFF;
+
+  border-radius: 50%;
+
+}
+
+.art {
+  height: 5vh;
+  width: 100%;
+
+  background: linear-gradient(to right, rgba(255, 255, 0, 0.1), rgba(255, 255, 0, 0.1), rgba(255, 208, 0, 0.1),rgba(255, 208, 0, 0.4),rgba(255, 166, 0, 0.6), rgba(255, 166, 0, 0.8)), url('../assets/noise.svg');
+  filter: contrast(60%) brightness(140%) saturate(500%); 
+
+  box-sizing: border-box;
+
+
+  color: black;
+
+  position: relative;
+}
+
+.art > .messageboard {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+
+  color: black;
+  font-size: 1em;
+  font-weight: 500;
+  font-style: bold;
+  filter: none;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 10;
+
+  mix-blend-mode: darken;
+  /* filter: contrast(10000000000000000000%)  brightness(0%); */
+}
+
+.post header > a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.post main {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  padding: 50px 0;
+}
+
+.post main > div {
+  max-width: 720px;
+}
+
+.post main > div > h3 {
+  font-family: 'Playfair display';
+  font-weight: 600;
+  font-size: 3em;
+  margin: 0;
+  margin-bottom: 10px;
+}
+
+.post main > div > h6 {
+  margin: 0;
+  font-size: 1.5em;
+  color: rgb(161, 161, 161);
+  font-family: 'Inter tight';
+  font-weight: 400;
+
+  margin-bottom: 10px;
+
+}
+
+
+.post main > div > p {
+  font-family: 'Titillium Web';
+  font-size: 1.5em;
+}
+
+.post main > div > :nth-child(3) {
+  display: flex;
+  font-family: 'Inter tight';
+
+  margin: 20px 0;
+}
+
+.post main > div > :nth-child(3) > div {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.post main > div > :nth-child(3) > :nth-child(2) {
+  margin-left: 10px;
+}
+
+.post main > div > :nth-child(3) > div > :nth-child(1) {
+  font-weight: 500;
+} 
+
+.post main > div > :nth-child(3) > div > :nth-child(2) {
+  font-size: 0.8em;
+  color: rgb(161, 161, 161);
+} 
+
+.post .likesgoa {
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  padding: 10px 0;
+  display: flex;
+  align-items: center;
+  user-select: none;
+}
+
+.likesgoa svg {
+  fill: #808080;
+  margin-right: 10px;
+}
+
+.likesgoa > :nth-child(n) {
+  margin-right: 20px;
+}
+
+.likesgoa button {
+  border: 0;
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.likesgoa > div {
+  display: flex;
+  align-items: center;
+  font-size: 1.2em;
+  color: #808080;
+}

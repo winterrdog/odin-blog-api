@@ -1,0 +1,87 @@
+.comments {
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.comments > header {
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  font-size: 1.5em;
+  font-family: 'Inter tight';
+  font-weight: 500;
+}
+
+.comments > header > svg {
+  height: 30px;
+  width: auto;
+  cursor: pointer;
+}
+
+.account {
+  text-transform: capitalize;
+  background-color: var(--iconic-medium-color);
+  width: 40px;
+  height: 40px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-weight: 900;
+  font-family: 'Titillium Web';
+  font-size: 1.5em;
+
+  color: #FFFFFF;
+
+  border-radius: 50%;
+
+  margin-right: 20px;
+
+}
+
+.payload {
+  padding: 20px;
+  box-sizing: border-box;
+  box-shadow: 0 0 15px #dddddd;
+  margin: 20px 0;
+  display: flex;
+  flex-direction: column;
+
+}
+
+.payload > :nth-child(1) {
+  display: flex;
+  align-items: center;
+  font-family: 'Inter tight';
+  font-size: 1.2em;
+}
+
+.payload > textarea {
+  outline: 0;
+  border: 0;
+  width: 100%;
+  min-height: 100px;
+  margin: 10px 0;
+  font-family: 'Inter tight';
+  font-size: 1.2em;
+}
+
+.payload > button {
+  border: 0;
+  background-color: var(--iconic-medium-color);
+  color: white;
+  font-family: 'Inter tight';
+  font-size: 1.2em;
+  padding: 10px 30px;
+  border-radius: 30px;
+  margin-left: auto;
+  margin-top: 10px;
+}
+
+button:disabled {
+  opacity: 0.5;
+}

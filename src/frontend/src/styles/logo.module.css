@@ -1,0 +1,8 @@
+.logo {
+  font-size: 2.5em;
+  font-family: 'DM Serif Display';
+  letter-spacing: -0.06em;
+
+  user-select: none;
+  text-transform: capitalize;
+}

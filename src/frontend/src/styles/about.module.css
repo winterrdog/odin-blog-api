@@ -1,0 +1,121 @@
+.about {
+  background-color: rgb(36, 36, 36);
+
+  display: flex;
+  flex-direction: column;
+  
+  box-sizing: border-box;
+}
+
+.about > header {
+  font-size: 0.9em;
+  border-bottom: 1px solid white;
+
+  display: flex;
+  justify-content: space-between;
+  color: white;
+  
+  padding: 24px;
+  
+  box-sizing: inherit;
+
+}
+
+.about > header > button {
+  font-family: 'Inter Tight';
+  padding: 0px 20px;
+  border-radius: 30px;
+
+  font-size: 1em;
+  
+  border: 0;
+}
+
+.about > footer {
+  margin-top: auto;
+
+  background-color: white;
+  color: #242424;
+  padding: 24px;
+  font-size: 0.9em;
+
+  box-sizing: border-box;
+
+}
+
+.about main {
+  /* flex: 1 1 auto; */
+  background-image: url(../assets/aboutbkgnd.png);
+
+  color: white;
+  padding: 120px 32px;
+  box-sizing: border-box;
+
+}
+
+.about main > :nth-child(n) {
+  max-width: 680px;
+  box-sizing: border-box;
+}
+
+.about main h1 {
+  font-family: 'Lora', serif;
+  font-weight: 400;
+
+  font-size: 5em;
+  margin: 0;
+  margin-bottom: 70px;
+  line-height: 1;
+}
+
+.about main article {
+  font-family: 'Titillium Web';
+  font-size: 1.2em;
+  line-height: 1.5;
+}
+
+.about .qoute {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 1.3em;
+  font-weight: 300;
+  text-decoration-color: aqua;
+  background-color: rgba(255, 255, 255, 0.2);
+  line-height: 35px;
+}
+
+.about > button {
+  font-family: 'Lora', serif;
+  font-size: 4em;
+  text-align: left;
+  padding: 56px 32px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 0;
+  background-color: rgb(36,36,36);
+
+  border: 0;
+  border-top: 1px solid white;
+
+  color: white;
+
+  transition: background-color ease-in-out 300ms, color ease-in-out 300ms;
+  cursor: pointer;
+}
+
+.about > button > svg {
+  fill: white;
+  height: 50px;
+  width: auto;
+  transition: fill ease-in-out 300ms;
+}
+
+.about > button:hover {
+  background-color: white;
+  color: #242424;
+}
+
+.about > button:hover svg {
+  fill: black;
+}

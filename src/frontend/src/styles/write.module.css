@@ -1,0 +1,146 @@
+.write {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+}
+
+.write header {
+  max-width: 1032px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+
+  padding: 10px 0;
+}
+
+.write > header  a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.write header .account {
+  text-transform: capitalize;
+  /* background-color: var(--iconic-medium-color); */
+  background-color: black;
+  width: 40px;
+  height: 40px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-weight: 900;
+  font-family: 'Titillium Web';
+  font-size: 1.5em;
+
+  color: #FFFFFF;
+
+  border-radius: 50%;
+
+}
+
+.write header > div {
+  display: flex;
+  align-items: center;
+}
+
+.write header > div > :nth-child(1) {
+  margin-right: 20px;
+}
+
+.write > header > :nth-child(2) > button {
+  background-color: var(--iconic-medium-color);
+  color: white;
+  font-size: 1.2em;
+  font-family: 'Inter Tight', sans-serif;
+  font-weight: 500;
+
+  border: 0;
+  padding: 5px 20px;
+  border-radius: 30px;
+
+  margin-right: 40px;
+}
+
+.write > header > :nth-child(2) > button:disabled {
+  opacity: 0.5;
+}
+
+.write > header > :nth-child(1) > :nth-child(2) {
+  margin-top: 10px;
+}
+
+.write main {
+  max-width: 800px;
+  width: 100%;
+
+  padding-bottom: 50px;
+}
+
+.write main form > .title {
+  outline: none;
+  border: 0;
+  font-family: 'Lora', serif;
+  font-size: 3em;
+
+  width: 100%;
+
+  border-left: 1px solid grey;
+  padding-left: 10px;
+
+  margin-top: 20px;
+}
+
+.write main h3 {
+  border-left: 1px solid grey;
+  padding-left: 10px;
+  font-family: 'Lora', serif;
+  font-size: 3em;
+  font-weight: 400;
+
+  margin: 20px 0px;
+}
+
+.write main form > .data {
+  outline: none;
+  border: 0;
+  font-family: 'Titillium Web', sans-serif;
+  font-size: 2em;
+
+  width: 100%;
+
+  border-left: 1px solid grey;
+  padding-left: 10px;
+}
+
+.write main p {
+  border-left: 1px solid grey;
+  padding-left: 10px;
+  font-size: 2em;
+  font-family: 'Titillium Web', sans-serif;
+  font-weight: 400;
+}
+
+.write > div {
+  font-size: 3em;
+  font-family: 'Inter Tight', sans-serif;
+  margin-top: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.write > div button {
+  border: 0;
+  font-size: 0.6em;
+  font-family: 'Inter tight', sans-serif;
+  background-color: var(--iconic-medium-color);
+  color: white;
+  padding: 10px 30px;
+  border-radius: 40px;
+  margin-top: 30px;
+}

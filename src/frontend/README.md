@@ -1,0 +1,1 @@
+# blog inspired by medium
