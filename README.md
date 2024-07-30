@@ -2,7 +2,7 @@
 
 An exercise by The Odin Project( TOP ) to create a blog. I only designed the backend as that's my speciality :). but it's worthwhile to check out the code.
 
-**AUTHOR**: [_winterrdog_](https://github.com/winterrdog)
+**AUTHORS**: [_winterrdog_](https://github.com/winterrdog) & [_muchubatactics_](https://github.com/muchubatactics)
 
 ## REQUIREMENTS
 
