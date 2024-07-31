@@ -137,7 +137,6 @@ export default function Homepage() {
                     return (
                       <div key={i} className={homepagestyles.post} onClick={() => {navigate('/post', {
                         state: {id: obj.id, summary: obj.sample},
-                        replace: false,
                       })}}>
                         <span>{obj.author}</span>
                         <h3>{obj.title}</h3>

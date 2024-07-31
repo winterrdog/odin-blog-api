@@ -1,14 +1,17 @@
 import { PropTypes } from "prop-types";
 import { baseURL, getLogInfo } from "./comsWithbackEnd";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import styles from '../styles/comments.module.css';
+import Comment from "./comment";
 
 export default function Comments({ id, cbToClose }) {
-  
+  const [data, setData] = useState(null);
+  const [trigger, setTrigger] = useState(1);
   const account = getLogInfo();
   const textareaRef = useRef();
   const buttonRef = useRef();
+
 
   useEffect(() => {
     fetch(`${baseURL}/api/v1/post-comments/${id}/comments/`, {
@@ -20,6 +23,7 @@ export default function Comments({ id, cbToClose }) {
     }).then((res) => {
       return res.json();
     }).then((res) => {
+      setData(res.comments);
       console.log(res);
     }).catch((err) => {
       console.error(err);
@@ -28,24 +32,28 @@ export default function Comments({ id, cbToClose }) {
     return () => {
 
     }
-  }, [id]);
+  }, [id, trigger]);
 
   function handleSubmit() {
     if (!textareaRef.current.value) return;
-    console.log('here');
+
+    let tmp = {
+      body: String(textareaRef.current.value),
+    }
+
     fetch(`${baseURL}/api/v1/post-comments/${id}/comments/`, {
       method: 'POST',
-      mode: 'cors',
       headers: {
         'Content-type': 'application/json',
         'Authorization': `Bearer ${account.token}`,
       },
-      body: JSON.stringify(String(textareaRef.current.value)),
+      body: JSON.stringify(tmp),
     }).then((res) => {
       return res.json();
     }).then((res) => {
       console.log(res);
-      textareaRef.current.reset();
+      textareaRef.current.value = '';
+      setTrigger((prev) =>  prev + 1);
     }).catch((err) => {
       console.error(err);
     });
@@ -55,7 +63,7 @@ export default function Comments({ id, cbToClose }) {
   return (
     <div className={styles.comments}>
       <header>
-        <span>Responses ({0})</span>
+        <span>Responses ({data ? data.length: 0})</span>
         <svg onClick={cbToClose} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#5f6368">
           <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/>
         </svg>
@@ -71,8 +79,14 @@ export default function Comments({ id, cbToClose }) {
           e.target.style.height = '';
           e.target.style.height = e.target.scrollHeight + 'px';
         }}></textarea>
-        <button ref={buttonRef}  onClick={handleSubmit}>Respond</button>
+        <button type='button' ref={buttonRef}  onClick={handleSubmit}>Respond</button>
       </div>
+      {
+        data ? data.map((obj, i) => {
+          return obj.parentComment ? null :
+          <Comment data={obj} key={i} postId={id} allComs={data} cbToTrigger={ () => {setTrigger((prev) => prev + 1)} }/>
+        }) : null
+      }
     </div>
   );
 }
