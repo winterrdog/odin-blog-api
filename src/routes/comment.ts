@@ -12,7 +12,6 @@ commentsRouter
   .get(commentController.getComments)
   .post(auth.authenticateJwt, commentController.createComment);
 
-// todo: document this route
 commentsRouter.get(
   "/user-comments",
   auth.authenticateJwt,
