@@ -10,8 +10,7 @@ export default function Comment({ data, postId, allComs, cbToTrigger}) {
 
   const account = getLogInfo();
 
-  function handleReply(e) {
-    console.log('clicked', e);
+  function handleReply() {
 
     if (!textareaRef.current.value) return;
 
@@ -27,12 +26,12 @@ export default function Comment({ data, postId, allComs, cbToTrigger}) {
       },
       body: JSON.stringify(tmp),
     }).then((res) => {
-      return res.json();
-    }).then((res) => {
-      console.log(res);
-      textareaRef.current.value = '';
-      setReplying(false);
-      cbToTrigger();
+      if (res.status != 201) throw new Error('problem sending reply');
+      else {
+        textareaRef.current.value = '';
+        setReplying(false);
+        cbToTrigger();
+      }
     }).catch((err) => {
       console.error(err);
     });

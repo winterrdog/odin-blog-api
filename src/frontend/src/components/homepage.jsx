@@ -49,11 +49,12 @@ export default function Homepage() {
         'Content-type': 'application/json',
       }
     }).then((response) => {
-      return response.json();
+      if (response.status !== 200) {
+        setPosts({error: true}); 
+        throw new Error('could not fetch posts');
+      } else return response.json();
     }).then((response) => {
 
-      if (response.message !== 'Posts retrieved successfully') setPosts({error: true});
-      
       let temp = response.posts.map((obj) => {
         return {
           author: obj.author,

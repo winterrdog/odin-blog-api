@@ -25,9 +25,9 @@ export default function Post() {
         'Authorization': `Bearer ${account.token}`,
       }
     }).then((res) => {
+      if (res.status !== 200) throw new Error('could not fetch post!');
       return res.json();
     }).then((res) => {
-      console.log(res);
       setData(res.post);
     }).catch((err) => {
       console.error(err);
@@ -46,10 +46,10 @@ export default function Post() {
         'Authorization': `Bearer ${account.token}`,
       },
     }).then((res) => {
-      return res.json();
-    }).then((res) => {
+      if (res.status !== 200) {
+        // this fails silently
+      }
       setlikeordis({like: true, dislike: false});
-      console.log(res);
     }).catch((err) =>{
       console.error(err);
     });
@@ -62,10 +62,10 @@ export default function Post() {
         'Authorization': `Bearer ${account.token}`,
       },
     }).then((res) => {
-      return res.json();
-    }).then((res) => {
+      if (res.status !== 200) {
+        // this fails silently
+      }
       setlikeordis({like: false, dislike: true});
-      console.log(res);
     }).catch((err) =>{
       console.error(err);
     });

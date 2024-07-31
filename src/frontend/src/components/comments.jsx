@@ -21,10 +21,10 @@ export default function Comments({ id, cbToClose }) {
         'Content-type': 'application/json'
       }
     }).then((res) => {
-      return res.json();
+      if (res.status !== 200) throw new Error('failed to fetch comments');
+      else return res.json();
     }).then((res) => {
       setData(res.comments);
-      console.log(res);
     }).catch((err) => {
       console.error(err);
     });
@@ -49,11 +49,11 @@ export default function Comments({ id, cbToClose }) {
       },
       body: JSON.stringify(tmp),
     }).then((res) => {
-      return res.json();
-    }).then((res) => {
-      console.log(res);
-      textareaRef.current.value = '';
-      setTrigger((prev) =>  prev + 1);
+      if (res.status !== 201) throw new Error('failed to post comment!');
+      else {
+        textareaRef.current.value = '';
+        setTrigger((prev) =>  prev + 1);
+      }
     }).catch((err) => {
       console.error(err);
     });

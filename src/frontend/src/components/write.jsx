@@ -30,15 +30,15 @@ export default function Write() {
       },
       body: JSON.stringify(data),
     }).then((res) => {
-      return res.json();
-    }).then((res) => {
       let result = {};
-      if (res.message === 'Post created successfully') result.message = 'Published Successfully';
+
+      if (res.status === 201) result.message = 'Published Successfully';
       else result.message = 'Something went wrong!';
-
+      
       result.status = true;
-
+      result.code = res.status;
       setPublished(result);
+      
     }).catch((err) => {
       console.error(err);
     })
@@ -63,7 +63,7 @@ export default function Write() {
         <div>
           <div>{published.message}</div>
           {
-            published.message == 'Something went wrong!'
+            published.code !== 201
             ? 
             <button onClick={() => {setPublished({status:false})}}>Try again</button>
             :
