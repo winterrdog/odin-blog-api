@@ -129,7 +129,63 @@
 
   border-radius: 50%;
 
+  position: relative;
+  cursor: pointer;
+
 }
+
+.SIheader > nav > .account > div {
+  position: absolute;
+
+  padding: 20px 10px;
+  min-width: 75px;
+  max-width: 75-px;
+
+
+  background-color: white;
+  border: 1px solid var(--border-color);
+  top: calc(100% + 15px);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.SIheader > nav > .account > div > div {
+  background-color: white;
+
+  border-top: 1px solid var(--border-color);
+  border-left: 1px solid var(--border-color);
+
+  position: absolute;
+  height: 20px;
+  width: 20px;
+  transform: rotate(45deg);
+  left: calc(50% - 10px);
+  top: -11px;
+}
+
+.SIheader > nav > .account > div > button { 
+  border: 2px solid red;
+  font-family: 'Inter tight';
+  font-weight: 500;
+  font-size: 0.5em;
+  padding: 4px 15px;
+  border-radius: 20px;
+}
+
+.SIheader > nav > .account > div > button:hover {
+  background-color: rgb(250, 212, 212);
+} 
+
+.off {
+ visibility: hidden;
+}
+
+.on {
+  visibility: visible;
+}
+
 
 
 .hp > .header nav > :nth-child(n) {
@@ -168,6 +224,8 @@
   color: black;
 
   position: relative;
+
+  padding: 15px 0;
 }
 
 .art > .messageboard {

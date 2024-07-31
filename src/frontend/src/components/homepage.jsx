@@ -2,8 +2,8 @@ import homepagestyles from '../styles/homepage.module.css';
 import Logo from './logo';
 import bkgimg from '../assets/bird.png'
 import Signinup from './sign-in-up';
-import { useEffect, useState } from 'react';
-import { baseURL, checkIfLoggedIn, setLoggedIn, getLogInfo } from './comsWithbackEnd';
+import { useEffect, useRef, useState } from 'react';
+import { baseURL, checkIfLoggedIn, setLoggedIn, getLogInfo, clearMemory } from './comsWithbackEnd';
 import About from './about';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -15,6 +15,7 @@ export default function Homepage() {
   const [isOnAbout, setIsOnAbout] = useState(false);
   const [posts, setPosts] = useState(null);
   const navigate = useNavigate();
+  const logOutRef = useRef();
 
   function handleGetStarted() {
     setSource('up');
@@ -110,7 +111,25 @@ export default function Homepage() {
                   </svg>
                   <span><Link to='/write' state={account}>Write</Link></span>
                 </span>
-                <div className={homepagestyles.account}>{account.name[0]}</div>
+                <div className={homepagestyles.account} onClick={() => {
+                  if (logOutRef.current.classList.contains(homepagestyles.off)) {
+                    logOutRef.current.classList.remove(homepagestyles.off);
+                    logOutRef.current.classList.add(homepagestyles.on);
+                  } else {
+                    logOutRef.current.classList.add(homepagestyles.off);
+                    logOutRef.current.classList.remove(homepagestyles.on);
+                  }
+                }}>
+                  {account.name[0]}
+                  <div ref={logOutRef} className={homepagestyles.off}>
+                    <div></div>
+                    <button onClick={() => {
+                      clearMemory();
+                      setIsSignedIn(false);
+                      navigate('/');
+                    }}>Log out</button>
+                  </div>
+                </div>
               </nav>
             </>
             :
