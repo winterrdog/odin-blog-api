@@ -17,6 +17,7 @@ const logger = startLogger(__filename);
 const postController = {
   getPostById: getPostByIdHandler(),
   getPosts: getPostsHandler(),
+  getUserPosts: getUserPostsHandler(),
   createPost: createPostHandler(),
   updatePost: updatePostHandler(),
   deletePost: deletePostHandler(),
@@ -26,10 +27,38 @@ const postController = {
   removeDislike: removeDislikeHandler(),
 };
 
+function getUserPostsHandler() {
+  const fetchUserPosts = async (req: Request, res: Response): Promise<any> => {
+    try {
+      logger.info("fetching a user's posts...");
+
+      const currUserId = Utility.extractUserIdFromToken(req);
+      const posts = await PostModel.find({ author: currUserId });
+
+      if (posts.length <= 0) {
+        logger.error("No posts found for user");
+        return res.status(404).json({
+          message: "No posts found for user",
+        });
+      }
+
+      return res.status(200).json({
+        message: "User's posts retrieved successfully",
+        posts,
+      });
+    } catch (e) {
+      logger.error(e, "error occurred during fetching user posts");
+      Utility.handle500Status(res, <Error>e);
+    }
+  };
+
+  return fetchUserPosts;
+}
+
 function getPostByIdHandler() {
   const retrievePostById = async function (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       const id = extractPostIdFromReq(req, res);
@@ -68,7 +97,7 @@ function getPostByIdHandler() {
 function getPostsHandler() {
   const fetchPosts = async function (
     _req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       logger.info("fetching all posts...");
@@ -96,7 +125,7 @@ function getPostsHandler() {
 function createPostHandler() {
   const createPost = async function (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       // grab user id from jwt
@@ -131,7 +160,7 @@ function createPostHandler() {
 function updatePostHandler() {
   const updatePost = async function (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       const id = extractPostIdFromReq(req, res);
@@ -145,7 +174,7 @@ function updatePostHandler() {
         Utility.isCurrUserSameAsCreator(
           req,
           res,
-          post.author._id.toHexString(),
+          post.author._id.toHexString()
         ) === false
       ) {
         return;
@@ -175,7 +204,7 @@ function updatePostHandler() {
 function deletePostHandler() {
   const deletePost = async function (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       const id = extractPostIdFromReq(req, res);
@@ -191,7 +220,7 @@ function deletePostHandler() {
         Utility.isCurrUserSameAsCreator(
           req,
           res,
-          post.author._id.toHexString(),
+          post.author._id.toHexString()
         ) === false
       ) {
         return;
@@ -213,7 +242,7 @@ function deletePostHandler() {
 function updateLikesHandler() {
   const updatePostLikes = async function (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       const id = extractPostIdFromReq(req, res);
@@ -256,7 +285,7 @@ function updateLikesHandler() {
 function updateDislikesHandler() {
   const updatePostDislikes = async function (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       const id = extractPostIdFromReq(req, res);
@@ -270,7 +299,7 @@ function updateDislikesHandler() {
       const updateOnDislikes = Utility.updateUserReactions(
         req,
         res,
-        post.dislikes,
+        post.dislikes
       );
       if (!updateOnDislikes) return;
 
@@ -307,7 +336,7 @@ function updateDislikesHandler() {
 function removeLikeHandler() {
   const removeLikeFromPost = async function (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       const id = extractPostIdFromReq(req, res);
@@ -357,7 +386,7 @@ function removeLikeHandler() {
 function removeDislikeHandler() {
   const removeDislike = async function (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       const id = extractPostIdFromReq(req, res);

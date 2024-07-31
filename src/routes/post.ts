@@ -12,6 +12,13 @@ postsRouter
   .get(postController.getPosts)
   .post(auth.authenticateJwt, auth.isAuthor, postController.createPost);
 
+  // todo document this route
+postsRouter.get(
+  "/user-posts",
+  auth.authenticateJwt,
+  postController.getUserPosts
+);
+
 logger.info("attaching controllers to 'post' route: /:id ...");
 postsRouter.use("/:id", auth.authenticateJwt);
 postsRouter
@@ -21,7 +28,7 @@ postsRouter
   .delete(auth.isAuthor, postController.deletePost);
 
 logger.info(
-  "attaching controllers to 'post' route: /:id/likes & /:id/dislikes ...",
+  "attaching controllers to 'post' route: /:id/likes & /:id/dislikes ..."
 );
 postsRouter
   .route("/:id/likes")

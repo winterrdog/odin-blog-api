@@ -67,6 +67,7 @@ It has `16+` endpoints i.e.:
 ### Post Endpoints
 
 - `POST /api/v1/posts/` - _for creating a post_
+- `GET /api/v1/posts/user-posts` - _for getting a user's posts_
 - `GET /api/v1/posts/` - _for getting all posts_
 - `GET /api/v1/posts/:postId` - _for getting a post_
 - `PATCH /api/v1/posts/:postId` - _for updating a post_
@@ -202,6 +203,37 @@ HTTP/1.1 201 Created
     "dateCreated": "2024-04-22T12:35:54.030Z",
     "dateUpdated": "2024-04-22T12:35:54.030Z"
   }
+}
+```
+
+#### Get all posts for a user
+
+Make sure the JWT is in the Authorization header since we rely on it to get the user's posts.
+
+```sh
+curl -X GET
+    -H "Authorization: Bearer eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InN1YiI6IjY2MjY1NWMxYTJlMjkxYjg0NjM1ODlmZSIsInJvbGUiOiJhdXRob3IifSwiaWF0IjoxNzEzNzg4MzUzLCJleHAiOjE3MTM5NjExNTN9.8oc3DOAR6SqaWUBynMZlAvHJr202cTXbtiq80EVyO5RSXMJrdGJ-aWdZF_lfR1p4"
+    http://localhost:3000/api/v1/posts/user-posts
+```
+
+The server will respond with:
+
+```json
+HTTP/1.1 200 OK
+
+{
+    "message": "User's posts retrieved successfully",
+    "posts": [
+        {
+            "author": "John Doe",
+            "title": "My first post",
+            "body": "This is my first post. I hope you like it.",
+            "hidden": false,
+            "id": "662659aaa2e291b846358a06",
+            "dateCreated": "2024-04-22T12:35:54.030Z",
+            "dateUpdated": "2024-04-22T12:35:54.030Z"
+        }
+    ]
 }
 ```
 
