@@ -12,7 +12,6 @@ postsRouter
   .get(postController.getPosts)
   .post(auth.authenticateJwt, auth.isAuthor, postController.createPost);
 
-  // todo document this route
 postsRouter.get(
   "/user-posts",
   auth.authenticateJwt,

@@ -12,8 +12,15 @@ commentsRouter
   .get(commentController.getComments)
   .post(auth.authenticateJwt, commentController.createComment);
 
+// todo: document this route
+commentsRouter.get(
+  "/user-comments",
+  auth.authenticateJwt,
+  commentController.getUserComments
+);
+
 logger.info(
-  "attaching controllers to 'comment' route: /:postId/comments/:id ...",
+  "attaching controllers to 'comment' route: /:postId/comments/:id ..."
 );
 commentsRouter
   .route("/:postId/comments/:id")
@@ -23,7 +30,7 @@ commentsRouter
 
 // to update a Reply, just hit the 'updateComment' endpoint above
 logger.info(
-  "attaching controllers to 'comment' route: /:postId/comments/:id/replies ...",
+  "attaching controllers to 'comment' route: /:postId/comments/:id/replies ..."
 );
 commentsRouter.use("/:postId/comments/:id/replies", auth.authenticateJwt);
 commentsRouter
@@ -35,7 +42,7 @@ commentsRouter
   .delete(commentController.deleteReply);
 
 logger.info(
-  "attaching controllers to 'comment' route: /:postId/comments/:id/likes and /:postId/comments/:id/dislikes ...",
+  "attaching controllers to 'comment' route: /:postId/comments/:id/likes and /:postId/comments/:id/dislikes ..."
 );
 commentsRouter.use("/:postId/comments/:id/likes", auth.authenticateJwt);
 commentsRouter.use("/:postId/comments/:id/dislikes", auth.authenticateJwt);

@@ -19,6 +19,7 @@ const logger = startLogger(__filename);
 const commentController = {
   getCommentById: fetchCommentByIdHandler(),
   getComments: getCommentsForPostHandler(),
+  getUserComments: getUserCommentsHandler(),
   createComment: createCommentHandler(),
   updateComment: modifyCommentHandler(),
   deleteComment: deleteCommentHandler(),
@@ -30,6 +31,37 @@ const commentController = {
   dislikeComment: dislikeCommentHandler(),
   removeDislike: removeDislikeFromCommentHandler(),
 };
+
+function getUserCommentsHandler() {
+  const fetchUserComments = async (
+    req: Request,
+    res: Response
+  ): Promise<any> => {
+    try {
+      const userId: string = Utility.extractUserIdFromToken(req);
+      logger.info(`fetching comments for user with id, ${userId}...`);
+
+      // query the database for comments made by the current user id
+      const userComments = await CommentModel.find({ user: userId });
+      if (userComments.length <= 0) {
+        logger.info("no comments found for the user");
+        return res.status(404).json({
+          message: "no comments found for the user",
+        });
+      }
+
+      return res.status(200).json({
+        message: "user comments fetched successfully",
+        comments: userComments,
+      });
+    } catch (e) {
+      logger.error(e, "error fetching a user's comments");
+      Utility.handle500Status(res, <Error>e);
+    }
+  };
+
+  return fetchUserComments;
+}
 
 function removeDislikeFromCommentHandler() {
   const removeDislikeFromComment = async function (
