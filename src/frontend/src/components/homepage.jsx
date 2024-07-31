@@ -39,6 +39,8 @@ export default function Homepage() {
   useEffect(() => {
     if (!isSignedIn) return; // could also load the posts immediately instead of waiting for log in // although, it's not necessary
 
+    console.log('has fetched posts');
+
     fetch(`${baseURL}/api/v1/posts/`, {
       method: 'GET',
       mode: 'cors',
