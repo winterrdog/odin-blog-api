@@ -79,7 +79,7 @@ export default function Comments({ id, cbToClose }) {
           e.target.style.height = '';
           e.target.style.height = e.target.scrollHeight + 'px';
         }}></textarea>
-        <button type='button' ref={buttonRef}  onClick={handleSubmit}>Respond</button>
+        <button type='button' ref={buttonRef}  onClick={handleSubmit} disabled={textareaRef.current ? textareaRef.current.value ? false : true : true}>Respond</button>
       </div>
       {
         data ? data.map((obj, i) => {

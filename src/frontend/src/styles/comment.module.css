@@ -59,7 +59,7 @@
   margin-top: 10px;
 }
 
-.comment > button {
+.comment > div > .replybutton {
   background-color: transparent;
   font-family: 'Inter tight';
   font-weight: 400;
@@ -94,6 +94,7 @@
   border-radius: 30px;
   margin-left: auto;
   margin-top: 10px;
+  margin-bottom: 20px;
 }
 
 .replies {
@@ -103,3 +104,31 @@
   padding-left: 20px;
   margin-top: 20px;
 }
+
+.comment > :nth-child(3) {
+  display: flex;
+  align-items: center;
+}
+
+.comment > :nth-child(3) > div {
+  display: flex;
+  align-items: flex-end;
+  font-size: 0.9em;
+  margin-right: 20px;
+  margin-top: 15px;
+
+}
+
+.comment > :nth-child(3) > div > svg {
+  height: 18px;
+}
+
+.liked {
+  fill: var(--iconic-medium-color);
+}
+
+.disliked {
+  fill: rgb(187, 1, 1);
+}
+
+
