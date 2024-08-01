@@ -18,6 +18,13 @@ postsRouter.get(
   postController.getUserPosts
 );
 
+postsRouter.get(
+  "/liked-posts",
+  auth.authenticateJwt,
+  postController.getLikedPosts
+);
+
+
 logger.info("attaching controllers to 'post' route: /:id ...");
 postsRouter.use("/:id", auth.authenticateJwt);
 postsRouter

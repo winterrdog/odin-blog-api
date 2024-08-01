@@ -18,6 +18,7 @@ const postController = {
   getPostById: getPostByIdHandler(),
   getPosts: getPostsHandler(),
   getUserPosts: getUserPostsHandler(),
+  getLikedPosts: getUserLikedPostsHandler(),
   createPost: createPostHandler(),
   updatePost: updatePostHandler(),
   deletePost: deletePostHandler(),
@@ -54,6 +55,36 @@ function getUserPostsHandler() {
 
   return fetchUserPosts;
 }
+
+function getUserLikedPostsHandler() {
+  const fetchUserLikedPosts = async (
+    req: Request,
+    res: Response
+  ): Promise<any> => {
+    try {
+      const currUserId = Utility.extractUserIdFromToken(req);
+      const posts = await PostModel.find({ likes: { $in: [currUserId] } });
+
+      if (posts.length <= 0) {
+        logger.error("No liked posts found for user");
+        return res.status(404).json({
+          message: "no liked posts found for user",
+        });
+      }
+
+      return res.status(200).json({
+        message: "user's liked posts retrieved successfully",
+        posts,
+      });
+    } catch (e) {
+      logger.error(e, "error occurred during fetching user liked posts");
+      Utility.handle500Status(res, <Error>e);
+    }
+  };
+
+  return fetchUserLikedPosts;
+}
+
 
 function getPostByIdHandler() {
   const retrievePostById = async function (
