@@ -6,7 +6,7 @@
 
   position: relative;
   overflow-x: hidden;
-  height: 100%;
+  min-height: 100%;
 }
 
 .comments {
@@ -146,18 +146,18 @@
   text-decoration: none;
 }
 
-.post main {
+.post > main {
   display: flex;
   width: 100%;
   justify-content: center;
   padding: 50px 0;
 }
 
-.post main > div {
+.post > main > div {
   max-width: 720px;
 }
 
-.post main > div > h3 {
+.post > main > div > h3 {
   font-family: 'Playfair display';
   font-weight: 600;
   font-size: 3em;
@@ -165,7 +165,7 @@
   margin-bottom: 10px;
 }
 
-.post main > div > h6 {
+.post > main > div > h6 {
   margin: 0;
   font-size: 1.5em;
   color: rgb(161, 161, 161);
@@ -177,33 +177,33 @@
 }
 
 
-.post main > div > p {
+.post > main > div > p {
   font-family: 'Titillium Web';
   font-size: 1.5em;
 }
 
-.post main > div > :nth-child(3) {
+.post  > main > div > :nth-child(3) {
   display: flex;
   font-family: 'Inter tight';
 
   margin: 20px 0;
 }
 
-.post main > div > :nth-child(3) > div {
+.post > main > div > :nth-child(3) > div {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
-.post main > div > :nth-child(3) > :nth-child(2) {
+.post > main > div > :nth-child(3) > :nth-child(2) {
   margin-left: 10px;
 }
 
-.post main > div > :nth-child(3) > div > :nth-child(1) {
+.post > main > div > :nth-child(3) > div > :nth-child(1) {
   font-weight: 500;
 } 
 
-.post main > div > :nth-child(3) > div > :nth-child(2) {
+.post > main > div > :nth-child(3) > div > :nth-child(2) {
   font-size: 0.8em;
   color: rgb(161, 161, 161);
 } 
@@ -218,7 +218,6 @@
 }
 
 .likesgoa svg {
-  fill: #808080;
   margin-right: 10px;
 }
 
@@ -240,3 +239,12 @@
   font-size: 1.2em;
   color: #808080;
 }
+
+.liked {
+  fill: var(--iconic-medium-color);
+}
+
+.disliked {
+  fill: rgb(187, 1, 1);
+}
+

@@ -1,0 +1,134 @@
+.comment {
+  display: flex;
+  flex-direction: column;
+
+  border-top: 1px solid var(--border-color);
+
+  padding: 20px 0;
+}
+
+.account {
+  text-transform: capitalize;
+  background-color: black;
+  width: 40px;
+  height: 40px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-weight: 900;
+  font-family: 'Titillium Web';
+  font-size: 1.2em;
+
+  color: #FFFFFF;
+
+  border-radius: 50%;
+
+  margin-right: 10px;
+
+}
+
+.comment > :nth-child(1) {
+  display: flex;
+  align-items: center;
+}
+
+.comment > :nth-child(1) > :nth-child(2) {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.comment > :nth-child(1) > :nth-child(2) > :nth-child(1) {
+  font-family: 'Inter tight';
+  font-weight: 400;
+  font-size: 1.2em;
+}
+
+.comment > :nth-child(1) > :nth-child(2) > :nth-child(2) {
+  font-family: 'Inter tight';
+  font-size: 1em;
+  color: rgb(168, 168, 168);
+}
+
+.comment > main {
+  font-size: 1.3em;
+  font-family: 'Inter tight';
+  padding: 0;
+  margin-top: 10px;
+}
+
+.comment > div > .replybutton {
+  background-color: transparent;
+  font-family: 'Inter tight';
+  font-weight: 400;
+  font-size: 1.1em;
+  border: 0;
+  margin-left: auto;
+  margin-right: 20px;
+  margin-top: 20px;
+}
+
+.replies  textarea {
+  outline: 0;
+  border: 0;
+  width: 100%;
+  min-height: 100px;
+  margin: 10px 0;
+  font-family: 'Inter tight';
+  font-size: 1.2em;
+}
+
+.off {
+  display: none;
+}
+
+.repres {
+  border: 0;
+  background-color: var(--iconic-medium-color);
+  color: white;
+  font-family: 'Inter tight';
+  font-size: 1em;
+  padding: 7px 20px;
+  border-radius: 30px;
+  margin-left: auto;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+.replies {
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--border-color);
+  padding-left: 20px;
+  margin-top: 20px;
+}
+
+.comment > :nth-child(3) {
+  display: flex;
+  align-items: center;
+}
+
+.comment > :nth-child(3) > div {
+  display: flex;
+  align-items: flex-end;
+  font-size: 0.9em;
+  margin-right: 20px;
+  margin-top: 15px;
+
+}
+
+.comment > :nth-child(3) > div > svg {
+  height: 18px;
+}
+
+.liked {
+  fill: var(--iconic-medium-color);
+}
+
+.disliked {
+  fill: rgb(187, 1, 1);
+}
+
+
