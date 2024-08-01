@@ -19,6 +19,7 @@ const postController = {
   getPosts: getPostsHandler(),
   getUserPosts: getUserPostsHandler(),
   getLikedPosts: getUserLikedPostsHandler(),
+  getRecentlyViewedPosts: getRecentlyViewedPostsHandler(),
   createPost: createPostHandler(),
   updatePost: updatePostHandler(),
   deletePost: deletePostHandler(),
@@ -85,6 +86,37 @@ function getUserLikedPostsHandler() {
   return fetchUserLikedPosts;
 }
 
+function getRecentlyViewedPostsHandler() {
+  const fetchRecentlyViewedPosts = async (
+    req: Request,
+    res: Response
+  ): Promise<any> => {
+    try {
+      // get the user's most recently viewed 5 posts
+      const currUserId = Utility.extractUserIdFromToken(req);
+      const posts = await PostModel.find({ views: { $in: [currUserId] } })
+        .sort({ updatedAt: -1 })
+        .limit(5);
+
+      if (posts.length <= 0) {
+        logger.error("No recently viewed posts found for user");
+        return res.status(404).json({
+          message: "no recently viewed posts found for user",
+        });
+      }
+
+      return res.status(200).json({
+        message: "user's recently viewed posts retrieved successfully",
+        posts,
+      });
+    } catch (e) {
+      logger.error(e, "error occurred during fetching recently viewed posts");
+      Utility.handle500Status(res, <Error>e);
+    }
+  };
+
+  return fetchRecentlyViewedPosts;
+}
 
 function getPostByIdHandler() {
   const retrievePostById = async function (

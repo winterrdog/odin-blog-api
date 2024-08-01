@@ -24,6 +24,11 @@ postsRouter.get(
   postController.getLikedPosts
 );
 
+postsRouter.get(
+  "/recently-viewed",
+  auth.authenticateJwt,
+  postController.getRecentlyViewedPosts
+);
 
 logger.info("attaching controllers to 'post' route: /:id ...");
 postsRouter.use("/:id", auth.authenticateJwt);
