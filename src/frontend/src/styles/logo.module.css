@@ -6,3 +6,12 @@
   user-select: none;
   text-transform: capitalize;
 }
+
+.logo a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.logo a:hover {
+  filter: drop-shadow(0 0 80px var(--iconic-medium-color));
+}
