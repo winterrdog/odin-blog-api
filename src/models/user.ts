@@ -23,6 +23,9 @@ const UserSchema = new Schema(
   },
 );
 
+// indexes
+UserSchema.index({ name: 1 });
+
 function toJsonHandler(_doc: any, ret: any) {
   ret.id = ret._id;
   ret.dateCreated = ret.createdAt;

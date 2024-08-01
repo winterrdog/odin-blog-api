@@ -28,8 +28,11 @@ const PostSchema = new Schema(
     timestamps: true,
     strictQuery: "throw",
     toJSON: { transform: toJsonHandler, flattenObjectIds: true },
-  },
+  }
 );
+
+// indexes
+PostSchema.index({ author: 1 });
 
 // hooks
 PostSchema.pre(["find", "findOne"], function (next) {
