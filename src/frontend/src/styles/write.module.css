@@ -80,7 +80,7 @@
   padding-bottom: 50px;
 }
 
-.write main form > .title {
+.title {
   outline: none;
   border: 0;
   font-family: 'Lora', serif;
@@ -92,6 +92,9 @@
   padding-left: 10px;
 
   margin-top: 20px;
+
+  color: rgb(97, 97, 97);
+  resize: none;
 }
 
 .write main h3 {
@@ -104,7 +107,7 @@
   margin: 20px 0px;
 }
 
-.write main form > .data {
+.data {
   outline: none;
   border: 0;
   font-family: 'Titillium Web', sans-serif;
@@ -114,6 +117,11 @@
 
   border-left: 1px solid grey;
   padding-left: 10px;
+
+  color: rgb(97, 97, 97);
+  resize: none;
+
+  height: fit-content;
 }
 
 .write main p {
@@ -144,3 +152,4 @@
   border-radius: 40px;
   margin-top: 30px;
 }
+
