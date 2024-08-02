@@ -43,7 +43,9 @@ function getUserCommentsHandler() {
       logger.info(`fetching comments for user with id, ${userId}...`);
 
       // query the database for comments made by the current user id
-      const userComments = await CommentModel.find({ user: userId });
+      const userComments = await CommentModel.find({ user: userId }).sort({
+        updatedAt: -1,
+      });
       if (userComments.length <= 0) {
         logger.info("no comments found for the user");
         return res.status(404).json({
@@ -737,7 +739,9 @@ async function findCommentsForPost(req: Request, res: Response) {
       return null;
     }
 
-    let storedComments = await CommentModel.find({ post: postId });
+    const storedComments = await CommentModel.find({ post: postId }).sort({
+      updatedAt: -1,
+    });
 
     if (storedComments.length <= 0) {
       logger.error(`No comments available for post with id, ${postId}.`);

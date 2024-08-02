@@ -35,7 +35,9 @@ function getUserPostsHandler() {
       logger.info("fetching a user's posts...");
 
       const currUserId = Utility.extractUserIdFromToken(req);
-      const posts = await PostModel.find({ author: currUserId });
+      const posts = await PostModel.find({ author: currUserId }).sort({
+        updatedAt: -1,
+      });
 
       if (posts.length <= 0) {
         logger.error("No posts found for user");
@@ -64,7 +66,11 @@ function getUserLikedPostsHandler() {
   ): Promise<any> => {
     try {
       const currUserId = Utility.extractUserIdFromToken(req);
-      const posts = await PostModel.find({ likes: { $in: [currUserId] } });
+      const posts = await PostModel.find({ likes: { $in: [currUserId] } }).sort(
+        {
+          updatedAt: -1,
+        }
+      );
 
       if (posts.length <= 0) {
         logger.error("No liked posts found for user");
@@ -164,7 +170,7 @@ function getPostsHandler() {
   ): Promise<any> {
     try {
       logger.info("fetching all posts...");
-      const posts = await PostModel.find({});
+      const posts = await PostModel.find({}).sort({ updatedAt: -1 });
       if (posts.length <= 0) {
         logger.error("No posts have ever been created");
         return res.status(404).json({
