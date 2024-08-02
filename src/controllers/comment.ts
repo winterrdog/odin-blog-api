@@ -44,7 +44,7 @@ function getUserCommentsHandler() {
 
       // query the database for comments made by the current user id
       const userComments = await CommentModel.find({ user: userId }).sort({
-        updatedAt: -1,
+        createdAt: -1,
       });
       if (userComments.length <= 0) {
         logger.info("no comments found for the user");
@@ -76,7 +76,7 @@ function getUserLikedCommentsHandler() {
       const userId: string = Utility.extractUserIdFromToken(req);
       const userLikedComments = await CommentModel.find({
         likes: { $in: [userId] },
-      }).sort({ updatedAt: -1 });
+      }).sort({ createdAt: -1 });
 
       if (userLikedComments.length <= 0) {
         logger.info("no comments found for the user");
@@ -740,7 +740,7 @@ async function findCommentsForPost(req: Request, res: Response) {
     }
 
     const storedComments = await CommentModel.find({ post: postId }).sort({
-      updatedAt: -1,
+      createdAt: -1,
     });
 
     if (storedComments.length <= 0) {

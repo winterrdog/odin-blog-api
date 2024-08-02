@@ -36,7 +36,7 @@ function getUserPostsHandler() {
 
       const currUserId = Utility.extractUserIdFromToken(req);
       const posts = await PostModel.find({ author: currUserId }).sort({
-        updatedAt: -1,
+        createdAt: -1,
       });
 
       if (posts.length <= 0) {
@@ -68,7 +68,7 @@ function getUserLikedPostsHandler() {
       const currUserId = Utility.extractUserIdFromToken(req);
       const posts = await PostModel.find({ likes: { $in: [currUserId] } }).sort(
         {
-          updatedAt: -1,
+          createdAt: -1,
         }
       );
 
@@ -101,7 +101,7 @@ function getRecentlyViewedPostsHandler() {
       // get the user's most recently viewed 5 posts
       const currUserId = Utility.extractUserIdFromToken(req);
       const posts = await PostModel.find({ views: { $in: [currUserId] } })
-        .sort({ updatedAt: -1 })
+        .sort({ createdAt: -1 })
         .limit(5);
 
       if (posts.length <= 0) {
@@ -170,7 +170,7 @@ function getPostsHandler() {
   ): Promise<any> {
     try {
       logger.info("fetching all posts...");
-      const posts = await PostModel.find({}).sort({ updatedAt: -1 });
+      const posts = await PostModel.find({}).sort({ createdAt: -1 });
       if (posts.length <= 0) {
         logger.error("No posts have ever been created");
         return res.status(404).json({
