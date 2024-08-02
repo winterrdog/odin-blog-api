@@ -1,13 +1,17 @@
 import styles from '../styles/about.module.css';
 import Logo from './logo';
-import { PropTypes } from 'prop-types';
 
-export default function About({ cb, cbToOpenDialog }) {
+import { useNavigate } from 'react-router-dom';
+
+export default function About() {
+
+  const navigate = useNavigate();
+
   return (
     <div className={styles.about}>
       <header>
         <Logo />
-        <button onClick={() => {cb(false)}}>Back to homepage</button>
+        <button onClick={() => {navigate('/')}}>Back to homepage</button>
       </header>
       <main>
         <h1>All the boys have a story to tell.</h1>
@@ -24,8 +28,7 @@ export default function About({ cb, cbToOpenDialog }) {
         </article>
       </main>
       <button onClick={() => {
-        cb(false);
-        cbToOpenDialog();
+        navigate('/');
       }}>
         <span>Start reading</span>
         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed">
@@ -33,8 +36,7 @@ export default function About({ cb, cbToOpenDialog }) {
         </svg>
       </button>
       <button onClick={() => {
-        cb(false);
-        cbToOpenDialog();
+        navigate('/');
       }}>
         <span>Start writing</span>
         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed">
@@ -46,9 +48,4 @@ export default function About({ cb, cbToOpenDialog }) {
       </footer>
     </div>
   );
-}
-
-About.propTypes = {
-  cb: PropTypes.func,
-  cbToOpenDialog: PropTypes.func,
 }

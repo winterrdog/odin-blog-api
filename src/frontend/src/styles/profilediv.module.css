@@ -1,0 +1,68 @@
+.profilediv.on {
+  visibility: visible;
+}
+
+.profilediv {
+  position: absolute;
+
+  z-index: 2;
+
+  min-width: 150px;
+
+
+  background-color: white;
+  border: 1px solid var(--border-color);
+  top: calc(100% + 5px);
+  right: 0px;
+
+  display: flex;
+  flex-direction: column;
+
+  box-shadow: 0 0 20px rgba(190, 190, 190, 0.459);
+
+  visibility: hidden;
+
+}
+
+.profilediv > a {
+  display: flex;
+  align-items: center;
+  color: #535353;
+  text-decoration: none;
+  font-family: 'Inter tight';
+  font-weight: 400;
+  font-size: 0.6em;
+  margin: 20px;
+  box-sizing: border-box;
+}
+
+.profilediv > a:hover {
+  color: #000000;
+}
+
+
+.profilediv > a > svg {
+  fill: #aaaaaa;
+  margin-right: 10px;
+}
+
+.profilediv > div {
+  border-top: 1px solid var(--border-color);
+}
+
+.profilediv > span {
+  margin: 20px;
+  font-family: 'Inter tight';
+  font-weight: 400;
+  font-size: 0.6em;
+  color: #535353;
+
+  display: block;
+}
+
+.profilediv > span:hover { 
+  color: #000000;
+}
+
+
+

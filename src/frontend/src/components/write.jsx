@@ -54,8 +54,12 @@ export default function Write() {
           <span>Draft for&#160;<span className={styles.accname}>{acc.name}</span></span>
         </div>
         <div>
+          <span><Link to='/posts'>All posts</Link></span>
+
           <button disabled={content.length > 1 ? false : true} onClick={publish} ref={buttonRef}>Publish</button>
-          <div className={styles.account}>{acc.name[0]}</div>
+          <Link to='/my-account'>
+            <div className={styles.account}>{acc.name[0]}</div>
+          </Link>
         </div>
       </header>
       {
@@ -74,13 +78,66 @@ export default function Write() {
         <main>
           {
             content.map((obj) => {
-              if (obj.key == 1) {
-                return <h3 key={obj.key}>{obj.val}</h3>
+              if (obj.clicked) {
+                if (obj.key == 1) {
+                  return (
+                    <textarea key={obj.key} name='title' id="title"
+                      maxLength={56}
+                      placeholder={'Title'} 
+                      className={styles.title}
+                      defaultValue={obj.val.split('\n')[0]} 
+                      onInput={(e) => {
+                        e.preventDefault();
+                        if (!e.nativeEvent.data && (e.nativeEvent.inputType === 'insertText' || e.nativeEvent.inputType === 'insertLineBreak')) {
+                          let tmp = [...content];
+                          tmp[obj.key - 1].clicked = false;
+                          tmp[obj.key - 1].val = e.target.value;
+                          setContent(tmp);
+                        }
+                        e.target.style.height = '';
+                        e.target.style.height = e.target.scrollHeight + 'px';
+                      }
+                    }></textarea>
+                  );
+                } else {
+                  return (
+                    <textarea key={obj.key} name='data' id="data"
+                      maxLength={524288}
+                      placeholder={'Tell your story...'} 
+                      className={styles.data}
+                      defaultValue={obj.val.slice(0, -1)} 
+                      rows={(obj.val.length / 40) + 1}
+                      onInput={(e) => {
+                        e.preventDefault();
+                        if (!e.nativeEvent.data && (e.nativeEvent.inputType === 'insertText' || e.nativeEvent.inputType === 'insertLineBreak')) {
+                          let tmp = [...content];
+                          tmp[obj.key - 1].clicked = false;
+                          tmp[obj.key - 1].val = e.target.value;
+                          setContent(tmp);
+                        }
+                        e.target.style.height = '';
+                        e.target.style.height = e.target.scrollHeight + 'px';
+                      }
+                    }></textarea>
+                  );
+                }
               }
-              return <p key={obj.key}>{obj.val}</p>
+              if (obj.key == 1) {
+                return <h3 key={obj.key} onClick={() => {
+                  let tmp = [...content];
+                  tmp[obj.key - 1].clicked = true;
+                  setContent(tmp);
+                }}>{obj.val}</h3>
+              }
+              return <p key={obj.key} onClick={() => {
+                let tmp = [...content];
+                tmp[obj.key - 1].clicked = true;
+                setContent(tmp);
+              }}>{obj.val}</p>
             })
           }
           <form action="" ref={formRef}>
+
             <textarea name={content.length ? 'data' : 'title'} id="data"
               maxLength={content.length ? 524288 : 56}
               placeholder={content.length ? 'Tell your story...' : 'Title'} 
@@ -97,6 +154,7 @@ export default function Write() {
                 e.target.style.height = e.target.scrollHeight + 'px';
               }
             }></textarea>
+
           </form>
         </main>
       }
