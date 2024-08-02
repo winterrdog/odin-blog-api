@@ -18,6 +18,12 @@ commentsRouter.get(
   commentController.getUserComments
 );
 
+commentsRouter.get(
+  "/user-liked-comments",
+  auth.authenticateJwt,
+  commentController.getUserLikedComments
+);
+
 logger.info(
   "attaching controllers to 'comment' route: /:postId/comments/:id ..."
 );

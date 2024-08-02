@@ -20,6 +20,8 @@ export interface CommentModelShape {
   likes?: string[];
 }
 const CommentModelName = "Comment";
+
+// todo: populate the necessary fields in all referenced fields
 const CommentSchema = new Schema(
   {
     body: { type: String, required: true },

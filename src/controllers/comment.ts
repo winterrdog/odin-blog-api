@@ -20,6 +20,7 @@ const commentController = {
   getCommentById: fetchCommentByIdHandler(),
   getComments: getCommentsForPostHandler(),
   getUserComments: getUserCommentsHandler(),
+  getUserLikedComments: getUserLikedCommentsHandler(),
   createComment: createCommentHandler(),
   updateComment: modifyCommentHandler(),
   deleteComment: deleteCommentHandler(),
@@ -61,6 +62,38 @@ function getUserCommentsHandler() {
   };
 
   return fetchUserComments;
+}
+
+// todo: sort by latest documents
+function getUserLikedCommentsHandler() {
+  const fetchUserLikedComments = async (
+    req: Request,
+    res: Response
+  ): Promise<any> => {
+    try {
+      const userId: string = Utility.extractUserIdFromToken(req);
+      const userLikedComments = await CommentModel.find({
+        likes: { $in: [userId] },
+      }).sort({ updatedAt: -1 });
+
+      if (userLikedComments.length <= 0) {
+        logger.info("no comments found for the user");
+        return res.status(404).json({
+          message: "no comments were liked by the user",
+        });
+      }
+
+      return res.status(200).json({
+        message: "user liked comments fetched successfully",
+        comments: userLikedComments,
+      });
+    } catch (e) {
+      logger.error(e, "error fetching a user's liked comments");
+      Utility.handle500Status(res, <Error>e);
+    }
+  };
+
+  return fetchUserLikedComments;
 }
 
 function removeDislikeFromCommentHandler() {

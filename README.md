@@ -83,6 +83,7 @@ It has `16+` endpoints i.e.:
 - `GET /api/v1/post-comments/:postId/comments/` - _for getting all comments for a post_
 - `GET /api/v1/post-comments/:postId/comments/:commentId` - _for getting a comment_
 - `GET /api/v1/post-comments/user-comments` - _for getting a user's comments_
+- `GET /api/v1/post-comments/user-liked-comments` - _for getting a user's liked comments_
 - `PATCH /api/v1/post-comments/:postId/comments/:commentId` - _for updating a comment_
 - `DELETE /api/v1/post-comments/:postId/comments/:commentId` - _for deleting a comment_
 - `PATCH /api/v1/post-comments/:postId/comments/:commentId/likes` - _for adding a like_
@@ -502,6 +503,47 @@ HTTP/1.1 200 OK
             "dateUpdated": "2024-04-22T12:45:01.875Z"
         }
     ]
+}
+```
+
+#### Get all liked comments for a user
+
+Make sure the JWT is in the Authorization header since we rely on it to get the user's liked comments.
+
+```sh
+curl -X GET
+    -H "Authorization: Bearer eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InN1YiI6IjY2MjY1NWMxYTJlMjkxYjg0NjM1ODlmZSIsInJvbGUiOiJhdXRob3IifSwiaWF0IjoxNzEzNzg4MzUzLCJleHAiOjE3MTM5NjExNTN9.8oc3DOAR6SqaWUBynMZlAvHJr202cTXbtiq80EVyO5RSXMJrdGJ-aWdZF_lfR1p4"
+    http://localhost:3000/api/v1/post-comments/user-liked-comments
+```
+
+On success, the server will respond with:
+
+```json
+HTTP/1.1 200 OK
+
+{
+    "message": "user liked comments fetched successfully",
+    "comments": [
+        {
+            "body": "This is a great post. I love it.",
+            "tldr": "great post",
+            "user": "John Doe",
+            "post": "662659aaa2e291b846358a07",
+            "id": "66265bcda2e291b846358a17",
+            "dateCreated": "2024-04-22T12:45:01.875Z",
+            "dateUpdated": "2024-04-22T12:45:01.875Z"
+        }
+    ]
+}
+```
+
+In case no liked comments are found, the server will respond with:
+
+```json
+HTTP/1.1 404 Not Found
+
+{
+    "message": "no comments were liked by the user",
 }
 ```
 
