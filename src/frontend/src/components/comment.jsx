@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from '../styles/comment.module.css';
 import PropTypes from 'prop-types';
 import { baseURL, getLogInfo } from './comsWithbackEnd';
@@ -71,6 +71,10 @@ export default function Comment({ data, postId, allComs, cbToTrigger}) {
     });
   }
 
+  useEffect(() => {
+    buttonRef.current.setAttribute('disabled', 'true');
+  }, []);
+
   return (
     <div className={styles.comment}>
       <div>
@@ -104,7 +108,7 @@ export default function Comment({ data, postId, allComs, cbToTrigger}) {
           e.target.style.height = '';
           e.target.style.height = e.target.scrollHeight + 'px';
         }}></textarea>
-        <button type='button' className={`${replying ? null : styles.off} ${styles.repres}`} ref={buttonRef} onClick={handleReply} disabled={textareaRef.current ? textareaRef.current.value ? false : true : true} >Respond</button>
+        <button type='button' className={`${replying ? null : styles.off} ${styles.repres}`} ref={buttonRef} onClick={handleReply} >Respond</button>
 
         {
           allComs ? allComs.map((obj, i) => {
