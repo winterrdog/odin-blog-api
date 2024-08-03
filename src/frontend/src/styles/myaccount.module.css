@@ -1,0 +1,72 @@
+.myaccount {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 1336px;
+  
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.myaccount > main {
+  max-width: 728px;
+  min-width: 728px;
+  
+}
+
+.myaccount > main > h1 {
+  text-transform: capitalize;
+  font-family: 'playfair display', sans-serif;
+  font-weight: 600;
+  font-size: 4em;
+}
+
+.account {
+  text-transform: capitalize;
+  background-color: black;
+  width: 88px;
+  height: 88px;
+  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+  font-weight: 900;
+  font-family: 'Titillium Web';
+  font-size: 3em;
+  
+  color: #FFFFFF;
+  
+  border-radius: 50%;
+}
+
+.side {
+  border-left: 1px solid var(--border-color);
+  padding-left: 40px;
+  padding-top: 60px;
+  padding-right: 24px;
+  min-width: 368px;
+  max-width: 368px;
+}
+
+.side > button {
+  border: 0;
+  color: var(--iconic-medium-color);
+  background-color: transparent;
+  font-size: 1em;
+  font-family: 'Inter tight', sans-serif;
+  margin: 0;
+  padding: 0;
+
+  margin-top: 24px;
+  margin-bottom: 46px;
+}
+
+.side > :nth-child(2) {
+  margin-top: 16px;
+  font-family: 'inter tight', sans-serif;
+  font-size: 1.5em;
+}
+
+.side > button:hover {
+  color: rgb(12, 109, 8);
+}

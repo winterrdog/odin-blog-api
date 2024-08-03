@@ -1,0 +1,15 @@
+.selector {
+  width: 100%;
+}
+
+.selector > :nth-child(1) {
+  width: inherit;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.selector > :nth-child(1) > span {
+  margin-right: 20px;
+  color: #909090;
+  font-family: 'inter tight', sans-serif;
+}
