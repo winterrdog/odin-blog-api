@@ -9,4 +9,5 @@ export interface PostUpdateReqBody {
   title?: string;
   body?: string;
   hidden?: boolean;
+  lastModified?: Date;
 }

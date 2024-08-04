@@ -248,8 +248,13 @@ function updatePostHandler() {
       ) {
         return;
       }
-      await Utility.updateDoc(post, req.body as PostUpdateReqBody);
+
+      const newData: PostUpdateReqBody = req.body;
+      newData["lastModified"] = new Date();
+      await Utility.updateDoc(post, newData);
+
       logger.info(`post updated successfully! post: ${post.toJSON()}`);
+
       return res.status(200).json({
         message: "Post updated",
         post,

@@ -6,6 +6,7 @@ export interface PostModelShape {
   title: string;
   body: string;
   hidden?: boolean;
+  lastModified?: Date;
   views?: string[]; // store user ids in string format
   likes?: string[];
   dislikes?: string[];
@@ -20,6 +21,7 @@ const PostSchema = new Schema(
     title: { type: String, required: true, minLength: 4, maxLength: 56 },
     body: { type: String, required: true },
     hidden: { type: Boolean, default: false },
+    lastModified: { type: Date, default: Date.now },
     views: [{ type: String, default: [] }], // store user ids in string format
     likes: [{ type: String, default: [] }],
     dislikes: [{ type: String, default: [] }],
@@ -55,7 +57,8 @@ PostSchema.pre("save", async function (next) {
 function toJsonHandler(doc: Document, ret: any) {
   ret.id = ret._id;
   ret.dateCreated = ret.createdAt;
-  ret.dateUpdated = ret.updatedAt;
+  ret.dateUpdated = ret.lastModified;
+
   if (ret.author && ret.author.name) {
     ret.author = ret.author.name;
   }

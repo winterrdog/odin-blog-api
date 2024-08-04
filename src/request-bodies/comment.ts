@@ -8,4 +8,5 @@ export interface CommentReqBody {
 export interface CommentUpdateReqBody {
   body?: string;
   tldr?: string;
+  lastModified?: Date;
 }

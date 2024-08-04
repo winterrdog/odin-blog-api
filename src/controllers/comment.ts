@@ -13,6 +13,7 @@ import {
 } from "../validators/comments";
 import Utility from "../utilities";
 import { startLogger } from "../logging";
+import { CommentUpdateReqBody } from "request-bodies/comment";
 
 const logger = startLogger(__filename);
 
@@ -508,7 +509,10 @@ function modifyCommentHandler() {
   ): Promise<any> {
     try {
       const storedComment = await findCommentByIdAndPostId(req, res);
-      if (!storedComment) return;
+      if (!storedComment) {
+        return;
+      }
+
       if (
         Utility.isCurrUserSameAsCreator(
           req,
@@ -518,10 +522,15 @@ function modifyCommentHandler() {
       ) {
         return;
       }
-      await Utility.updateDoc(storedComment, req.body);
+
+      const newData: CommentUpdateReqBody = req.body;
+      newData["lastModified"] = new Date();
+      await Utility.updateDoc(storedComment, newData);
+
       logger.info(
         `comment with id, ${storedComment.id}, updated successfully!`
       );
+
       return res.status(200).json({
         message: "post comment updated successfully",
         comment: storedComment,

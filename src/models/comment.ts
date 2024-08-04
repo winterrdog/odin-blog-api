@@ -16,6 +16,7 @@ export interface CommentModelShape {
   deleted?: boolean;
   body: string;
   tldr?: string;
+  lastModified?: Date;
   dislikes?: string[];
   likes?: string[];
 }
@@ -37,6 +38,7 @@ const CommentSchema = new Schema(
       required: true,
     },
     deleted: { type: Boolean, default: false },
+    lastModified: { type: Date, default: Date.now },
     parentComment: {
       type: Schema.Types.ObjectId,
       ref: CommentModelName,
@@ -89,7 +91,7 @@ function toJsonHandler(doc: Document, ret: any) {
   // NOTE: never mark this function as 'async'
   ret.id = ret._id;
   ret.dateCreated = ret.createdAt;
-  ret.dateUpdated = ret.updatedAt;
+  ret.dateUpdated = ret.lastModified;
 
   if (ret.user && ret.user.name) {
     ret.user = ret.user.name;
