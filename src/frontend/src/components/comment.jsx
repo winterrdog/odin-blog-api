@@ -81,7 +81,7 @@ export default function Comment({ data, postId, allComs, cbToTrigger}) {
         <div className={styles.account}>{data.user[0]}</div>
         <div>
           <span>{data.user}</span>
-          <span>{data.dateCreated.split('T')[0]}</span>
+          <span>{data.dateUpdated.split('T')[0]}</span>
         </div>
       </div>
       <main dangerouslySetInnerHTML={{__html: data.body}}></main>

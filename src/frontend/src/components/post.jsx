@@ -92,7 +92,7 @@ export default function Post() {
             <div className={styles.account}>{data.author[0]}</div>
             <div>
               <span>{data.author}</span>
-              <span>{data.dateCreated.split('T')[0]}</span>
+              <span>{data.dateUpdated.split('T')[0]}</span>
             </div>
           </div>
           <div className={styles.likesgoa}>
