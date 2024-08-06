@@ -2,8 +2,8 @@ import { Request, Response } from "express";
 import * as _ from "lodash";
 import * as argon2 from "argon2";
 import { JwtPayload } from "../middleware/interfaces";
-import { UserModel } from "../models/user";
-import Utility from "../utilities";
+import { UserDocument, UserModel } from "../models/user";
+import Utility, { TransactionCallback } from "../utilities";
 import {
   passwordValidator,
   unameValidator,
@@ -35,7 +35,14 @@ function signUpHandler() {
       // check if user with name already exists
       {
         logger.info("checking if user with name already exists...");
-        const user = await UserModel.findOne({ name });
+
+        const cb: TransactionCallback<UserDocument | null> = async (
+          session,
+        ) => {
+          return await UserModel.findOne({ name }, null, { session });
+        };
+
+        const user = await Utility.runOperationInTransaction(cb);
         if (user) {
           logger.error(`user with name: ${name} already exists`);
           return res.status(409).json({
@@ -47,18 +54,17 @@ function signUpHandler() {
 
       // store details in db
       const passwordHash = await argon2.hash(<string>password);
-      const createdUser = await UserModel.create({
-        name,
-        passwordHash,
-        role,
-      });
+      const cb: TransactionCallback<UserDocument> = async (session) => {
+        const newUserData = [{ name, passwordHash, role }];
+        const user = await UserModel.create(newUserData, { session });
+
+        return user[0] as unknown as UserDocument;
+      };
+      const createdUser = await Utility.runOperationInTransaction(cb);
 
       // craft jwt and send it back
       const jwtPayload: JwtPayload = {
-        data: {
-          sub: createdUser.id,
-          role,
-        },
+        data: { sub: createdUser.id, role },
       };
 
       const token = await Utility.generateJwtPayload(jwtPayload);
@@ -91,15 +97,22 @@ function signInHandler() {
   ): Promise<any> {
     try {
       const { name, pass: password } = req.body;
+
       logger.info(`signing in user with name: ${name}...`);
-      const user = await UserModel.findOne({ name });
+
+      const cb: TransactionCallback<UserDocument | null> = async (session) => {
+        return await UserModel.findOne({ name }, null, { session });
+      };
+      const user = await Utility.runOperationInTransaction(cb);
       if (!user) {
         logger.error(`user with name: ${name} not found`);
         return res.status(404).json({
           message: `user with username: ${name} was not found.`,
         });
       }
+
       logger.info(`user with name: ${name} found. verifying password...`);
+
       const isPasswordValid = await argon2.verify(user.passwordHash, password);
       if (!isPasswordValid) {
         logger.error(`invalid password for user with name: ${name}`);
@@ -108,15 +121,14 @@ function signInHandler() {
 
       // craft jwt and send it back
       const jwtPayload: JwtPayload = {
-        data: {
-          sub: user.id,
-          role: user.role,
-        },
+        data: { sub: user.id, role: user.role! },
       };
       const token = await Utility.generateJwtPayload(jwtPayload);
+
       logger.info(
         `user with name: ${name} and role: ${user.role} signed in successfully -- token: ${token}`,
       );
+
       return res.status(200).json({
         message: "User signed in successfully",
         token,
@@ -144,17 +156,25 @@ function deleteUserHandler() {
       logger.info(`deleting user with id: ${currUserId}...`);
 
       // check if user with id exists
-      const user = await UserModel.findById(currUserId);
+      const cb: TransactionCallback<UserDocument | null> = async (session) => {
+        return await UserModel.findById(currUserId, null, { session });
+      };
+
+      const user = await Utility.runOperationInTransaction(cb);
       if (!user) {
         logger.error(
           `user with id: ${currUserId} not found hence cannot be deleted`,
         );
-        return res.status(404).json({
-          message: "User not found",
-        });
+        return res.status(404).json({ message: "User not found" });
       }
-      await user.deleteOne();
+
+      const deleteCb: TransactionCallback<void> = async (session) => {
+        await user.deleteOne({ session });
+      };
+
+      await Utility.runOperationInTransaction(deleteCb);
       logger.info(`user with id: ${currUserId} deleted successfully`);
+
       return res.status(204).end();
     } catch (e) {
       logger.error(e, "error occurred during deletion of user");
@@ -175,19 +195,22 @@ function updateUserHandler() {
       logger.info(`updating user with id: ${currUserId}...`);
 
       // check if user with id exists
-      let user = await UserModel.findById(currUserId);
+      const cb: TransactionCallback<UserDocument | null> = async (session) => {
+        return await UserModel.findById(currUserId, null, { session });
+      };
+
+      let user = await Utility.runOperationInTransaction(cb);
       if (!user) {
         logger.error(
           `user with id: ${currUserId} not found hence cannot be updated`,
         );
         return res.status(404).json({ message: "User not found" });
       }
-      await Utility.updateDoc(user, req.body as UserUpdateReqBody);
+
+      user = await Utility.updateDoc(user, req.body as UserUpdateReqBody);
       logger.info(`user with id: ${currUserId} updated successfully!`);
-      return res.status(200).json({
-        message: "User updated",
-        user,
-      });
+
+      return res.status(200).json({ message: "user updated", user });
     } catch (e) {
       logger.error(e, "error occurred during updating a user's details");
       Utility.handle500Status(res, <Error>e);

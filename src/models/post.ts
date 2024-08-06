@@ -11,6 +11,7 @@ export interface PostModelShape {
   likes?: string[];
   dislikes?: string[];
 }
+export interface PostDocument extends PostModelShape, Document {}
 const PostSchema = new Schema(
   {
     author: {
@@ -29,8 +30,9 @@ const PostSchema = new Schema(
   {
     timestamps: true,
     strictQuery: "throw",
+    strict: "throw",
     toJSON: { transform: toJsonHandler, flattenObjectIds: true },
-  }
+  },
 );
 
 // indexes
@@ -38,6 +40,8 @@ PostSchema.index({ author: 1 });
 
 // hooks
 PostSchema.pre(["find", "findOne"], function (next) {
+  // todo: get a session from the document
+
   // NOTE: make a clone of the query object since we could
   // have executed the query multiple times already
   this.clone().populate("author", "name");
@@ -48,7 +52,16 @@ PostSchema.pre(["find", "findOne"], function (next) {
 // triggered by a create, update, and save
 PostSchema.pre("save", async function (next) {
   try {
-    await this.populate("author", "name");
+    const session = this.$session();
+    if (!session) {
+      throw new Error("session is missing from the Comment document");
+    }
+
+    await this.populate({
+      path: "author",
+      select: "name",
+      options: { session },
+    });
   } catch (e) {
     console.error(`Error occurred during population on Post: ${e}`);
   }

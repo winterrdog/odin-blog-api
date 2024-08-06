@@ -2,7 +2,11 @@ import { Request, Response } from "express";
 import * as _ from "lodash";
 import { Types } from "mongoose";
 import { matchedData } from "express-validator";
-import { CommentModel, CommentModelShape } from "../models/comment";
+import {
+  CommentDocument,
+  CommentModel,
+  CommentModelShape,
+} from "../models/comment";
 import {
   commentBodyValidator,
   commentIdSanitizer,
@@ -11,7 +15,7 @@ import {
   postIdSanitizer,
   replyIdSanitizer,
 } from "../validators/comments";
-import Utility from "../utilities";
+import Utility, { TransactionCallback } from "../utilities";
 import { startLogger } from "../logging";
 import { CommentUpdateReqBody } from "request-bodies/comment";
 
@@ -37,16 +41,23 @@ const commentController = {
 function getUserCommentsHandler() {
   const fetchUserComments = async (
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<any> => {
     try {
       const userId: string = Utility.extractUserIdFromToken(req);
       logger.info(`fetching comments for user with id, ${userId}...`);
 
       // query the database for comments made by the current user id
-      const userComments = await CommentModel.find({ user: userId }).sort({
-        createdAt: -1,
-      });
+      const cb: TransactionCallback<CommentDocument[]> = async (session) => {
+        const comments = await CommentModel.find({ user: userId }, null, {
+          session,
+          sort: { lastModified: -1 },
+        });
+
+        return comments as unknown as CommentDocument[];
+      };
+
+      const userComments = await Utility.runOperationInTransaction(cb);
       if (userComments.length <= 0) {
         logger.info("no comments found for the user");
         return res.status(404).json({
@@ -67,18 +78,25 @@ function getUserCommentsHandler() {
   return fetchUserComments;
 }
 
-// todo: sort by latest documents
 function getUserLikedCommentsHandler() {
   const fetchUserLikedComments = async (
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<any> => {
     try {
       const userId: string = Utility.extractUserIdFromToken(req);
-      const userLikedComments = await CommentModel.find({
-        likes: { $in: [userId] },
-      }).sort({ createdAt: -1 });
 
+      const cb: TransactionCallback<CommentDocument[]> = async (session) => {
+        const comments = await CommentModel.find(
+          { likes: { $in: [userId] } },
+          null,
+          { session, sort: { lastModified: -1 } },
+        );
+
+        return comments as unknown as CommentDocument[];
+      };
+
+      const userLikedComments = await Utility.runOperationInTransaction(cb);
       if (userLikedComments.length <= 0) {
         logger.info("no comments found for the user");
         return res.status(404).json({
@@ -102,12 +120,15 @@ function getUserLikedCommentsHandler() {
 function removeDislikeFromCommentHandler() {
   const removeDislikeFromComment = async function (
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<any> {
     try {
-      const comment = await findCommentByIdAndPostId(req, res);
-      if (!comment) return;
-      if (comment.dislikes.length <= 0) {
+      let comment = await findCommentByIdAndPostId(req, res);
+      if (!comment) {
+        return;
+      }
+
+      if (comment.dislikes!.length <= 0) {
         logger.info("no dislikes to remove from comment");
         return res
           .status(204)
@@ -116,19 +137,27 @@ function removeDislikeFromCommentHandler() {
 
       // remove dislike
       {
-        const dislikesSet = Utility.arrayToSet(comment.dislikes);
+        const dislikesSet = Utility.arrayToSet(comment.dislikes!);
         const userId: string = Utility.extractUserIdFromToken(req);
+
         if (!dislikesSet.has(userId)) {
           logger.info("user already removed dislike from comment");
           return res.status(400).json({
             message: "user already removed dislike from comment",
           });
         }
+
         dislikesSet.delete(userId); // remove user from dislikes
         comment.dislikes = dislikesSet.size > 0 ? Array.from(dislikesSet) : [];
-        await comment.save();
+
+        const cb: TransactionCallback<CommentDocument> = async (session) => {
+          return await comment!.save({ session });
+        };
+
+        comment = await Utility.runOperationInTransaction(cb);
         logger.info("dislike removed from the comment successfully!");
       }
+
       return res.status(200).json({
         message: "comment dislike removed successfully!",
         comment,
@@ -151,30 +180,43 @@ function removeDislikeFromCommentHandler() {
 function dislikeCommentHandler() {
   const dislikeComment = async function (
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<any> {
     try {
-      const comment = await findCommentByIdAndPostId(req, res);
-      if (!comment) return;
+      let comment = await findCommentByIdAndPostId(req, res);
+      if (!comment) {
+        return;
+      }
+
       logger.info("updating comment dislikes...");
+
       const updatedCommentDislikes = Utility.updateUserReactions(
         req,
         res,
-        comment.dislikes
+        comment.dislikes!,
       );
-      if (!updatedCommentDislikes) return;
+      if (!updatedCommentDislikes) {
+        return;
+      }
 
       // if the user liked the comment, "remove" them from likes
-      if (comment.likes.length > 0) {
-        const likesSet = Utility.arrayToSet(comment.likes);
+      if (comment.likes!.length > 0) {
+        const likesSet = Utility.arrayToSet(comment.likes!);
         const userId: string = Utility.extractUserIdFromToken(req);
+
         if (likesSet.has(userId)) {
           likesSet.delete(userId); // remove user
           comment.likes = likesSet.size > 0 ? Array.from(likesSet) : [];
         }
       }
-      await comment.save();
+
+      const cb: TransactionCallback<CommentDocument> = async (session) => {
+        return await comment!.save({ session });
+      };
+
+      comment = await Utility.runOperationInTransaction(cb);
       logger.info("comment's dislikes updated successfully!");
+
       return res.status(200).json({
         message: "comment's dislikes updated successfully",
         comment,
@@ -193,12 +235,12 @@ function dislikeCommentHandler() {
 function removeCommentLikeHandler() {
   const removeCommentLike = async function (
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<any> {
     try {
-      const comment = await findCommentByIdAndPostId(req, res);
+      let comment = await findCommentByIdAndPostId(req, res);
       if (!comment) return;
-      if (comment.likes.length <= 0) {
+      if (comment.likes!.length <= 0) {
         logger.info("no likes to remove from comment");
         return res.status(204).json({
           message: "there are no likes on the comment yet",
@@ -207,17 +249,24 @@ function removeCommentLikeHandler() {
 
       // remove like
       {
-        const likesSet = Utility.arrayToSet(comment.likes);
+        const likesSet = Utility.arrayToSet(comment.likes!);
         const userId: string = Utility.extractUserIdFromToken(req);
+
         if (!likesSet.has(userId)) {
           logger.info("user already removed like from comment");
           return res.status(400).json({
             message: "user already removed like from comment",
           });
         }
+
         likesSet.delete(userId); // remove user from likes
         comment.likes = likesSet.size > 0 ? Array.from(likesSet) : [];
-        await comment.save();
+
+        const cb: TransactionCallback<CommentDocument> = async (session) => {
+          return await comment!.save({ session });
+        };
+
+        comment = await Utility.runOperationInTransaction(cb);
         logger.info("like removed from the comment successfully!");
       }
 
@@ -243,30 +292,39 @@ function removeCommentLikeHandler() {
 function likeCommentHandler() {
   const likeComment = async function (
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<any> {
     try {
-      const comment = await findCommentByIdAndPostId(req, res);
+      let comment = await findCommentByIdAndPostId(req, res);
       if (!comment) return;
+
       logger.info("updating comment likes...");
+
       const updatedCommentLikes = Utility.updateUserReactions(
         req,
         res,
-        comment.likes
+        comment.likes!,
       );
       if (!updatedCommentLikes) return;
 
       // if the user disliked the comment, "remove" them from dislikes
-      if (comment.dislikes.length >= 1) {
-        const dislikeSet = Utility.arrayToSet(comment.dislikes);
+      if (comment.dislikes!.length >= 1) {
+        const dislikeSet = Utility.arrayToSet(comment.dislikes!);
         const userId: string = Utility.extractUserIdFromToken(req);
+
         if (dislikeSet.has(userId)) {
           dislikeSet.delete(userId); // remove user
           comment.dislikes = dislikeSet.size > 0 ? Array.from(dislikeSet) : [];
         }
       }
-      await comment.save();
+
+      const cb: TransactionCallback<CommentDocument> = async (session) => {
+        return await comment!.save({ session });
+      };
+
+      comment = await Utility.runOperationInTransaction(cb);
       logger.info("comment's likes updated successfully!");
+
       return res.status(200).json({
         message: "comment's likes updated successfully",
         comment,
@@ -285,7 +343,7 @@ function likeCommentHandler() {
 function deleteReplyToCommentHandler() {
   const deleteReplyToComment = async function (
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<any> {
     try {
       const parentComment = await findParentComment(req, res);
@@ -303,14 +361,17 @@ function deleteReplyToCommentHandler() {
       const deletedReply = await findCommentByIdAndParentId(
         replyId,
         parentComment.id,
-        res
+        res,
       );
-      if (!deletedReply) return;
+      if (!deletedReply) {
+        return;
+      }
+
       if (
         Utility.isCurrUserSameAsCreator(
           req,
           res,
-          deletedReply.user._id.toHexString()
+          (<any>deletedReply.user).id,
         ) === false
       ) {
         return;
@@ -321,19 +382,26 @@ function deleteReplyToCommentHandler() {
         const objectIdToString = (currMongoId: Types.ObjectId): string => {
           return currMongoId._id.toHexString();
         };
-        const hexUserIds = parentComment.childComments.map(objectIdToString);
+
+        const hexUserIds = parentComment.childComments!.map(objectIdToString);
         const userIdSet: Set<string> = Utility.arrayToSet(hexUserIds);
+
         if (!userIdSet.has(replyId)) {
           return res.status(404).json({
             message: `the current reply with id, ${replyId}, was not found among the current comment's( ${parentComment.id} ) replies`,
           });
         }
+
         userIdSet.delete(replyId);
         parentComment.childComments =
           userIdSet.size > 0
             ? Array.from(userIdSet).map((id) => new Types.ObjectId(id))
             : [];
-        await parentComment.save();
+
+        const cb: TransactionCallback<void> = async (session) => {
+          await parentComment.save({ session });
+        };
+        await Utility.runOperationInTransaction(cb);
       }
 
       // delete in database
@@ -360,14 +428,16 @@ function deleteReplyToCommentHandler() {
 function createReplyToCommentHandler() {
   const createSubComment = async function (
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<any> {
     try {
       // find the parent comment first
       const sanitizedData = matchedData(req);
       const { postId, id: parentCommentId } = sanitizedData;
       const parentComment = await findParentComment(req, res);
-      if (!parentComment) return;
+      if (!parentComment) {
+        return;
+      }
 
       // is the parent comment deleted?
       if (parentComment.deleted) {
@@ -379,21 +449,35 @@ function createReplyToCommentHandler() {
       // make sub comment / reply
       const currUserId = Utility.extractUserIdFromToken(req);
       logger.info(
-        `creating a sub-comment for comment,${parentCommentId}, by user with id, ${currUserId}...`
+        `creating a sub-comment for comment,${parentCommentId}, by user with id, ${currUserId}...`,
       );
+
       const replyCommentData: CommentModelShape = {
         user: new Types.ObjectId(<string>currUserId),
         post: new Types.ObjectId(<string>postId),
-        parentComment: parentComment._id, // attach parent to child/reply
+        parentComment: parentComment.id, // attach parent to child/reply
         ...req.body,
       } as const;
-      const newReplyComment = await CommentModel.create({
-        ...replyCommentData,
-      });
+
+      const cb: TransactionCallback<CommentDocument> = async (session) => {
+        const comment = await CommentModel.create([replyCommentData], {
+          session,
+        });
+
+        return comment[0] as unknown as CommentDocument;
+      };
 
       // attach child/reply to parent
-      parentComment.childComments.push(newReplyComment._id);
-      await parentComment.save();
+      const newReplyComment = await Utility.runOperationInTransaction(cb);
+      parentComment.childComments!.push(newReplyComment.id);
+
+      const saveParentCommentCb: TransactionCallback<void> = async (
+        session,
+      ) => {
+        await parentComment.save({ session });
+      };
+
+      await Utility.runOperationInTransaction(saveParentCommentCb);
 
       return res.status(201).json({
         message: "reply created successfully",
@@ -418,7 +502,7 @@ function createReplyToCommentHandler() {
 function retrieveRepliesHandler() {
   const fetchReplies = async function (
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<any> {
     try {
       const parentComment = await findParentComment(req, res);
@@ -427,28 +511,50 @@ function retrieveRepliesHandler() {
       // is the parent comment deleted? if so it'll hv no children
       // but it'll have detached children
       if (parentComment.deleted) {
-        await parentComment.populate("detachedchildComments");
-        const detachedReplies = parentComment.detachedchildComments;
-        if (detachedReplies.length <= 0) {
-          return res.status(404).json({
-            message: `no replies added for comment, ${parentComment.id}`,
+        const cb: TransactionCallback<void> = async (session) => {
+          await parentComment.populate({
+            path: "detachedchildComments",
+            options: { session },
           });
-        }
-        return res.status(200).json({
-          message: "replies retrieved successfully",
-          replies: detachedReplies,
-        });
+
+          const detachedReplies = parentComment.detachedchildComments;
+          if (detachedReplies!.length <= 0) {
+            res.status(404).json({
+              message: `no replies added for comment, ${parentComment.id}`,
+            });
+
+            return;
+          }
+
+          res.status(200).json({
+            message: "replies retrieved successfully",
+            replies: detachedReplies,
+          });
+        };
+
+        await Utility.runOperationInTransaction(cb);
+        return;
       }
 
       // populate child comments
       logger.info(`populating comment's( ${parentComment.id} ) replies...`);
-      await parentComment.populate("childComments");
-      let replies = parentComment.childComments;
-      if (replies.length <= 0) {
+
+      const cb: TransactionCallback<void> = async (session) => {
+        await parentComment.populate({
+          path: "childComments",
+          options: { session },
+        });
+      };
+
+      await Utility.runOperationInTransaction(cb);
+
+      const replies = parentComment.childComments;
+      if (replies!.length <= 0) {
         return res.status(404).json({
           message: `no replies added for comment, ${parentComment.id}`,
         });
       }
+
       return res.status(200).json({
         message: "replies retrieved successfully",
         replies,
@@ -472,24 +578,29 @@ function retrieveRepliesHandler() {
 function deleteCommentHandler() {
   const deleteComment = async function (
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<any> {
     try {
       const storedComment = await findCommentByIdAndPostId(req, res);
-      if (!storedComment) return;
+      if (!storedComment) {
+        return;
+      }
+
       if (
         Utility.isCurrUserSameAsCreator(
           req,
           res,
-          storedComment!.user._id.toHexString()
+          (<any>storedComment.user).id,
         ) === false
       ) {
         return;
       }
+
       await markCommentAsDeleted(storedComment);
       logger.info(
-        `comment with id, ${storedComment.id}, deleted successfully!`
+        `comment with id, ${storedComment.id}, deleted successfully!`,
       );
+
       return res.status(204).end();
     } catch (e) {
       logger.error(e, "error deleting a comment");
@@ -505,10 +616,10 @@ function deleteCommentHandler() {
 function modifyCommentHandler() {
   const handleUpdateComment = async function (
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<any> {
     try {
-      const storedComment = await findCommentByIdAndPostId(req, res);
+      let storedComment = await findCommentByIdAndPostId(req, res);
       if (!storedComment) {
         return;
       }
@@ -517,7 +628,7 @@ function modifyCommentHandler() {
         Utility.isCurrUserSameAsCreator(
           req,
           res,
-          storedComment.user._id.toHexString()
+          (<any>storedComment.user).id,
         ) === false
       ) {
         return;
@@ -525,10 +636,13 @@ function modifyCommentHandler() {
 
       const newData: CommentUpdateReqBody = req.body;
       newData["lastModified"] = new Date();
-      await Utility.updateDoc(storedComment, newData);
+      storedComment = (await Utility.updateDoc(
+        storedComment,
+        newData,
+      )) as CommentDocument;
 
       logger.info(
-        `comment with id, ${storedComment.id}, updated successfully!`
+        `comment with id, ${storedComment.id}, updated successfully!`,
       );
 
       return res.status(200).json({
@@ -554,27 +668,36 @@ function modifyCommentHandler() {
 function createCommentHandler() {
   const createComment = async function (
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<any> {
     try {
       const sanitizedData = matchedData(req);
       const { postId } = sanitizedData;
-      if (!Utility.validateObjectId(postId, res)) return;
+      if (!Utility.validateObjectId(postId, res)) {
+        return;
+      }
+
       const currUserId = Utility.extractUserIdFromToken(req);
       const reqBody: CommentModelShape = {
         user: new Types.ObjectId(<string>currUserId),
         post: new Types.ObjectId(<string>postId),
         ...req.body,
       } as const;
+
       logger.info(
-        `creating a comment for user with id, ${currUserId} and post id, ${postId}...`
+        `creating a comment for user with id, ${currUserId} and post id, ${postId}...`,
       );
-      const createdComment = await CommentModel.create({
-        ...reqBody,
-      });
+
+      const cb: TransactionCallback<CommentDocument> = async (session) => {
+        const comment = await CommentModel.create([reqBody], { session });
+        return comment[0] as unknown as CommentDocument;
+      };
+
+      const createdComment = await Utility.runOperationInTransaction(cb);
       logger.info(
-        `comment with id, ${createdComment.id}, created successfully!`
+        `comment with id, ${createdComment.id}, created successfully!`,
       );
+
       return res.status(201).json({
         message: "comment created successfully",
         comment: createdComment,
@@ -598,12 +721,16 @@ function createCommentHandler() {
 function getCommentsForPostHandler() {
   const fetchPostComments = async function (
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<any> {
     try {
       const storedComments = await findCommentsForPost(req, res);
-      if (!storedComments) return;
+      if (!storedComments) {
+        return;
+      }
+
       logger.info("comments fetched successfully!");
+
       return res.status(200).json({
         message: "post comments fetched successfully",
         comments: storedComments,
@@ -626,12 +753,16 @@ function getCommentsForPostHandler() {
 function fetchCommentByIdHandler() {
   const handleCommentRetrieval = async function (
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<any> {
     try {
       const storedComment = await findCommentByIdAndPostId(req, res);
-      if (!storedComment) return;
+      if (!storedComment) {
+        return;
+      }
+
       logger.info("comment retrieved successfully!");
+
       return res.status(200).json({
         message: "comment retrieved successfully",
         comment: storedComment,
@@ -685,7 +816,12 @@ async function markCommentAsDeleted(storedComment: any) {
     storedComment.childComments = [];
     storedComment.tldr = "";
     storedComment.body = "deleted comment";
-    await storedComment.save();
+
+    const cb: TransactionCallback<CommentDocument> = async (session) => {
+      return await storedComment.save({ session });
+    };
+
+    await Utility.runOperationInTransaction(cb);
   } catch (e) {
     throw e;
   }
@@ -694,13 +830,30 @@ async function markCommentAsDeleted(storedComment: any) {
 async function findCommentByIdAndParentId(
   id: string,
   parentId: string,
-  res: Response
+  res: Response,
 ) {
   try {
-    const storedComment = await CommentModel.findOne({
-      _id: id,
-      parentComment: parentId,
-    });
+    const cb: TransactionCallback<CommentDocument | null> = async (session) => {
+      const comment = await CommentModel.findOne(
+        { _id: id, parentComment: parentId },
+        null,
+        { session },
+      );
+
+      if (!comment) {
+        return null;
+      }
+
+      await comment.populate({
+        path: "user",
+        select: "id",
+        options: { session },
+      });
+
+      return comment as unknown as CommentDocument;
+    };
+
+    const storedComment = await Utility.runOperationInTransaction(cb);
     return validateCommentFromDb(storedComment, res) ? storedComment : null;
   } catch (e) {
     throw e;
@@ -718,7 +871,7 @@ async function findCommentByIdAndPostId(req: Request, res: Response) {
     const sanitizedData = matchedData(req);
     const { postId, id: commentId } = sanitizedData;
     logger.info(
-      `searching for comment with id, ${commentId}, for post with id, ${postId}...`
+      `searching for comment with id, ${commentId}, for post with id, ${postId}...`,
     );
 
     if (
@@ -728,10 +881,27 @@ async function findCommentByIdAndPostId(req: Request, res: Response) {
       return null;
     }
 
-    const storedComment = await CommentModel.findOne({
-      _id: commentId,
-      post: postId,
-    });
+    const cb: TransactionCallback<CommentDocument | null> = async (session) => {
+      const comment = await CommentModel.findOne(
+        { _id: commentId, post: postId },
+        null,
+        { session },
+      );
+
+      if (!comment) {
+        return null;
+      }
+
+      await comment.populate({
+        path: "user",
+        select: "id",
+        options: { session },
+      });
+
+      return comment as unknown as CommentDocument;
+    };
+
+    const storedComment = await Utility.runOperationInTransaction(cb);
     return validateCommentFromDb(storedComment, res) ? storedComment : null;
   } catch (e) {
     throw e;
@@ -748,11 +918,23 @@ async function findCommentsForPost(req: Request, res: Response) {
       return null;
     }
 
-    const storedComments = await CommentModel.find({ post: postId }).sort({
-      createdAt: -1,
-    });
+    const cb: TransactionCallback<CommentDocument[] | null> = async (
+      session,
+    ) => {
+      const comments = await CommentModel.find({ post: postId }, null, {
+        session,
+        sort: { lastModified: -1 },
+      });
 
-    if (storedComments.length <= 0) {
+      if (!comments || comments.length <= 0) {
+        return null;
+      }
+
+      return comments as unknown as CommentDocument[];
+    };
+
+    const storedComments = await Utility.runOperationInTransaction(cb);
+    if (!storedComments) {
       logger.error(`No comments available for post with id, ${postId}.`);
       res.status(200).json({
         message: `No comments available for post with id, ${postId}.`,
@@ -773,13 +955,12 @@ async function findCommentsForPost(req: Request, res: Response) {
  * @returns a boolean representing the validity of the comment
  */
 function validateCommentFromDb(comment: any | null, res: Response) {
-  if (!comment) {
-    logger.error("comment not found");
-    res.status(404).json({ message: "comment not found" });
-  } else {
+  if (comment) {
     return true;
   }
 
+  logger.error("comment not found");
+  res.status(404).json({ message: "comment not found" });
   return false;
 }
 

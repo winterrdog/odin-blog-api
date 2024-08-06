@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 import * as _ from "lodash";
 import { matchedData } from "express-validator";
-import { PostModel } from "../models/post";
+import { PostDocument, PostModel } from "../models/post";
 import { JwtPayload } from "../middleware/interfaces";
 import { postIdSanitizer } from "../validators/post";
-import Utility from "../utilities";
+import Utility, { TransactionCallback } from "../utilities";
 import {
   postReqBodyValidators,
   postUpdateReqBodyValidators,
@@ -35,10 +35,15 @@ function getUserPostsHandler() {
       logger.info("fetching a user's posts...");
 
       const currUserId = Utility.extractUserIdFromToken(req);
-      const posts = await PostModel.find({ author: currUserId }).sort({
-        createdAt: -1,
-      });
+      const cb: TransactionCallback<PostDocument[]> = async (session) => {
+        const posts = await PostModel.find({ author: currUserId }, null, {
+          session,
+        }).sort({ lastModified: -1 });
 
+        return posts as unknown as PostDocument[];
+      };
+
+      const posts = await Utility.runOperationInTransaction(cb);
       if (posts.length <= 0) {
         logger.error("No posts found for user");
         return res.status(404).json({
@@ -62,16 +67,22 @@ function getUserPostsHandler() {
 function getUserLikedPostsHandler() {
   const fetchUserLikedPosts = async (
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<any> => {
     try {
       const currUserId = Utility.extractUserIdFromToken(req);
-      const posts = await PostModel.find({ likes: { $in: [currUserId] } }).sort(
-        {
-          createdAt: -1,
-        }
-      );
+      const cb: TransactionCallback<PostDocument[]> = async (session) => {
+        const posts = await PostModel.find(
+          { likes: { $in: [currUserId] } },
+          null,
+        )
+          .sort({ lastModified: -1 })
+          .session(session);
 
+        return posts as unknown as PostDocument[];
+      };
+
+      const posts = await Utility.runOperationInTransaction(cb);
       if (posts.length <= 0) {
         logger.error("No liked posts found for user");
         return res.status(404).json({
@@ -95,15 +106,21 @@ function getUserLikedPostsHandler() {
 function getRecentlyViewedPostsHandler() {
   const fetchRecentlyViewedPosts = async (
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<any> => {
     try {
       // get the user's most recently viewed 5 posts
       const currUserId = Utility.extractUserIdFromToken(req);
-      const posts = await PostModel.find({ views: { $in: [currUserId] } })
-        .sort({ createdAt: -1 })
-        .limit(5);
+      const cb: TransactionCallback<PostDocument[]> = async (session) => {
+        const posts = await PostModel.find({ views: { $in: [currUserId] } })
+          .sort({ lastModified: -1 })
+          .limit(5)
+          .session(session);
 
+        return posts as unknown as PostDocument[];
+      };
+
+      const posts = await Utility.runOperationInTransaction(cb);
       if (posts.length <= 0) {
         logger.error("No recently viewed posts found for user");
         return res.status(404).json({
@@ -127,27 +144,39 @@ function getRecentlyViewedPostsHandler() {
 function getPostByIdHandler() {
   const retrievePostById = async function (
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<any> {
     try {
       const id = extractPostIdFromReq(req, res);
       if (!id) return;
+
       logger.info(`fetching post by id: ${id}...`);
-      const post = await findPostById(id, res);
+
+      const cb: TransactionCallback<PostDocument | null> = async (session) => {
+        return await PostModel.findById(id, null, { session });
+      };
+
+      const post = await Utility.runOperationInTransaction(cb);
       if (!post) return;
 
       // track the number of viewers
       {
         const currUserId = Utility.extractUserIdFromToken(req);
         logger.info(`getting user id for view tracking: ${currUserId}...`);
-        const postViewersSet: Set<string> = Utility.arrayToSet(post.views);
+
+        const postViewersSet: Set<string> = Utility.arrayToSet(post.views!);
         if (!postViewersSet.has(currUserId)) {
-          post.views.push(currUserId);
-          await post.save();
+          post.views!.push(currUserId);
+
+          const cb: TransactionCallback<void> = async (session) => {
+            await post.save({ session });
+          };
+          await Utility.runOperationInTransaction(cb);
         }
       }
 
       logger.info("post retrieved successfully!");
+
       return res.status(200).json({
         message: "Post retrieved successfully",
         post,
@@ -166,18 +195,29 @@ function getPostByIdHandler() {
 function getPostsHandler() {
   const fetchPosts = async function (
     _req: Request,
-    res: Response
+    res: Response,
   ): Promise<any> {
     try {
       logger.info("fetching all posts...");
-      const posts = await PostModel.find({}).sort({ createdAt: -1 });
+
+      const cb: TransactionCallback<PostDocument[]> = async (session) => {
+        const posts = await PostModel.find({})
+          .sort({ lastModified: -1 })
+          .session(session);
+
+        return posts as unknown as PostDocument[];
+      };
+
+      const posts = await Utility.runOperationInTransaction(cb);
       if (posts.length <= 0) {
         logger.error("No posts have ever been created");
         return res.status(404).json({
           message: "No posts found",
         });
       }
+
       logger.info("all posts retrieved successfully!");
+
       return res.status(200).json({
         message: "Posts retrieved successfully",
         posts,
@@ -194,7 +234,7 @@ function getPostsHandler() {
 function createPostHandler() {
   const createPost = async function (
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<any> {
     try {
       // grab user id from jwt
@@ -202,11 +242,18 @@ function createPostHandler() {
       logger.info(`creating post for user with id: ${currUserId}...`);
 
       // create post
-      const post = await PostModel.create({
-        author: currUserId,
-        ...req.body,
-      });
+      const cb: TransactionCallback<PostDocument> = async (session) => {
+        const post = await PostModel.create(
+          [{ author: currUserId, ...req.body }],
+          { session },
+        );
+
+        return post[0] as unknown as PostDocument;
+      };
+
+      const post = await Utility.runOperationInTransaction(cb);
       logger.info(`post created successfully! post: ${post}`);
+
       return res.status(201).json({
         message: "Post created successfully",
         post,
@@ -229,36 +276,50 @@ function createPostHandler() {
 function updatePostHandler() {
   const updatePost = async function (
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<any> {
     try {
       const id = extractPostIdFromReq(req, res);
       if (!id) return;
+
       logger.info(`updating post with id: ${id}...`);
-      const post = await findPostById(id, res);
+
+      const cb: TransactionCallback<PostDocument | null> = async (session) => {
+        const post = await PostModel.findById(id, null, { session });
+        if (!post) {
+          logger.error(`post with id: ${id} not found`);
+          res.status(404).json({ message: `Post with id ${id} not found` });
+
+          return null;
+        }
+
+        await post.populate({
+          path: "author",
+          select: "name id",
+          options: { session },
+        });
+
+        return post as unknown as PostDocument;
+      };
+
+      let post = await Utility.runOperationInTransaction(cb);
       if (!post) return;
 
       // check if user is the author of the post
       if (
-        Utility.isCurrUserSameAsCreator(
-          req,
-          res,
-          post.author._id.toHexString()
-        ) === false
+        Utility.isCurrUserSameAsCreator(req, res, (<any>post.author).id) ===
+        false
       ) {
         return;
       }
 
       const newData: PostUpdateReqBody = req.body;
       newData["lastModified"] = new Date();
-      await Utility.updateDoc(post, newData);
+      post = (await Utility.updateDoc(post, newData)) as PostDocument;
 
       logger.info(`post updated successfully! post: ${post.toJSON()}`);
 
-      return res.status(200).json({
-        message: "Post updated",
-        post,
-      });
+      return res.status(200).json({ message: "Post updated", post });
     } catch (e) {
       logger.error(e, "error occurred during updating post");
       Utility.handle500Status(res, <Error>e);
@@ -278,7 +339,7 @@ function updatePostHandler() {
 function deletePostHandler() {
   const deletePost = async function (
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<any> {
     try {
       const id = extractPostIdFromReq(req, res);
@@ -291,16 +352,19 @@ function deletePostHandler() {
 
       // check if user is the author of the post
       if (
-        Utility.isCurrUserSameAsCreator(
-          req,
-          res,
-          post.author._id.toHexString()
-        ) === false
+        Utility.isCurrUserSameAsCreator(req, res, (<any>post.author).id) ===
+        false
       ) {
         return;
       }
-      await post.deleteOne();
+
+      const cb: TransactionCallback<void> = async (session) => {
+        await post.deleteOne({ session });
+      };
+
+      await Utility.runOperationInTransaction(cb);
       logger.info(`post with id: ${id} deleted successfully!`);
+
       return res.status(204).end();
     } catch (e) {
       logger.error(e, "error occurred during deleting post");
@@ -316,31 +380,43 @@ function deletePostHandler() {
 function updateLikesHandler() {
   const updatePostLikes = async function (
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<any> {
     try {
       const id = extractPostIdFromReq(req, res);
       if (!id) return;
+
       logger.info(`fetching post by id: ${id}...`);
-      const post = await findPostById(id, res);
+
+      const cb: TransactionCallback<PostDocument | null> = async (session) => {
+        return await PostModel.findById(id, null, { session });
+      };
+      const post = await Utility.runOperationInTransaction(cb);
       if (!post) return;
 
       // update likes
       logger.info(`updating user likes...`);
-      const updateOnLikes = Utility.updateUserReactions(req, res, post.likes);
+      const updateOnLikes = Utility.updateUserReactions(req, res, post.likes!);
       if (!updateOnLikes) return;
 
       // if the user disliked the post, "remove" them from dislikes
-      if (post.dislikes.length > 0) {
-        const dislikeSet = Utility.arrayToSet(post.dislikes);
+      if (post.dislikes!.length > 0) {
+        const dislikeSet = Utility.arrayToSet(post.dislikes!);
         const userId: string = ((<any>req.user!).data as JwtPayload).data.sub;
+
         if (dislikeSet.has(userId)) {
           dislikeSet.delete(userId); // remove user
           post.dislikes = dislikeSet.size > 0 ? Array.from(dislikeSet) : [];
         }
       }
-      await post.save();
+
+      const postSaveCb: TransactionCallback<void> = async (session) => {
+        await post.save({ session });
+      };
+
+      await Utility.runOperationInTransaction(postSaveCb);
       logger.info("likes updated successfully!");
+
       return res.status(200).json({
         message: "likes updated successfully",
         post,
@@ -359,13 +435,17 @@ function updateLikesHandler() {
 function updateDislikesHandler() {
   const updatePostDislikes = async function (
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<any> {
     try {
       const id = extractPostIdFromReq(req, res);
       if (!id) return;
       logger.info(`fetching post by id: ${id}...`);
-      const post = await findPostById(id, res);
+
+      const cb: TransactionCallback<PostDocument | null> = async (session) => {
+        return await PostModel.findById(id, null, { session });
+      };
+      const post = await Utility.runOperationInTransaction(cb);
       if (!post) return;
 
       // update dislikes
@@ -373,21 +453,27 @@ function updateDislikesHandler() {
       const updateOnDislikes = Utility.updateUserReactions(
         req,
         res,
-        post.dislikes
+        post.dislikes!,
       );
       if (!updateOnDislikes) return;
 
       // if the user liked the post, "remove" them from likes
-      if (post.likes.length > 0) {
-        const likesSet = Utility.arrayToSet(post.likes);
+      if (post.likes!.length > 0) {
+        const likesSet = Utility.arrayToSet(post.likes!);
         const userId: string = ((<any>req.user!).data as JwtPayload).data.sub;
         if (likesSet.has(userId)) {
           likesSet.delete(userId); // remove user from likes
           post.likes = likesSet.size > 0 ? Array.from(likesSet) : [];
         }
       }
-      await post.save();
+
+      const postSaveCb: TransactionCallback<void> = async (session) => {
+        await post.save({ session });
+      };
+
+      await Utility.runOperationInTransaction(postSaveCb);
       logger.info("dislikes updated successfully!");
+
       return res.status(200).json({
         message: "dislikes updated successfully",
         post,
@@ -410,7 +496,7 @@ function updateDislikesHandler() {
 function removeLikeHandler() {
   const removeLikeFromPost = async function (
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<any> {
     try {
       const id = extractPostIdFromReq(req, res);
@@ -418,15 +504,21 @@ function removeLikeHandler() {
       logger.info(`fetching post by id: ${id}...`);
 
       // check if post exists
-      const post = await findPostById(id, res);
+      const cb: TransactionCallback<PostDocument | null> = async (session) => {
+        return await PostModel.findById(id, null, { session });
+      };
+
+      const post = await Utility.runOperationInTransaction(cb);
       if (!post) return;
 
-      if (post.likes.length <= 0) {
+      if (post.likes!.length <= 0) {
         logger.info("no likes to remove from");
         return res.status(400).json({ message: "there are no likes yet" });
       }
+
       logger.info(`removing user like...`);
-      const likesSet = Utility.arrayToSet(post.likes);
+
+      const likesSet = Utility.arrayToSet(post.likes!);
       const userId: string = ((<any>req.user!).data as JwtPayload).data.sub;
       if (!likesSet.has(userId)) {
         logger.info("user already unliked post");
@@ -434,10 +526,17 @@ function removeLikeHandler() {
           message: "user already unliked post",
         });
       }
+
       likesSet.delete(userId); // remove user from likes
       post.likes = likesSet.size > 0 ? Array.from(likesSet) : [];
-      await post.save();
+
+      const postSaveCb: TransactionCallback<void> = async (session) => {
+        await post.save({ session });
+      };
+
+      await Utility.runOperationInTransaction(postSaveCb);
       logger.info("like removed successfully!");
+
       return res.status(200).json({
         message: "post like removed successfully!",
         post,
@@ -460,25 +559,31 @@ function removeLikeHandler() {
 function removeDislikeHandler() {
   const removeDislike = async function (
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<any> {
     try {
       const id = extractPostIdFromReq(req, res);
       if (!id) return;
+
       logger.info(`fetching post by id: ${id}...`);
 
       // check if post exists
-      const post = await findPostById(id, res);
+      const cb: TransactionCallback<PostDocument | null> = async (session) => {
+        return await PostModel.findById(id, null, { session });
+      };
+
+      const post = await Utility.runOperationInTransaction(cb);
       if (!post) return;
 
       // update dislikes
-      if (post.dislikes.length <= 0) {
+      if (post.dislikes!.length <= 0) {
         logger.info("no dislikes to remove from");
         return res.status(400).json({ message: "there are no dislikes yet" });
       }
 
       logger.info(`removing user dislike...`);
-      const dislikesSet = Utility.arrayToSet(post.dislikes);
+
+      const dislikesSet = Utility.arrayToSet(post.dislikes!);
       const userId: string = ((<any>req.user!).data as JwtPayload).data.sub;
       if (!dislikesSet.has(userId)) {
         logger.info("user already removed their dislike from post");
@@ -486,10 +591,17 @@ function removeDislikeHandler() {
           message: "user already removed their dislike from post",
         });
       }
+
       dislikesSet.delete(userId); // remove user from dislikes
       post.dislikes = dislikesSet.size > 0 ? Array.from(dislikesSet) : [];
-      await post.save();
+
+      const postSaveCb: TransactionCallback<void> = async (session) => {
+        await post.save({ session });
+      };
+
+      await Utility.runOperationInTransaction(postSaveCb);
       logger.info("dislike removed successfully!");
+
       return res.status(204).end();
     } catch (e) {
       logger.error(e, "Error occurred during removing dislike");
@@ -504,12 +616,24 @@ function removeDislikeHandler() {
 
 async function findPostById(id: string, res: Response) {
   try {
-    const post = await PostModel.findById(id);
-    if (!post) {
-      logger.error(`post with id ${id} not found`);
-      res.status(404).json({ message: `Post with id ${id} not found` });
-      return null;
-    }
+    const cb: TransactionCallback<PostDocument | null> = async (session) => {
+      const post = await PostModel.findById(id, null, { session });
+      if (!post) {
+        logger.error(`post with id ${id} not found`);
+        res.status(404).json({ message: `Post with id ${id} not found` });
+        return null;
+      }
+
+      await post.populate({
+        path: "author",
+        select: "name id",
+        options: { session },
+      });
+
+      return post as unknown as PostDocument;
+    };
+
+    const post = await Utility.runOperationInTransaction(cb);
     return post;
   } catch (e) {
     throw e;

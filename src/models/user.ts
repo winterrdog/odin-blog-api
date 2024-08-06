@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import { Document, Schema, model } from "mongoose";
 
 export const roles = ["author", "reader"];
 export interface UserModelShape {
@@ -6,19 +6,17 @@ export interface UserModelShape {
   passwordHash: string;
   role?: string;
 }
+export interface UserDocument extends UserModelShape, Document {}
 const UserSchema = new Schema(
   {
     name: { type: String, required: true, maxLength: 64 },
     passwordHash: { type: String, required: true },
-    role: {
-      type: String,
-      enum: roles,
-      default: "reader",
-    },
+    role: { type: String, enum: roles, default: "reader" },
   },
   {
     timestamps: true,
     strictQuery: "throw",
+    strict: "throw",
     toJSON: { transform: toJsonHandler },
   },
 );

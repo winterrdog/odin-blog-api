@@ -2,13 +2,14 @@ import { NextFunction, Request, Response } from "express";
 import * as fs from "fs";
 import * as _ from "lodash";
 import * as jwt from "jsonwebtoken";
-import { isValidObjectId } from "mongoose";
+import mongoose, { ClientSession, Connection, isValidObjectId } from "mongoose";
 import { validationResult } from "express-validator";
 import { PathLike } from "fs";
 import { JwtPayload } from "./middleware/interfaces";
 import { startLogger } from "./logging";
 
 const logger = startLogger(__filename);
+export type TransactionCallback<T> = (session: ClientSession) => Promise<T>;
 export default class Utility {
   static generateJwtPayload(payload: JwtPayload): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -32,14 +33,14 @@ export default class Utility {
         payload,
         <string>process.env.JWT_SECRET,
         jwtSignOptions,
-        jwtSignCb
+        jwtSignCb,
       );
     });
   }
   static validateRequest(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): void {
     logger.info("validating and sanitizing request body, query, and params...");
 
@@ -85,14 +86,21 @@ export default class Utility {
     if (!isValidObjectId(id)) {
       logger.error("invalid or malformed object id");
       res.status(400).json({ message: "Invalid id was provided, " + id });
+
       return false;
     }
+
     return true;
   }
   static async updateDoc(docToUpdate: any, newData: any) {
     try {
       _.merge(docToUpdate, newData);
-      await docToUpdate.save();
+
+      const cb: TransactionCallback<any> = async (session) => {
+        return await docToUpdate.save({ session });
+      };
+
+      return await Utility.runOperationInTransaction(cb);
 
       // note: no need to return doc because Objects are passed by ref in JS.
       // so any changes made to the doc are propagated to the original doc
@@ -114,11 +122,11 @@ export default class Utility {
   static isCurrUserSameAsCreator(
     req: Request,
     res: Response,
-    dbUserId: string
+    dbUserId: string,
   ): boolean {
     const currUserId = Utility.extractUserIdFromToken(req);
     logger.info(
-      `checking if user with id, ${currUserId}, is the author of the resource...`
+      `checking if user with id, ${currUserId}, is the author of the resource...`,
     );
     if (currUserId !== dbUserId) {
       logger.error(`user( ${currUserId} ) is not the author of the resource`);
@@ -133,7 +141,7 @@ export default class Utility {
   static updateUserReactions(
     req: Request,
     res: Response,
-    arr: Array<string>
+    arr: Array<string>,
   ): boolean {
     if (!req.user) {
       throw new Error("user's not authenticated thus user object is missing");
@@ -147,5 +155,30 @@ export default class Utility {
     logger.info("the current reaction was already updated by the user");
     res.status(400).json({ message: "user reaction already updated" });
     return false;
+  }
+  static async runOperationInTransaction<T>(
+    cb: TransactionCallback<T>,
+    connection: Connection = mongoose.connection,
+  ): Promise<T> {
+    let session: ClientSession | null = null;
+    let result: T;
+
+    try {
+      session = await connection.startSession();
+      const execTransactionCb = async () => {
+        const res = await cb(session!);
+        return res;
+      };
+
+      result = await session.withTransaction<T>(execTransactionCb);
+    } catch (e) {
+      throw e;
+    } finally {
+      if (session) {
+        await session.endSession();
+      }
+    }
+
+    return result;
   }
 }

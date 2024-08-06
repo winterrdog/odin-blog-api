@@ -3,16 +3,17 @@ import {
   Document,
   Schema,
   model,
+  Types,
 } from "mongoose";
 import { UserModelName } from "./user";
 import { PostModelName } from "./post";
 
 export interface CommentModelShape {
-  user: Schema.Types.ObjectId;
-  post: Schema.Types.ObjectId;
-  parentComment?: Schema.Types.ObjectId;
-  childComments?: Schema.Types.ObjectId[];
-  detachedchildComments?: Schema.Types.ObjectId[];
+  user: Types.ObjectId;
+  post: Types.ObjectId;
+  parentComment?: Types.ObjectId;
+  childComments?: Types.ObjectId[];
+  detachedchildComments?: Types.ObjectId[];
   deleted?: boolean;
   body: string;
   tldr?: string;
@@ -20,6 +21,8 @@ export interface CommentModelShape {
   dislikes?: string[];
   likes?: string[];
 }
+export interface CommentDocument extends CommentModelShape, Document {}
+
 const CommentModelName = "Comment";
 
 // todo: populate the necessary fields in all referenced fields
@@ -56,8 +59,9 @@ const CommentSchema = new Schema(
   {
     timestamps: true,
     strictQuery: "throw",
+    strict: "throw",
     toJSON: { transform: toJsonHandler, flattenObjectIds: true },
-  }
+  },
 );
 
 // indexes
@@ -67,23 +71,31 @@ CommentSchema.index({ user: 1 });
 CommentSchema.pre(
   ["find", "findOne"],
   function (next: CallbackWithoutResultAndOptionalError) {
+    // todo: get a session from the document
     this.clone().populate({
       path: "user",
       select: "name",
     });
+
     return next();
-  }
+  },
 );
 CommentSchema.pre("save", async function (this: Document) {
   try {
+    const session = this.$session();
+    if (!session) {
+      throw new Error("session is missing from the Comment document");
+    }
+
     await this.populate({
       path: "user",
       select: "name",
+      options: { session },
     });
   } catch (e) {
     console.error(
       "error during post middleware on saving a comment",
-      e as Error
+      e as Error,
     );
   }
 });
