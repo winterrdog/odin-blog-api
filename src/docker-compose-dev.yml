@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # application services
   web_app:
     build: .
     container_name: blog_backend
@@ -9,23 +10,54 @@ services:
     networks:
       - mongo_network
     depends_on:
-      - blog_db
+      - mongo1
+      - mongo2
+      - mongo3
     env_file:
       - ./.env
     volumes:
       - ./:/var/log:rw
-  blog_db:
-    image: mongo:7.0.8-jammy
-    container_name: mongo_db
+  # database services -- used 3 mongo instances for a replica set for HA
+  mongo1:
+    image: mongo:8.0.0-rc16-jammy
+    container_name: mongo1
     networks:
       - mongo_network
+    ports:
+      - "27015:27017"
+    command: bash -c "mongod --replSet rs0 --bind_ip_all && sleep 4 && /scripts/init-replica-sets.sh"
     volumes:
-      - mongo_data:/data/db
+      - mongo1_data:/data/db:rw
+      - ./scripts:/scripts:ro
+  mongo2:
+    image: mongo:8.0.0-rc16-jammy
+    container_name: mongo2
+    networks:
+      - mongo_network
+    ports:
+      - "27018:27017"
+    command: mongod --replSet rs0 --bind_ip_all
+    volumes:
+      - mongo2_data:/data/db:rw
+  mongo3:
+    image: mongo:8.0.0-rc16-jammy
+    container_name: mongo3
+    networks:
+      - mongo_network
+    ports:
+      - "27019:27017"
+    command: mongod --replSet rs0 --bind_ip_all
+    volumes:
+      - mongo3_data:/data/db:rw
 
 networks:
   mongo_network:
     driver: bridge
 
 volumes:
-  mongo_data:
+  mongo1_data:
+    driver: local
+  mongo2_data:
+    driver: local
+  mongo3_data:
     driver: local
