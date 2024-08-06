@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/posts.module.css';
 
-import { baseURL, checkIfLoggedIn, shortCutToSignIn } from './comsWithbackEnd';
+import { baseURL, checkIfLoggedIn, decodeHTML, shortCutToSignIn } from './comsWithbackEnd';
 import { useEffect, useState } from 'react';
 
 export default function Posts() {
@@ -67,7 +67,7 @@ export default function Posts() {
                 }}>
                   <span>{obj.author}</span>
                   <h3>{obj.title}</h3>
-                  <p dangerouslySetInnerHTML={{__html: obj.sample}}></p>
+                  <p>{decodeHTML(obj.sample)}</p>
                   <div>
                     <span>{obj.dateUpdated}</span>
                     <div>

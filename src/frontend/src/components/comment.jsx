@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import styles from '../styles/comment.module.css';
 import PropTypes from 'prop-types';
-import { baseURL, getLogInfo } from './comsWithbackEnd';
+import { baseURL, decodeHTML, getLogInfo } from './comsWithbackEnd';
 
 export default function Comment({ data, postId, allComs, cbToTrigger}) {
   const [likeordis, setlikeordis] = useState({like: false, dislike: false});  
@@ -84,7 +84,7 @@ export default function Comment({ data, postId, allComs, cbToTrigger}) {
           <span>{data.dateUpdated.split('T')[0]}</span>
         </div>
       </div>
-      <main dangerouslySetInnerHTML={{__html: data.body}}></main>
+      <main>{decodeHTML(data.body)}</main>
 
       <div>
 
