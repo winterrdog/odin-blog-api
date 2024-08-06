@@ -1,7 +1,7 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from '../styles/comment.module.css';
 import PropTypes from 'prop-types';
-import { baseURL, getLogInfo } from './comsWithbackEnd';
+import { baseURL, decodeHTML, getLogInfo } from './comsWithbackEnd';
 
 export default function Comment({ data, postId, allComs, cbToTrigger}) {
   const [likeordis, setlikeordis] = useState({like: false, dislike: false});  
@@ -71,16 +71,20 @@ export default function Comment({ data, postId, allComs, cbToTrigger}) {
     });
   }
 
+  useEffect(() => {
+    buttonRef.current.setAttribute('disabled', 'true');
+  }, []);
+
   return (
     <div className={styles.comment}>
       <div>
         <div className={styles.account}>{data.user[0]}</div>
         <div>
           <span>{data.user}</span>
-          <span>{data.dateCreated.split('T')[0]}</span>
+          <span>{data.dateUpdated.split('T')[0]}</span>
         </div>
       </div>
-      <main dangerouslySetInnerHTML={{__html: data.body}}></main>
+      <main>{decodeHTML(data.body)}</main>
 
       <div>
 
@@ -104,7 +108,7 @@ export default function Comment({ data, postId, allComs, cbToTrigger}) {
           e.target.style.height = '';
           e.target.style.height = e.target.scrollHeight + 'px';
         }}></textarea>
-        <button type='button' className={`${replying ? null : styles.off} ${styles.repres}`} ref={buttonRef} onClick={handleReply} disabled={textareaRef.current ? textareaRef.current.value ? false : true : true} >Respond</button>
+        <button type='button' className={`${replying ? null : styles.off} ${styles.repres}`} ref={buttonRef} onClick={handleReply} >Respond</button>
 
         {
           allComs ? allComs.map((obj, i) => {

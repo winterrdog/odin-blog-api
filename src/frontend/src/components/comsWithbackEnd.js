@@ -54,4 +54,10 @@ let shortCutToSignIn = (() => {
 if (checkIfLoggedIn()) document.body.style.backgroundColor = 'white';
 else document.body.style.backgroundColor = 'rgb(255, 253, 241)';
 
-export {baseURL, setLoggedIn, checkIfLoggedIn, clearMemory, getLogInfo, setToken, getToken, shortCutToSignIn};
+function decodeHTML(encoded) {
+  let tmp = document.createElement('textarea');
+  tmp.innerHTML = encoded;
+  return tmp.value;
+}
+
+export {baseURL, setLoggedIn, checkIfLoggedIn, clearMemory, getLogInfo, setToken, getToken, shortCutToSignIn, decodeHTML};

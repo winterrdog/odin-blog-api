@@ -1,7 +1,7 @@
 import { useLocation } from "react-router-dom";
 import styles from '../styles/post.module.css';
 import { useEffect, useRef, useState } from "react";
-import { baseURL, getLogInfo } from "./comsWithbackEnd";
+import { baseURL, decodeHTML, getLogInfo } from "./comsWithbackEnd";
 import Comments from "./comments";
 
 
@@ -87,12 +87,12 @@ export default function Post() {
         data ? 
         <div>
           <h3>{data.title}</h3>
-          <h6 dangerouslySetInnerHTML={{__html: location.state.summary}}></h6>
+          <h6>{decodeHTML(location.state.summary)}</h6>
           <div>
             <div className={styles.account}>{data.author[0]}</div>
             <div>
               <span>{data.author}</span>
-              <span>{data.dateCreated.split('T')[0]}</span>
+              <span>{data.dateUpdated.split('T')[0]}</span>
             </div>
           </div>
           <div className={styles.likesgoa}>
@@ -118,7 +118,7 @@ export default function Post() {
           </div>
           {
             data.body.split('\n').map((str, i) => {
-              return <p key={i} dangerouslySetInnerHTML={{__html: str}}></p>
+              return <p key={i}>{decodeHTML(str)}</p>
             })
           }
           <div className={styles.likesgoa}>

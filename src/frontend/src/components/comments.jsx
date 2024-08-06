@@ -29,10 +29,14 @@ export default function Comments({ id, cbToClose }) {
       console.error(err);
     });
 
+    buttonRef.current.setAttribute('disabled', 'true');
+
     return () => {
 
     }
   }, [id, trigger]);
+
+  console.log('called');
 
   function handleSubmit() {
     if (!textareaRef.current.value) return;
@@ -79,7 +83,7 @@ export default function Comments({ id, cbToClose }) {
           e.target.style.height = '';
           e.target.style.height = e.target.scrollHeight + 'px';
         }}></textarea>
-        <button type='button' ref={buttonRef}  onClick={handleSubmit} disabled={textareaRef.current ? textareaRef.current.value ? false : true : true}>Respond</button>
+        <button type='button' ref={buttonRef}  onClick={handleSubmit}>Respond</button>
       </div>
       {
         data ? data.map((obj, i) => {

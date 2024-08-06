@@ -1,7 +1,7 @@
 import styles from '../styles/write.module.css';
 
-import { baseURL, getLogInfo } from './comsWithbackEnd';
-import { Link } from 'react-router-dom';
+import { baseURL, decodeHTML, getLogInfo } from './comsWithbackEnd';
+import { Link, useLocation } from 'react-router-dom';
 import Logo from './logo.jsx';
 import { useRef, useState } from 'react';
 
@@ -10,6 +10,28 @@ export default function Write() {
   const [content, setContent] = useState([]);
   const formRef = useRef();
   const [published, setPublished] = useState({message: null, status: false});
+
+  const location = useLocation();
+  console.log(location);
+
+  if (location.state && !content.length) {
+    
+    console.log('in func');
+    let tmp = [];
+    tmp.push({
+      val: decodeHTML(location.state.title),
+      key: 1,
+    });
+
+    location.state.body.split('\n').map((str) => {
+      tmp.push({
+        val: decodeHTML(str),
+        key: tmp[tmp.length - 1].key + 1,
+      });
+    });
+
+    setContent(tmp);
+  }
   
   const acc = getLogInfo();
 
@@ -18,30 +40,60 @@ export default function Write() {
     data.title = content[0].val;
     data.body = content.reduce((prev, obj) => {
       if (obj.key == 1) return '';
-      else return prev + obj.val;
+      else {
+        if (obj.val[obj.val.length - 1] !== '\n') obj.val += '\n';
+        return prev + obj.val;
+      }
     }, '');
 
-    fetch(`${baseURL}/api/v1/posts/`, {
-      method: 'POST',
-      mode: 'cors',
-      headers: {
-        'Content-type': 'Application/json',
-        'Authorization': `Bearer ${acc.token}`,
-      },
-      body: JSON.stringify(data),
-    }).then((res) => {
-      let result = {};
 
-      if (res.status === 201) result.message = 'Published Successfully';
-      else result.message = 'Something went wrong!';
-      
-      result.status = true;
-      result.code = res.status;
-      setPublished(result);
-      
-    }).catch((err) => {
-      console.error(err);
-    })
+    if (location.state) {
+      fetch(`${baseURL}/api/v1/posts/${location.state.id}`, {
+        method: 'PATCH',
+        mode: 'cors',
+        headers: {
+          'Content-type': 'application/json',
+          'Authorization': `Bearer ${acc.token}`,
+        },
+        body: JSON.stringify(data),
+      }).then((res) => {
+        console.log(res);
+        let result = {};
+  
+        if (res.status === 200) result.message = 'Updated Successfully';
+        else result.message = 'Something went wrong!';
+        
+        result.status = true;
+        result.code = res.status;
+        console.log(result);
+        setPublished(result);
+        
+      }).catch((err) => {
+        console.error(err);
+      });
+    } else {
+      fetch(`${baseURL}/api/v1/posts/`, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-type': 'application/json',
+          'Authorization': `Bearer ${acc.token}`,
+        },
+        body: JSON.stringify(data),
+      }).then((res) => {
+        let result = {};
+  
+        if (res.status === 201) result.message = 'Published Successfully';
+        else result.message = 'Something went wrong!';
+        
+        result.status = true;
+        result.code = res.status;
+        setPublished(result);
+        
+      }).catch((err) => {
+        console.error(err);
+      });
+    }
   }
 
   return(
@@ -56,7 +108,7 @@ export default function Write() {
         <div>
           <span><Link to='/posts'>All posts</Link></span>
 
-          <button disabled={content.length > 1 ? false : true} onClick={publish} ref={buttonRef}>Publish</button>
+          <button disabled={content.length > 1 ? false : true} onClick={publish} ref={buttonRef}>{ location.state ? 'Update' : 'Publish' }</button>
           <Link to='/my-account'>
             <div className={styles.account}>{acc.name[0]}</div>
           </Link>
@@ -67,7 +119,7 @@ export default function Write() {
         <div>
           <div>{published.message}</div>
           {
-            published.code !== 201
+            (published.code !== 201 && published.code !== 200)
             ? 
             <button onClick={() => {setPublished({status:false})}}>Try again</button>
             :
@@ -79,6 +131,7 @@ export default function Write() {
           {
             content.map((obj) => {
               if (obj.clicked) {
+                console.log(obj.val);
                 if (obj.key == 1) {
                   return (
                     <textarea key={obj.key} name='title' id="title"
