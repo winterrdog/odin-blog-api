@@ -41,44 +41,73 @@
   max-width: 680px;
   padding: 32px 0;
 
-  cursor: pointer;
 }
 
-.post > :nth-child(1) {
+.post > span:nth-child(1) {
   text-transform: capitalize;
+  font-family: 'inter tight', sans-serif;
+  font-size: 0.8em;
 }
 
 .post > h3 {
   font-family: 'Playfair display', serif;
-  font-size: 2.5em;
+  font-size: 2em;
   margin: 5px 0;
   font-weight: 200;
+  cursor: pointer;
 }
 
 .post > p {
   font-family: 'Titillium Web';
-  font-size: 1.3em;
+  font-size: 1.2em;
+  cursor: pointer;
   margin: 0;
-  margin-bottom: 30px;
 }
 
-.post > div {
+.post > .poststat {
+  margin-top: 20px;
   display: flex;
+  font-size: 0.8em;
+  cursor: pointer;
+  align-items: center;
 }
 
-.post > div > :nth-child(n) {
+.post > .poststat > :nth-child(n), .post > .postmanage > :nth-child(n) {
   margin-right: 20px;  
 }
 
-.post > div > div {
+.post > .poststat > div {
   display: flex;
   align-items: center;
 }
 
-.post > div svg {
-  fill: #aaaaaa;
-  height: 20px;
-  width: 20px;
+.post > .poststat svg {
+  fill: #8f8f8f;
+  height: 14px;
+  width: 14px;
   margin-left: 2px;
+}
 
+.post > .postmanage {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  flex-direction: row-reverse;
+  cursor: default;
+}
+
+.post > .postmanage > :nth-child(n) {
+  border: 0;
+  background-color: transparent;
+  padding: 0;
+  font-size: 1em;
+  font-family: 'inter tight', sans-serif;
+}
+
+.post > .postmanage > :nth-child(1):hover {
+  color: rgb(138, 0, 0);
+}
+
+.post > .postmanage > :nth-child(2):hover {
+  color: var(--iconic-medium-color);
 }
