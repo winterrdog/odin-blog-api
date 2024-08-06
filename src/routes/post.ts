@@ -15,19 +15,19 @@ postsRouter
 postsRouter.get(
   "/user-posts",
   auth.authenticateJwt,
-  postController.getUserPosts
+  postController.getUserPosts,
 );
 
 postsRouter.get(
   "/liked-posts",
   auth.authenticateJwt,
-  postController.getLikedPosts
+  postController.getLikedPosts,
 );
 
 postsRouter.get(
   "/recently-viewed",
   auth.authenticateJwt,
-  postController.getRecentlyViewedPosts
+  postController.getRecentlyViewedPosts,
 );
 
 logger.info("attaching controllers to 'post' route: /:id ...");
@@ -39,7 +39,7 @@ postsRouter
   .delete(auth.isAuthor, postController.deletePost);
 
 logger.info(
-  "attaching controllers to 'post' route: /:id/likes & /:id/dislikes ..."
+  "attaching controllers to 'post' route: /:id/likes & /:id/dislikes ...",
 );
 postsRouter
   .route("/:id/likes")

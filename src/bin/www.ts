@@ -128,7 +128,7 @@ async function connectToDb() {
     await mongoose.connect(
       process.env.NODE_ENV === "production"
         ? process.env.MONGO_URI!
-        : process.env.DEV_MONGO_URI!
+        : process.env.DEV_MONGO_URI!,
     );
     logger.info("database connected successfully...");
     return mongoose.connection;
@@ -151,13 +151,13 @@ async function closeDb(conn: mongoose.Connection) {
 
 async function handleUncaughtExceptions(
   err: Error,
-  origin: NodeJS.UncaughtExceptionOrigin
+  origin: NodeJS.UncaughtExceptionOrigin,
 ) {
   logger.error(
     err,
     origin === "unhandledRejection"
       ? "an unhandled rejection occurred"
-      : "an uncaught exception occurred"
+      : "an uncaught exception occurred",
   );
 
   // close the database connection gracefully
@@ -165,7 +165,7 @@ async function handleUncaughtExceptions(
 
   const forceAnExit = () => {
     logger.fatal(
-      "server didn't close in time so forcing the process to exit..."
+      "server didn't close in time so forcing the process to exit...",
     );
     process.abort();
   };

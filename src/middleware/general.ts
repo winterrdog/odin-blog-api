@@ -12,7 +12,7 @@ const logger = startLogger(__filename);
 const customHeaders = (
   req: express.Request,
   res: express.Response,
-  next: express.NextFunction
+  next: express.NextFunction,
 ) => {
   res.setHeader("X-Powered-By", "some-shxt");
   return next();
@@ -33,8 +33,8 @@ export default function applyGeneralMiddleware(app: Express) {
       origin: string | undefined,
       callback: (
         err: Error | null,
-        origin?: string | boolean | RegExp | (string | boolean | RegExp)[]
-      ) => void
+        origin?: string | boolean | RegExp | (string | boolean | RegExp)[],
+      ) => void,
     ): void => {
       // allow mobile apps to access the API
       if (!origin) {
@@ -67,7 +67,7 @@ export default function applyGeneralMiddleware(app: Express) {
         message:
           "Too many requests from this IP, please try again after 20 minutes. Like for real, chill out a bit.",
         statusCode: 429,
-      })
+      }),
     ); // limit repeated requests to avoid abuse of the API
   }
 
