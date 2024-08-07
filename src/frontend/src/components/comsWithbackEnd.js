@@ -2,12 +2,25 @@ const baseURL = 'http://localhost:3000';
 
 function checkIfLoggedIn() {
   const accname = localStorage.getItem('accname');
-  if (accname) return true;
-  else return false;
+  const initDate = localStorage.getItem('initDate');
+
+  if (!accname || !initDate) return false;
+
+  let setTime = new Date(initDate);
+  let nowTime = new Date();
+
+  let dif = Math.abs((nowTime - setTime) / 86400000); // difference in days (86400000 is the number of milli seconds in a day)
+
+  if (dif < 1.9) return true; // todo:: handle if new setting of expiry date of token
+  else {
+    localStorage.clear();
+    return false;
+  }
 }
 
 function setLoggedIn(str) {
   localStorage.setItem('accname', str);
+  localStorage.setItem('initDate', String(new Date()));
   document.body.style.backgroundColor = 'white';
 }
 
