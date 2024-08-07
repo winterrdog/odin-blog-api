@@ -1,5 +1,5 @@
 version: '3.8'
-# todo: test this one
+
 services:
   # application services
   web_app:
@@ -25,7 +25,7 @@ services:
       - mongo_network
     ports:
       - "27015:27017"
-    command: bash -c "mongod --replSet rs0 --bind_ip_all && sleep 4 && /scripts/init-replica-sets.sh"
+    command: bash -c "mongod --replSet rs0 --bind_ip_all && sleep 4 && sh /scripts/init-replica-sets.sh"
     volumes:
       - mongo1_data:/data/db:rw
       - ./scripts:/scripts:ro
