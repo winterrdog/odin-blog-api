@@ -16,6 +16,7 @@
 .post {
   border-top: 1px solid var(--border-color);
   max-width: 680px;
+  min-width: 680px;
   padding: 32px 0;
 
   cursor: pointer;
