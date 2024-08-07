@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # application services
   web_app:
