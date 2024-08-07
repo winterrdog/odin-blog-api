@@ -39,6 +39,12 @@ export default function Selector() {
 
       if (res.posts) {
         let temp = res.posts.map((obj) => {
+          let sampled = obj.body.split('.')[0];
+        
+          if (sampled.length > 75) {
+            sampled = sampled.substr(0, 70) + '...';
+          }
+          
           if (selected === 'yp') {
             return {
               title: obj.title,
@@ -47,7 +53,7 @@ export default function Selector() {
               likes: obj.numOfLikes,
               dislikes: obj.numOfDislikes,
               views: obj.numOfViewers,
-              sample: obj.body.split('.')[0],
+              sample: sampled,
               body: obj.body,
             };
           } else {
@@ -55,7 +61,7 @@ export default function Selector() {
               author: obj.author,
               title: obj.title,
               id: obj.id,
-              sample: obj.body.split('.')[0],
+              sample: sampled,
             };
           }
         });
@@ -63,7 +69,17 @@ export default function Selector() {
         setData({posts: temp});
       } else {
         // todo
-        setData({...res.comments})
+        let coms = res.comments.map((com) => {
+          return {
+            user: com.user,
+            dateUpdated: com.dateUpdated.split('T')[0],
+            parent: com.parentComment ? true : false,
+            body: com.body,
+            numOfDislikes: com.numOfDislikes,
+            numOfLikes: com.numOfLikes,
+          };
+        });
+        setData({comments: coms});
       }
 
     }).catch((err) => {
@@ -119,7 +135,7 @@ export default function Selector() {
             {
               data.error ?
               <>
-                <span>An error eccoured</span>
+                <span style={{marginTop: '20px', display: 'block', color: 'rgb(189, 189, 189)'}}>Nothing to see here, you have none so far!</span>
               </>
               :
               <>
@@ -177,7 +193,38 @@ export default function Selector() {
                   );
                 })
                 : 
-                <></>
+                data.comments.map((obj, i) => {
+                  return (
+                    <div className={`${styles.comment} ${obj.parent ? styles.parent : null}`} key={i}>
+                      <div>
+                        <div className={styles.account}>{obj.user[0]}</div>
+                        <div>
+                          <span>{obj.user}</span>
+                          <span>{obj.dateUpdated}</span>
+                        </div>
+                      </div>
+                      <main>{decodeHTML(obj.body)}</main>
+
+                      {
+                        selected === 'yc' ? 
+                        <>
+                          <div>
+                            <div>
+                              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#aaaaaa"><path d="M720-120H320v-520l280-280 50 50q7 7 11.5 19t4.5 23v14l-44 174h218q32 0 56 24t24 56v80q0 7-1.5 15t-4.5 15L794-168q-9 20-30 34t-44 14ZM240-640v520H80v-520h160Z"/></svg>
+                              <span>{obj.numOfLikes}</span>
+                            </div>
+
+                            <div>
+                              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#aaaaaa"><path d="M240-840h400v520L360-40l-50-50q-7-7-11.5-19t-4.5-23v-14l44-174H120q-32 0-56-24t-24-56v-80q0-7 1.5-15t4.5-15l120-282q9-20 30-34t44-14Zm480 520v-520h160v520H720Z"/></svg>
+                              <span>{obj.numOfDislikes}</span>
+                            </div>
+                          </div>
+                        </>
+                        : null
+                      }
+                    </div>
+                  );
+                })
               }
               </>
             }
