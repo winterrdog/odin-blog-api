@@ -57,8 +57,7 @@ export default class Utility {
   static createFile(fname: PathLike): Promise<void> {
     // create a file if it doesn't exist
     // if it exists, do nothing
-    return new Promise((resolve, reject) => {
-      // "wx" flag creates a file if it doesn't exist
+    const cb = (resolve, reject) => {
       logger.info(`creating log file: ${fname}...`);
 
       fs.open(fname, "a", (err, fd) => {
@@ -77,7 +76,9 @@ export default class Utility {
           return resolve();
         });
       });
-    });
+    }
+    
+    return new Promise(cb);
   }
   static arrayToSet(arr: Array<any>): Set<any> {
     return new Set(arr);
