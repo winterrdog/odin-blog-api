@@ -6,7 +6,7 @@ import styles from '../styles/header.module.css';
 import Logo from './logo';
 import Signinup from './sign-in-up';
 
-import { checkIfLoggedIn, getLogInfo, setLoggedIn, shortCutToSignIn } from './comsWithbackEnd';
+import { checkIfLoggedIn, getLogInfo, setLoggedIn, shortCutToSignIn, shortCutToSignOut } from './comsWithbackEnd';
 import ProfileDiv from './profilediv';
 
 export default function Header() {
@@ -39,6 +39,7 @@ export default function Header() {
   }
 
   shortCutToSignIn.setCb(() => {setShowDialog(true)});
+  shortCutToSignOut.setCb(() => {setIsSignedIn(false)});
 
   return (
     <div className={isSignedIn ? styles.nocolor : styles.yescolor }>

@@ -119,6 +119,21 @@ let shortCutToSignIn = (() => {
   return { setCb, callCb};
 })();
 
+let shortCutToSignOut = (() => {
+  let cb = null;
+
+  function setCb(callBack) {
+    cb = callBack;
+  }
+
+  function callCb() {
+    if (cb) cb();
+  }
+
+  return { setCb, callCb};
+})();
+
+
 // clearMemory();
 
 if (checkIfLoggedIn()) document.body.style.backgroundColor = 'white';
@@ -172,5 +187,5 @@ function test() {
 
 export {
   baseURL, setLoggedIn, checkIfLoggedIn, clearMemory, getLogInfo, setToken, getToken, shortCutToSignIn, decodeHTML, localLikedComments, localLikedPosts,
-  addToLLC, addToLLP, removeFromLLC, removeFromLLP, test, checkLLC, checkLLP,
+  addToLLC, addToLLP, removeFromLLC, removeFromLLP, test, checkLLC, checkLLP, shortCutToSignOut,
 };
