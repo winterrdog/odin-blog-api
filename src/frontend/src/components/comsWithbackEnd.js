@@ -81,6 +81,10 @@ function setLoggedIn(str) {
   document.body.style.backgroundColor = 'white';
 }
 
+function setUserNameOnly(str) {
+  localStorage.setItem('accname', str);
+}
+
 function setToken(str) {
   localStorage.setItem('token', str);
 }
@@ -187,5 +191,5 @@ function test() {
 
 export {
   baseURL, setLoggedIn, checkIfLoggedIn, clearMemory, getLogInfo, setToken, getToken, shortCutToSignIn, decodeHTML, localLikedComments, localLikedPosts,
-  addToLLC, addToLLP, removeFromLLC, removeFromLLP, test, checkLLC, checkLLP, shortCutToSignOut,
+  addToLLC, addToLLP, removeFromLLC, removeFromLLP, test, checkLLC, checkLLP, shortCutToSignOut, setUserNameOnly,
 };
