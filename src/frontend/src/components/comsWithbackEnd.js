@@ -3,7 +3,9 @@ const baseURL = 'http://localhost:3000';
 let localLikedComments;
 let localLikedPosts;
 
-window.onload = function() {
+window.onload = setupLS;
+
+function setupLS() {
   console.log('run');
   (() => {
     let account = getLogInfo();
@@ -78,6 +80,7 @@ function checkIfLoggedIn() {
 function setLoggedIn(str) {
   localStorage.setItem('accname', str);
   localStorage.setItem('initDate', String(new Date()));
+  setupLS();
   document.body.style.backgroundColor = 'white';
 }
 
