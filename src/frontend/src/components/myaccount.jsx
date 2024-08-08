@@ -53,7 +53,8 @@ export default function MyAccount() {
     setTimeout(() => {
       messageRef.current.style.backgroundColor = null;
       messageRef.current.style.visibility = null;
-    }, 5000);
+      window.location.reload();
+    }, 3000);
   }
 
   return (
