@@ -1,5 +1,62 @@
 const baseURL = 'http://localhost:3000';
 
+let localLikedComments;
+let localLikedPosts;
+
+window.onload = function() {
+  console.log('run');
+  (() => {
+    let account = getLogInfo();
+    if (!Object.keys(account).length) return null;
+  
+    return fetch(`${baseURL}/api/v1/post-comments/user-liked-comments`, {
+      mode: 'cors',
+      method: 'GET',
+      headers: {
+        'Content-type': 'application/json',
+        Authorization: `Bearer ${account.token}`,
+      }
+    }).then((res) => {
+      if (res.status === 200) return res.json();
+      else return null;
+    }).then((res) => {
+      let coms;
+  
+      if (!res) coms = [];
+      else coms = res.comments.map((obj) => {return obj.id});
+  
+      localLikedComments = coms;
+      return
+    });
+  })();
+  
+  (() => {
+    let account = getLogInfo();
+    if (!Object.keys(account).length) return null;
+  
+    return fetch(`${baseURL}/api/v1/posts/liked-posts`, {
+      mode: 'cors',
+      method: 'GET',
+      headers: {
+        'Content-type': 'application/json',
+        Authorization: `Bearer ${account.token}`,
+      }
+    }).then((res) => {
+      if (res.status === 200) return res.json();
+      else return null;
+    }).then((res) => {
+      let posts;
+  
+      if (!res) posts = [];
+      else posts = res.posts.map((obj) => {return obj.id});
+  
+      localLikedPosts = posts;
+      return;
+    });
+  })();
+
+}
+
 function checkIfLoggedIn() {
   const accname = localStorage.getItem('accname');
   const initDate = localStorage.getItem('initDate');
@@ -73,4 +130,47 @@ function decodeHTML(encoded) {
   return tmp.value;
 }
 
-export {baseURL, setLoggedIn, checkIfLoggedIn, clearMemory, getLogInfo, setToken, getToken, shortCutToSignIn, decodeHTML};
+function removeFromLLC(id) {
+  if (!localLikedComments) return;
+  let index = localLikedComments.indexOf(id);
+  if (index == -1) return;
+  localLikedComments.splice(index, 1);
+}
+
+function removeFromLLP(id) {
+  if (!localLikedComments) return;
+  let index = localLikedPosts.indexOf(id);
+  if (index == -1) return;
+  localLikedPosts.splice(index, 1);
+}
+
+function addToLLC(id) {
+  if (!localLikedComments) return;
+  if (localLikedComments.includes(id)) return;
+  localLikedComments.push(id);
+}
+
+function addToLLP(id) {
+  if (!localLikedComments) return;
+  if (localLikedPosts.includes(id)) return;
+  localLikedPosts.push(id);
+}
+
+function checkLLP(id) {
+  if (!localLikedComments) return false;
+  return localLikedPosts.includes(id);
+}
+
+function checkLLC(id) {
+  if (!localLikedComments) return false;
+  return localLikedComments.includes(id);
+}
+
+function test() {
+  console.log('llc -> ', localLikedComments, '\nllp -> ', localLikedPosts );
+}
+
+export {
+  baseURL, setLoggedIn, checkIfLoggedIn, clearMemory, getLogInfo, setToken, getToken, shortCutToSignIn, decodeHTML, localLikedComments, localLikedPosts,
+  addToLLC, addToLLP, removeFromLLC, removeFromLLP, test, checkLLC, checkLLP,
+};
