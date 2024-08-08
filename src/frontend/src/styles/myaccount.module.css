@@ -58,7 +58,7 @@
   padding: 0;
 
   margin-top: 24px;
-  margin-bottom: 46px;
+  margin-bottom: 24px;
 }
 
 .side > :nth-child(2) {
@@ -69,4 +69,84 @@
 
 .side > button:hover {
   color: rgb(12, 109, 8);
+}
+
+.side > .edit label {
+  display: flex;
+  flex-direction: column;
+  font-family: 'inter tight';
+}
+
+.side > .edit > form  input {
+  width: 100%;
+  background-color: rgb(242, 242, 242);
+  border: 1px solid rgb(242, 242, 242);
+  border-radius: 3px;
+  padding: 8px;
+  font-size: 15px;
+  box-sizing: border-box;
+
+  font-family: 'Inter tight';
+
+  margin: 15px 0;
+}
+
+.side > .edit > form  input:focus {
+  outline: 0px;
+  border: 1px solid black; 
+  background-color: rgb(250, 250, 250);
+}
+
+.side > .edit > form  input:invalid {
+  border: 1px solid red;
+}
+
+.side > .edit > form button {
+  background-color: transparent;
+  border: 0;
+  cursor: pointer;
+  padding: 0;
+  font-size: 1em;
+  font-family: 'inter tight';
+
+  margin-bottom: 15px;
+}
+
+.side > .edit > form button:hover {
+  color: var(--iconic-medium-color);
+}
+
+.side > .edit > button {
+  background-color: transparent;
+  border: 0;
+  cursor: pointer;
+  font-size: 1em;
+  font-family: 'inter tight';
+  padding: 0;
+
+  color: rgb(128, 1, 1);
+  margin-bottom: 15px;
+}
+
+.on {
+  visibility: visible;
+}
+
+.off {
+  visibility: hidden;
+}
+
+.side > .message {
+  background-color: var(--iconic-medium-color);
+  width: 100%;
+  padding: 10px;
+  color: white;
+  box-sizing: border-box;
+  text-align: center;
+  opacity: 0.7;
+  font-size: 1.2em;
+  font-weight: 500;
+  font-family: 'inter tight';
+  border-radius: 3px;
+  visibility: hidden;
 }
