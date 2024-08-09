@@ -218,9 +218,10 @@
 
 @media (max-width: 600px) {
   .header {
-    font-size: 0.7em;
-    padding-left: 20px;
-    padding-right: 20px;
+    font-size: 0.75em;
+    padding: 8px 0;
+    padding-left: 10px;
+    padding-right: 10px;
   }
 
   .header > nav > :nth-child(n) {
@@ -235,6 +236,7 @@
 @media (max-width: 400px) {
   .header {
     font-size: 0.65em;
+    padding: 8px 0;
     padding-left: 10px;
     padding-right: 10px;
   }
