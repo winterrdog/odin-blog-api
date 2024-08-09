@@ -217,36 +217,53 @@
 }
 
 @media (max-width: 600px) {
-  .header {
+  .header, .SIheader {
     font-size: 0.75em;
     padding: 8px 0;
     padding-left: 10px;
     padding-right: 10px;
   }
 
-  .header > nav > :nth-child(n) {
+  .header > nav > :nth-child(n), .SIheader > nav > :nth-child(n) {
     margin: 6px;
   }
 
   .art {
     font-size: 0.9em;
   }
+
+  .SIheader > nav > .account {
+    width: 30px;
+    height: 30px;
+  }
 }
 
 @media (max-width: 400px) {
-  .header {
+  .header, .SIheader {
     font-size: 0.65em;
     padding: 8px 0;
     padding-left: 10px;
     padding-right: 10px;
   }
 
-  .header > nav > :nth-child(n) {
+  .header > nav > :nth-child(n), .SIheader > nav > :nth-child(n) {
     margin: 4px;
   }
 
   .art {
     font-size: 0.8em;
   }
+
+  .SIheader > nav > .account {
+    width: 25px;
+    height: 25px;
+  }
+
+  .SIheader > nav > span > svg {
+    height: 20px;
+    width: auto;
+    margin-right: 2px;
+  }
+  
 }
 

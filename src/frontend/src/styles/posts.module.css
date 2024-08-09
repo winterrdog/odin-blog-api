@@ -8,7 +8,7 @@
 
 .posts {
   flex: 1 1 auto;
-  border-right: 1px solid var(--border-color);
+  /* border-right: 1px solid var(--border-color); */
   padding-right: 50px;
   padding-top: 50px;
 }
@@ -64,5 +64,22 @@
   height: 12px;
   width: 12px;
   margin-left: 2px;
+}
+
+@media (max-width: 760px) {
+
+  .posts {
+    padding: 20px;
+    padding-top: 0;
+  }
+
+  .post {
+    max-width: 100%;
+    min-width: 0px;
+    width: 100%;
+    border-bottom: 1px solid var(--border-color);
+    border-top: 0;
+    font-size: 0.9em;
+  }
 
 }
