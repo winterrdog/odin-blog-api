@@ -115,7 +115,7 @@ export default function Comment({ data, postId, allComs, cbToTrigger}) {
           <span>{data.dateUpdated.split('T')[0]}</span>
         </div>
       </div>
-      <main>{decodeHTML(data.body)}</main>
+      <main>{`${decodeHTML(data.body)}`}</main>
 
       <div>
 

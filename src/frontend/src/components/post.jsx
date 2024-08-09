@@ -126,7 +126,7 @@ export default function Post() {
         data ? 
         <div>
           <h3>{data.title}</h3>
-          <h6>{decodeHTML(location.state.summary)}</h6>
+          <h6>{`${decodeHTML(location.state.summary)}`}</h6>
           <div>
             <div className={styles.account}>{data.author[0]}</div>
             <div>
@@ -157,7 +157,7 @@ export default function Post() {
           </div>
           {
             data.body.split('\n').map((str, i) => {
-              return <p key={i}>{decodeHTML(str)}</p>
+              return <p key={i}>{`${decodeHTML(str)}`}</p>
             })
           }
           <div className={styles.likesgoa}>

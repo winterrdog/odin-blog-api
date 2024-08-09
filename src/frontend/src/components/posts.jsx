@@ -73,7 +73,7 @@ export default function Posts() {
                 }}>
                   <span>{obj.author}</span>
                   <h3>{obj.title}</h3>
-                  <p>{decodeHTML(obj.sample)}</p>
+                  <p>{`${decodeHTML(obj.sample)}`}</p>
                   <div>
                     <span>{obj.dateUpdated}</span>
                     <div>

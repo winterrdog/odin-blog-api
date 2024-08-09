@@ -158,7 +158,7 @@ export default function Selector() {
                         navigate('/post', {
                           state: {id: obj.id, summary: obj.sample},
                         });
-                      }}>{decodeHTML(obj.sample)}</p>
+                      }}>{`${decodeHTML(obj.sample)}`}</p>
                       {
                         selected == 'yp' ?
                         <>
@@ -203,7 +203,7 @@ export default function Selector() {
                           <span>{obj.dateUpdated}</span>
                         </div>
                       </div>
-                      <main>{decodeHTML(obj.body)}</main>
+                      <main>{`${decodeHTML(obj.body)}`}</main>
 
                       {
                         selected === 'yc' ? 

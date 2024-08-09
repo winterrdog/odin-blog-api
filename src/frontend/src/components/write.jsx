@@ -20,13 +20,13 @@ export default function Write() {
     console.log('in func');
     let tmp = [];
     tmp.push({
-      val: decodeHTML(location.state.title),
+      val: `${decodeHTML(location.state.title)}`,
       key: 1,
     });
 
     location.state.body.split('\n').map((str) => {
       tmp.push({
-        val: decodeHTML(str),
+        val: `${decodeHTML(str)}`,
         key: tmp[tmp.length - 1].key + 1,
       });
     });
