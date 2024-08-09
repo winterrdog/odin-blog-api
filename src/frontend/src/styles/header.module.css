@@ -169,6 +169,9 @@
   background: linear-gradient(to right, rgba(255, 255, 0, 0.1), rgba(255, 255, 0, 0.1), rgba(255, 208, 0, 0.1),rgba(255, 208, 0, 0.4),rgba(255, 166, 0, 0.6), rgba(255, 166, 0, 0.8)), url('../assets/noise.svg');
   filter: contrast(60%) brightness(140%) saturate(500%); 
 
+  background-repeat: no-repeat;
+  background-size: cover;
+
   border-top: 1px solid #242424;
   border-bottom: 1px solid #242424;
 
