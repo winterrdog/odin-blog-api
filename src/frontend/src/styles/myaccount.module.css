@@ -10,7 +10,6 @@
 .myaccount > main {
   max-width: 728px;
   min-width: 728px;
-  
 }
 
 .myaccount > main > h1 {
@@ -150,3 +149,96 @@
   border-radius: 3px;
   visibility: hidden;
 }
+
+@media (max-width: 1300px) {
+  .myaccount {
+    max-width: 100%;
+  }
+  
+  .myaccount > main {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .side {
+    padding-right: 0px;
+    min-width: 0;
+    max-width: 100%;
+  }
+  
+}
+
+@media (max-width: 900px) {
+  .myaccount {
+    max-width: 100%;
+    padding: 0 20px;
+    box-sizing: border-box;
+  }
+  
+  .myaccount > main {
+    max-width: 100%;
+    min-width: 0;
+    font-size: 0.9em;
+  }
+
+  .side {
+    padding-right: 0px;
+    min-width: 0;
+    font-size: 0.9em;
+    max-width: 100%;
+    padding-left: 20px;
+  }
+  
+}
+
+@media (max-width: 760px) {
+  .myaccount {
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    padding: 20px;
+  }
+
+  .off {
+    display: none;
+  }
+
+  .on {
+    display: block;
+  }
+
+  .side {
+    padding: 0;
+    border: 0;
+    margin: 0;
+  }
+
+  .myaccount > main > h1 {
+    display: none;
+  }
+
+  .side > :nth-child(2) {
+    margin-top: 0;
+    font-family: 'inter tight', sans-serif;
+    /* text-transform: capitalize; */
+    font-size: 3em;
+    display: inline;
+    margin-left: 20px;
+  }
+
+  .account {    
+    display: inline-flex;
+    height: 70px;
+    width: 70px;
+  }
+
+  .side > button {
+    margin-bottom: 10px;
+    display: block;
+    font-size: 1.3em;
+  }
+
+  .side > .message {
+    margin: 15px 0;
+  }
+}
+

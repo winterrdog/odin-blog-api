@@ -193,3 +193,16 @@
 .comment > :nth-child(3) > div > svg {
   height: 18px;
 }
+
+@media (max-width: 900px) {
+  .selector > :nth-child(1) > span {
+    margin-right: 10px;
+  }
+}
+
+@media (max-width: 472px) {
+  .selector > :nth-child(1) > span {
+    font-size: 0.8em;
+  }
+  
+}
