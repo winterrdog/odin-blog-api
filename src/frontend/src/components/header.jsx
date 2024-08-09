@@ -92,7 +92,7 @@ export default function Header() {
           </header>
 
           <div className={styles.art} style={isSignedIn ? {border: 0} : {}}>
-            <div className={styles.messageboard}>This message can be anything!</div>
+            <div className={styles.messageboard}>Winterrdog says Hi!</div>
           </div>
         </>
       }
