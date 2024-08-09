@@ -233,12 +233,15 @@
 
   .art {
     font-size: 0.9em;
+    background: linear-gradient(to right, rgba(255, 255, 0, 0.2), rgba(255, 255, 0, 0.2),rgba(255, 208, 0, 0.5),rgba(255, 166, 0, 0.7), rgba(255, 166, 0, 0.8));
   }
 
   .SIheader > nav > .account {
     width: 30px;
     height: 30px;
   }
+
+
 }
 
 @media (max-width: 400px) {
