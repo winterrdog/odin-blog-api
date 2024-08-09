@@ -162,7 +162,7 @@ export default function Write() {
                       maxLength={524288}
                       placeholder={'Tell your story...'} 
                       className={styles.data}
-                      defaultValue={obj.val.slice(0, -1)} 
+                      defaultValue={obj.val} 
                       rows={(obj.val.length / 40) + 1}
                       onInput={(e) => {
                         e.preventDefault();

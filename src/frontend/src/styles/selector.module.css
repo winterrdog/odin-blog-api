@@ -53,7 +53,7 @@
   font-family: 'Playfair display', serif;
   font-size: 2em;
   margin: 5px 0;
-  font-weight: 200;
+  font-weight: 500;
   cursor: pointer;
 }
 
@@ -61,6 +61,7 @@
   font-family: 'Titillium Web';
   font-size: 1.2em;
   cursor: pointer;
+  color: #707070;
   margin: 0;
 }
 
