@@ -119,3 +119,27 @@
 .about > button:hover svg {
   fill: black;
 }
+
+@media (max-width: 600px) {
+  .about > header {
+    font-size: 0.7em;
+  }
+
+  .about main {
+    padding: 60px 20px;
+  }
+
+  .about main h1 {
+    font-size: 3em;
+    margin-bottom: 30px;
+  }
+  
+  .about > button {
+    font-size: 2.5em;
+    padding: 30px 16px;
+  }
+  
+  .about > button > svg {
+    height: 35px;
+  }
+}
