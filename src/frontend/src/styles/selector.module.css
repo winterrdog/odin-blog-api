@@ -206,3 +206,9 @@
   }
   
 }
+
+@media (max-width: 400px) {
+  .selector > :nth-child(1) > span {
+    font-size: 0.7em;
+  }
+}
