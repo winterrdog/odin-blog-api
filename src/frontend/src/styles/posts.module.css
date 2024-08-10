@@ -8,7 +8,7 @@
 
 .posts {
   flex: 1 1 auto;
-  border-right: 1px solid var(--border-color);
+  /* border-right: 1px solid var(--border-color); */
   padding-right: 50px;
   padding-top: 50px;
 }
@@ -16,6 +16,7 @@
 .post {
   border-top: 1px solid var(--border-color);
   max-width: 680px;
+  min-width: 680px;
   padding: 32px 0;
 
   cursor: pointer;
@@ -31,7 +32,7 @@
   font-family: 'Playfair display', serif;
   font-size: 2em;
   margin: 5px 0;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .post > p {
@@ -39,6 +40,7 @@
   font-size: 1.1em;
   margin: 0;
   margin-bottom: 20px;
+  color: #707070;
 }
 
 .post > div {
@@ -62,5 +64,22 @@
   height: 12px;
   width: 12px;
   margin-left: 2px;
+}
+
+@media (max-width: 760px) {
+
+  .posts {
+    padding: 20px;
+    padding-top: 0;
+  }
+
+  .post {
+    max-width: 100%;
+    min-width: 0px;
+    width: 100%;
+    border-bottom: 1px solid var(--border-color);
+    border-top: 0;
+    font-size: 0.9em;
+  }
 
 }

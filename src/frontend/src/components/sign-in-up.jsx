@@ -14,6 +14,8 @@ export default function Signinup({handleClose, source, login}) {
   function handleSubmit(e) {
     e.preventDefault();
 
+    if (e.target['0'].value === '' || passwordRef.current.value === '') return;
+
     if (src) {
       let data = {
         name: e.target['0'].value,

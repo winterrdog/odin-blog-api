@@ -131,4 +131,16 @@
   fill: rgb(187, 1, 1);
 }
 
+@media (max-width: 760px) {
+  .comment {
+    padding: 10px 0;
+  }
+  
+  .account {
+    font-size: 1.5em;
+  }
 
+  .replies {
+    padding-left: 15px;
+  }
+}

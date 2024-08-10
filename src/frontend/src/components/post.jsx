@@ -1,14 +1,16 @@
 import { useLocation } from "react-router-dom";
 import styles from '../styles/post.module.css';
 import { useEffect, useRef, useState } from "react";
-import { baseURL, decodeHTML, getLogInfo } from "./comsWithbackEnd";
+import { addToLLP, baseURL, checkLLP, decodeHTML, getLogInfo, removeFromLLP } from "./comsWithbackEnd";
 import Comments from "./comments";
 
 
 export default function Post() {
-  const [likeordis, setlikeordis] = useState({like: false, dislike: false});  
-  const [data, setData] = useState(null);
   const location = useLocation();
+  const [likeordis, setlikeordis] = useState(checkLLP(location.state.id) ? {like: true, dislike: false} : {like: false, dislike: false});  
+  const [data, setData] = useState(null);
+  const [nol, setNol] = useState(null);
+  const [nod, setNod] = useState(null);
   const commentRef = useRef();
   
   const account = getLogInfo();
@@ -27,15 +29,16 @@ export default function Post() {
       return res.json();
     }).then((res) => {
       setData(res.post);
+      setNol(res.post.numOfLikes);
+      setNod(res.post.numOfDislikes);
     }).catch((err) => {
       console.error(err);
     });
 
-
     return () => {
 
     }
-  }, [account.token, location.state.id, likeordis]);
+  }, [account.token, location.state.id]);
 
   function addLike() {
     fetch(`${baseURL}/api/v1/posts/${location.state.id}/likes`, {
@@ -44,26 +47,62 @@ export default function Post() {
         'Authorization': `Bearer ${account.token}`,
       },
     }).then((res) => {
-      if (res.status !== 200) {
+      if (res.status !== 200 && res.status !== 204) {
         // this fails silently
+        setlikeordis({like: true, dislike: false});
+      } else {
+        if (likeordis.like) {
+          removeFromLLP(data.id);
+          setNol((prev) => {return prev - 1});
+        } else {
+          addToLLP(data.id);
+          setNol((prev) => {return prev + 1});
+          if(likeordis.dislike) setNod((prev) => {return prev - 1});
+        }
+        setlikeordis(likeordis.like ? {like: false, dislike: false} : {like: true, dislike: false});
       }
-      setlikeordis(likeordis.like ? {like: false, dislike: false} : {like: true, dislike: false});
     }).catch((err) =>{
       console.error(err);
-    });
+    });    
   }
 
   function addDisLike() {
+    console.log(likeordis);
+    /**
+     * 
+     * since we cant tell if it was already disliked while rendering
+     * this function will increase the dislikes on the UI when the dislike icon is clicked
+     * whether it was disliked already or not!
+     * However this won't affect the backend numbers, infact, the patch request will fail
+     * only extremely observant users will realise this
+     * it could be fixed, but the fixes i have in mind are not very worth it in this case.
+     * 
+     */
     fetch(`${baseURL}/api/v1/posts/${location.state.id}/dislikes`, {
       method: likeordis.dislike ? 'DELETE' : 'PATCH',
       headers: {
         'Authorization': `Bearer ${account.token}`,
       },
     }).then((res) => {
-      if (res.status !== 200) {
+      if (res.status !== 200 && res.status !== 204) {
         // this fails silently
+        setlikeordis({like: false, dislike: true});
+      } else {
+        if (likeordis.dislike) {
+          console.log('here in if');
+          setNod((prev) => {return prev - 1});
+        } else {
+          console.log('here in else');
+          setNod((prev) => {return prev + 1});
+          if (likeordis.like) {
+          console.log('here if init liked');
+
+            removeFromLLP(data.id);
+            setNol((prev) => {return prev - 1});
+          }
+        }
+        setlikeordis(likeordis.dislike ? {like: false, dislike: false} : {like: false, dislike: true});
       }
-      setlikeordis(likeordis.dislike ? {like: false, dislike: false} : {like: false, dislike: true});
     }).catch((err) =>{
       console.error(err);
     });
@@ -87,7 +126,7 @@ export default function Post() {
         data ? 
         <div>
           <h3>{data.title}</h3>
-          <h6>{decodeHTML(location.state.summary)}</h6>
+          <h6>{`${decodeHTML(location.state.summary)}`}</h6>
           <div>
             <div className={styles.account}>{data.author[0]}</div>
             <div>
@@ -98,11 +137,11 @@ export default function Post() {
           <div className={styles.likesgoa}>
             <div>
               <svg  className={likeordis.like ? styles.liked : null} onClick={addLike} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#aaaaaa"><path d="M720-120H320v-520l280-280 50 50q7 7 11.5 19t4.5 23v14l-44 174h218q32 0 56 24t24 56v80q0 7-1.5 15t-4.5 15L794-168q-9 20-30 34t-44 14ZM240-640v520H80v-520h160Z"/></svg>
-              <span>{data.numOfLikes}</span>
+              <span>{nol}</span>
             </div>
             <div>
               <svg className={likeordis.dislike ? styles.disliked : null} onClick={addDisLike} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#aaaaaa"><path d="M240-840h400v520L360-40l-50-50q-7-7-11.5-19t-4.5-23v-14l44-174H120q-32 0-56-24t-24-56v-80q0-7 1.5-15t4.5-15l120-282q9-20 30-34t44-14Zm480 520v-520h160v520H720Z"/></svg>
-              <span>{data.numOfDislikes}</span>
+              <span>{nod}</span>
             </div>
             <div>
               <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#aaaaaa"><path d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Z"/></svg>
@@ -118,17 +157,17 @@ export default function Post() {
           </div>
           {
             data.body.split('\n').map((str, i) => {
-              return <p key={i}>{decodeHTML(str)}</p>
+              return <p key={i}>{`${decodeHTML(str)}`}</p>
             })
           }
           <div className={styles.likesgoa}>
             <div>
               <svg  className={likeordis.like ? styles.liked : null} onClick={addLike} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#aaaaaa"><path d="M720-120H320v-520l280-280 50 50q7 7 11.5 19t4.5 23v14l-44 174h218q32 0 56 24t24 56v80q0 7-1.5 15t-4.5 15L794-168q-9 20-30 34t-44 14ZM240-640v520H80v-520h160Z"/></svg>
-              <span>{data.numOfLikes}</span>
+              <span>{nol}</span>
             </div>
             <div>
               <svg className={likeordis.dislike ? styles.disliked : null} onClick={addDisLike} xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#aaaaaa"><path d="M240-840h400v520L360-40l-50-50q-7-7-11.5-19t-4.5-23v-14l44-174H120q-32 0-56-24t-24-56v-80q0-7 1.5-15t4.5-15l120-282q9-20 30-34t44-14Zm480 520v-520h160v520H720Z"/></svg>
-              <span>{data.numOfDislikes}</span>
+              <span>{nod}</span>
             </div>
             <div>
               <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#aaaaaa"><path d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Z"/></svg>

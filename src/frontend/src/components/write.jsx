@@ -10,6 +10,7 @@ export default function Write() {
   const [content, setContent] = useState([]);
   const formRef = useRef();
   const [published, setPublished] = useState({message: null, status: false});
+  const inputRef = useRef();
 
   const location = useLocation();
   console.log(location);
@@ -19,13 +20,13 @@ export default function Write() {
     console.log('in func');
     let tmp = [];
     tmp.push({
-      val: decodeHTML(location.state.title),
+      val: `${decodeHTML(location.state.title)}`,
       key: 1,
     });
 
     location.state.body.split('\n').map((str) => {
       tmp.push({
-        val: decodeHTML(str),
+        val: `${decodeHTML(str)}`,
         key: tmp[tmp.length - 1].key + 1,
       });
     });
@@ -46,6 +47,9 @@ export default function Write() {
       }
     }, '');
 
+    if (inputRef.current.value !== '') {
+      data.body += `${inputRef.current.value}\n`;
+    }
 
     if (location.state) {
       fetch(`${baseURL}/api/v1/posts/${location.state.id}`, {
@@ -158,7 +162,7 @@ export default function Write() {
                       maxLength={524288}
                       placeholder={'Tell your story...'} 
                       className={styles.data}
-                      defaultValue={obj.val.slice(0, -1)} 
+                      defaultValue={obj.val} 
                       rows={(obj.val.length / 40) + 1}
                       onInput={(e) => {
                         e.preventDefault();
@@ -195,6 +199,7 @@ export default function Write() {
               maxLength={content.length ? 524288 : 56}
               placeholder={content.length ? 'Tell your story...' : 'Title'} 
               className={content.length ? styles.data : styles.title} 
+              ref={inputRef}
               onInput={(e) => {
                 e.preventDefault();
                 if (!e.nativeEvent.data && (e.nativeEvent.inputType === 'insertText' || e.nativeEvent.inputType === 'insertLineBreak')) {

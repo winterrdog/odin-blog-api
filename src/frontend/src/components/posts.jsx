@@ -26,6 +26,12 @@ export default function Posts() {
     }).then((response) => {
 
       let temp = response.posts.map((obj) => {
+        let sampled = obj.body.split('.')[0];
+        
+        if (sampled.length > 75) {
+          sampled = sampled.substr(0, 70) + '...';
+        }
+        
         return {
           author: obj.author,
           title: obj.title,
@@ -34,7 +40,7 @@ export default function Posts() {
           likes: obj.numOfLikes,
           dislikes: obj.numOfDislikes,
           views: obj.numOfViewers,
-          sample: obj.body.split('.')[0],
+          sample: sampled,
         };
       });
 
@@ -51,7 +57,7 @@ export default function Posts() {
 
 
   return (
-    <div className={styles.posts}>
+    <div className={styles.posts} style={posts && posts.error ? {border: 0, paddingRight: 0} : {}}>
       {
         posts && posts.error ? <div className={styles.posterror}>There are no posts currently!</div> :
         <>
@@ -67,7 +73,7 @@ export default function Posts() {
                 }}>
                   <span>{obj.author}</span>
                   <h3>{obj.title}</h3>
-                  <p>{decodeHTML(obj.sample)}</p>
+                  <p>{`${decodeHTML(obj.sample)}`}</p>
                   <div>
                     <span>{obj.dateUpdated}</span>
                     <div>
