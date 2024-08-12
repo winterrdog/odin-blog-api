@@ -50,11 +50,12 @@
   color: white;
   padding: 120px 32px;
   box-sizing: border-box;
+  background-position: right;
 
 }
 
 .about main > :nth-child(n) {
-  max-width: 680px;
+  max-width: 1200px;
   box-sizing: border-box;
 }
 
