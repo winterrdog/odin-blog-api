@@ -1,15 +1,22 @@
 import { NextFunction, Request, Response } from "express";
 import * as fs from "fs";
-import * as _ from "lodash";
+import { merge } from "lodash";
 import * as jwt from "jsonwebtoken";
-import mongoose, { ClientSession, Connection, isValidObjectId } from "mongoose";
+import mongoose, {
+  ClientSession,
+  Connection,
+  Document,
+  isValidObjectId,
+} from "mongoose";
 import { validationResult } from "express-validator";
 import { PathLike } from "fs";
 import { JwtPayload } from "./middleware/interfaces";
 import { startLogger } from "./logging";
 
 const logger = startLogger(__filename);
+
 export type TransactionCallback<T> = (session: ClientSession) => Promise<T>;
+
 export default class Utility {
   static generateJwtPayload(payload: JwtPayload): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -33,14 +40,15 @@ export default class Utility {
         payload,
         <string>process.env.JWT_SECRET,
         jwtSignOptions,
-        jwtSignCb,
+        jwtSignCb
       );
     });
   }
+
   static validateRequest(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
   ): void {
     logger.info("validating and sanitizing request body, query, and params...");
 
@@ -54,6 +62,7 @@ export default class Utility {
     logger.info("request validated successfully!");
     return next();
   }
+
   static createFile(fname: PathLike): Promise<void> {
     // create a file if it doesn't exist
     // if it exists, do nothing
@@ -76,13 +85,15 @@ export default class Utility {
           return resolve();
         });
       });
-    }
-    
+    };
+
     return new Promise(cb);
   }
+
   static arrayToSet(arr: Array<any>): Set<any> {
     return new Set(arr);
   }
+
   static validateObjectId(id: string, res: Response): boolean {
     if (!isValidObjectId(id)) {
       logger.error("invalid or malformed object id");
@@ -93,9 +104,10 @@ export default class Utility {
 
     return true;
   }
-  static async updateDoc(docToUpdate: any, newData: any) {
+
+  static async updateDoc(docToUpdate: Document, newData: any) {
     try {
-      _.merge(docToUpdate, newData);
+      merge(docToUpdate, newData);
 
       const cb: TransactionCallback<any> = async (session) => {
         return await docToUpdate.save({ session });
@@ -109,6 +121,7 @@ export default class Utility {
       throw e;
     }
   }
+
   static handle500Status(res: Response, err: Error): void {
     res.status(500).json({
       message:
@@ -117,18 +130,22 @@ export default class Utility {
           : err.message,
     });
   }
+
   static extractUserIdFromToken(req: Request): string {
     return ((<any>req.user!).data as JwtPayload).data.sub;
   }
+
   static isCurrUserSameAsCreator(
     req: Request,
     res: Response,
-    dbUserId: string,
+    dbUserId: string
   ): boolean {
     const currUserId = Utility.extractUserIdFromToken(req);
+
     logger.info(
-      `checking if user with id, ${currUserId}, is the author of the resource...`,
+      `checking if user with id, ${currUserId}, is the author of the resource...`
     );
+
     if (currUserId !== dbUserId) {
       logger.error(`user( ${currUserId} ) is not the author of the resource`);
       res.status(403).json({
@@ -137,29 +154,35 @@ export default class Utility {
       });
       return false;
     }
+
     return true;
   }
+
   static updateUserReactions(
     req: Request,
     res: Response,
-    arr: Array<string>,
+    arr: Array<string>
   ): boolean {
     if (!req.user) {
       throw new Error("user's not authenticated thus user object is missing");
     }
+
     const currUserId = Utility.extractUserIdFromToken(req);
     const uniqueUsersReactions: Set<string> = Utility.arrayToSet(arr);
+
     if (!uniqueUsersReactions.has(currUserId)) {
       arr.push(currUserId);
       return true;
     }
+
     logger.info("the current reaction was already updated by the user");
     res.status(400).json({ message: "user reaction already updated" });
     return false;
   }
+
   static async runOperationInTransaction<T>(
     cb: TransactionCallback<T>,
-    connection: Connection = mongoose.connection,
+    connection: Connection = mongoose.connection
   ): Promise<T> {
     let session: ClientSession | null = null;
     let result: T;
