@@ -25,21 +25,12 @@ export interface CommentDocument extends CommentModelShape, Document {}
 
 const CommentModelName = "Comment";
 
-// todo: populate the necessary fields in all referenced fields
 const CommentSchema = new Schema(
   {
     body: { type: String, required: true },
     tldr: { type: String, default: "nil", maxLength: 64 },
-    user: {
-      type: Schema.Types.ObjectId,
-      ref: UserModelName,
-      required: true,
-    },
-    post: {
-      type: Schema.Types.ObjectId,
-      ref: PostModelName,
-      required: true,
-    },
+    user: { type: Schema.Types.ObjectId, ref: UserModelName, required: true },
+    post: { type: Schema.Types.ObjectId, ref: PostModelName, required: true },
     deleted: { type: Boolean, default: false },
     lastModified: { type: Date, default: Date.now },
     parentComment: {
@@ -61,7 +52,7 @@ const CommentSchema = new Schema(
     strictQuery: "throw",
     strict: "throw",
     toJSON: { transform: toJsonHandler, flattenObjectIds: true },
-  },
+  }
 );
 
 // indexes
@@ -71,14 +62,10 @@ CommentSchema.index({ user: 1 });
 CommentSchema.pre(
   ["find", "findOne"],
   function (next: CallbackWithoutResultAndOptionalError) {
-    // todo: get a session from the document
-    this.clone().populate({
-      path: "user",
-      select: "name",
-    });
+    this.clone().populate({ path: "user", select: "name" });
 
     return next();
-  },
+  }
 );
 CommentSchema.pre("save", async function (this: Document) {
   try {
@@ -87,18 +74,15 @@ CommentSchema.pre("save", async function (this: Document) {
       throw new Error("session is missing from the Comment document");
     }
 
-    await this.populate({
-      path: "user",
-      select: "name",
-      options: { session },
-    });
+    await this.populate({ path: "user", select: "name", options: { session } });
   } catch (e) {
     console.error(
       "error during post middleware on saving a comment",
-      e as Error,
+      e as Error
     );
   }
 });
+
 function toJsonHandler(doc: Document, ret: any) {
   // NOTE: never mark this function as 'async'
   ret.id = ret._id;
@@ -124,4 +108,5 @@ function toJsonHandler(doc: Document, ret: any) {
 
   return ret;
 }
+
 export const CommentModel = model(CommentModelName, CommentSchema);
