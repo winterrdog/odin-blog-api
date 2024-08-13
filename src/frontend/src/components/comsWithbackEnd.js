@@ -1,4 +1,4 @@
-const baseURL = 'http://localhost:3000';
+const baseURL = 'https://odin-blog-api-backend.up.railway.app';
 
 let localLikedComments;
 let localLikedPosts;
