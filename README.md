@@ -23,17 +23,20 @@ Make sure you have the following installed:
   ./containerize.sh
   ```
 
-- In case you want to run it in development mode, run the following command( for backend dev only ):
-
-  ```bash
-  docker compose -f ./docker-compose-dev.yml up -d
-  ```
-
 - Stop the backend by running the following command:
 
   ```bash
   docker compose down
   ```
+
+- In case you wanna run backend in production mode, run the following command:
+
+  ```bash
+  cd ./src
+  docker compose -f docker-compose.yml up
+  ```
+
+  Remember to set `MONGODB_URI` to your production database URI somewhere in the cloud in the `.env` file.
 
 - The backend will be available at `http://localhost:3000`.
 
