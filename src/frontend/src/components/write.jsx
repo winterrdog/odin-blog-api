@@ -5,6 +5,8 @@ import { Link, useLocation } from 'react-router-dom';
 import Logo from './logo.jsx';
 import { useRef, useState } from 'react';
 
+import DOMPurify from 'dompurify';
+
 export default function Write() {
   const buttonRef = useRef();
   const [content, setContent] = useState([]);
@@ -204,7 +206,7 @@ export default function Write() {
                 e.preventDefault();
                 if (!e.nativeEvent.data && (e.nativeEvent.inputType === 'insertText' || e.nativeEvent.inputType === 'insertLineBreak')) {
                   setContent(
-                    content.length ? [...content, { val: e.target.value, key: content[content.length - 1].key + 1 }] : [ { val: e.target.value, key: 1} ]
+                    content.length ? [...content, { val: DOMPurify.sanitize(e.target.value), key: content[content.length - 1].key + 1 }] : [ { val: e.target.value, key: 1} ]
                   );
                   formRef.current.reset();
                 }
