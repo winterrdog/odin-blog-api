@@ -67,14 +67,14 @@ function getUserPostsHandler() {
 function getUserLikedPostsHandler() {
   const fetchUserLikedPosts = async (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> => {
     try {
       const currUserId = Utility.extractUserIdFromToken(req);
       const cb: TransactionCallback<PostDocument[]> = async (session) => {
         const posts = await PostModel.find(
           { likes: { $in: [currUserId] } },
-          null,
+          null
         )
           .sort({ lastModified: -1 })
           .session(session);
@@ -106,7 +106,7 @@ function getUserLikedPostsHandler() {
 function getRecentlyViewedPostsHandler() {
   const fetchRecentlyViewedPosts = async (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> => {
     try {
       // get the user's most recently viewed 5 posts
@@ -144,7 +144,7 @@ function getRecentlyViewedPostsHandler() {
 function getPostByIdHandler() {
   const retrievePostById = async function (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       const id = extractPostIdFromReq(req, res);
@@ -195,7 +195,7 @@ function getPostByIdHandler() {
 function getPostsHandler() {
   const fetchPosts = async function (
     _req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       logger.info("fetching all posts...");
@@ -234,7 +234,7 @@ function getPostsHandler() {
 function createPostHandler() {
   const createPost = async function (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       // grab user id from jwt
@@ -245,7 +245,7 @@ function createPostHandler() {
       const cb: TransactionCallback<PostDocument> = async (session) => {
         const post = await PostModel.create(
           [{ author: currUserId, ...req.body }],
-          { session },
+          { session }
         );
 
         return post[0] as unknown as PostDocument;
@@ -276,7 +276,7 @@ function createPostHandler() {
 function updatePostHandler() {
   const updatePost = async function (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       const id = extractPostIdFromReq(req, res);
@@ -317,7 +317,7 @@ function updatePostHandler() {
       newData["lastModified"] = new Date();
       post = (await Utility.updateDoc(post, newData)) as PostDocument;
 
-      logger.info(`post updated successfully! post: ${post.toJSON()}`);
+      logger.info(`post updated successfully! post: ${JSON.stringify(post)}`);
 
       return res.status(200).json({ message: "Post updated", post });
     } catch (e) {
@@ -339,7 +339,7 @@ function updatePostHandler() {
 function deletePostHandler() {
   const deletePost = async function (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       const id = extractPostIdFromReq(req, res);
@@ -380,7 +380,7 @@ function deletePostHandler() {
 function updateLikesHandler() {
   const updatePostLikes = async function (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       const id = extractPostIdFromReq(req, res);
@@ -435,7 +435,7 @@ function updateLikesHandler() {
 function updateDislikesHandler() {
   const updatePostDislikes = async function (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       const id = extractPostIdFromReq(req, res);
@@ -453,7 +453,7 @@ function updateDislikesHandler() {
       const updateOnDislikes = Utility.updateUserReactions(
         req,
         res,
-        post.dislikes!,
+        post.dislikes!
       );
       if (!updateOnDislikes) return;
 
@@ -496,7 +496,7 @@ function updateDislikesHandler() {
 function removeLikeHandler() {
   const removeLikeFromPost = async function (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       const id = extractPostIdFromReq(req, res);
@@ -559,7 +559,7 @@ function removeLikeHandler() {
 function removeDislikeHandler() {
   const removeDislike = async function (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       const id = extractPostIdFromReq(req, res);

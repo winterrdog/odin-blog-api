@@ -1,8 +1,8 @@
 # odin-blog-api
 
-An exercise by The Odin Project( TOP ) to create a blog. I only designed the backend as that's my speciality :), then [_@muchubatactics_](https://github.com/muchubatactics) did the frontend. The backend is a `REST`ful API built with `Node.js`, `Express.js`, `MongoDB`, and `JWT` for authorization. It has `16+` endpoints for creating, reading, updating, and deleting users, posts, comments, and replies.
+An exercise by The Odin Project( TOP ) to create a blog. I only designed the backend as that's my speciality :), then [_@muchubatactics_](https://github.com/muchubatactics) did the frontend. The backend is a `REST`ful API built with `Node.js`, `React`( for the frontend ), `Express.js`, `MongoDB`, and `JWT` for authorization. It has `16+` endpoints for creating, reading, updating, and deleting users, posts, comments, and replies.
 
-**AUTHORS**: [_winterrdog_](https://github.com/winterrdog) & [_muchubatactics_](https://github.com/muchubatactics)
+**AUTHORS**: [_muchubatactics_](https://github.com/muchubatactics) & [_winterrdog_](https://github.com/winterrdog)
 
 ## REQUIREMENTS
 
@@ -10,7 +10,7 @@ Make sure you have the following installed:
 
 - `Postman` / `curl` - _for testing the API_
 - `Docker` - _for building the database(`mongodb`) and the application_
-- `Docker Compose` - _for deploying the application_
+- `Docker Compose` - _for deploying the application_. Use the new Go-based version, `docker compose` instead of the old Python-based version, `docker-compose` otherwise you will get an error unless you use some workarounds.
 
 ## RUNNING BACKEND
 
@@ -23,17 +23,20 @@ Make sure you have the following installed:
   ./containerize.sh
   ```
 
-- In case you want to run it in development mode, run the following command( for backend dev only ):
-
-  ```bash
-  docker-compose -f ./docker-compose-dev.yml up -d
-  ```
-
 - Stop the backend by running the following command:
 
   ```bash
-  docker-compose down
+  docker compose down
   ```
+
+- In case you wanna run backend in production mode, run the following command:
+
+  ```bash
+  cd ./src
+  docker compose -f docker-compose.yml up
+  ```
+
+  Remember to set `MONGODB_URI` to your production database URI somewhere in the cloud in the `.env` file.
 
 - The backend will be available at `http://localhost:3000`.
 
@@ -42,7 +45,7 @@ Make sure you have the following installed:
 - To view logs, run the following command:
 
   ```bash
-  docker-compose logs -f
+  docker logs --tail=300 -f blog_backend
   ```
 
 - The container will also write logs to `./src/blog-app.log` external to the container.

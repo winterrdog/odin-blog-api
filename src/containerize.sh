@@ -7,4 +7,4 @@ if [ ! -f blog-app.log ]; then
 fi
 
 # start containers via docker compose
-docker compose up -d
+docker compose -f docker-compose-dev.yml up -d

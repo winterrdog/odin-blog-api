@@ -32,7 +32,7 @@ const PostSchema = new Schema(
     strictQuery: "throw",
     strict: "throw",
     toJSON: { transform: toJsonHandler, flattenObjectIds: true },
-  },
+  }
 );
 
 // indexes
@@ -40,11 +40,9 @@ PostSchema.index({ author: 1 });
 
 // hooks
 PostSchema.pre(["find", "findOne"], function (next) {
-  // todo: get a session from the document
-
   // NOTE: make a clone of the query object since we could
   // have executed the query multiple times already
-  this.clone().populate("author", "name");
+  this.clone().populate({ path: "author", select: "name" });
 
   return next();
 });
