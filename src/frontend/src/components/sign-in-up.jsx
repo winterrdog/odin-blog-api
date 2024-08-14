@@ -40,7 +40,7 @@ export default function Signinup({handleClose, source, login}) {
       }).then((res)=> {
         if (res.token) setToken(res.token);
       }).catch((error) => {
-        console.log(error);
+        console.error(error);
       });
 
 
@@ -57,7 +57,6 @@ export default function Signinup({handleClose, source, login}) {
         role: 'author',
       }
 
-      // TODO:: what to do with the token returned by the server
 
       fetch(`${baseURL}/api/v1/users/sign-up`, {
         method: 'POST',
@@ -76,7 +75,7 @@ export default function Signinup({handleClose, source, login}) {
       }).then((res) => {
         if (res.token) setToken(res.token);
       }).catch((error) => {
-        console.log(error);
+        console.error(error);
       });
 
 

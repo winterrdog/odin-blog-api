@@ -1,3 +1,4 @@
+// const baseURL = 'http://localhost:3000';
 const baseURL = 'https://odin-blog-api-backend.up.railway.app';
 
 let localLikedComments;
@@ -6,7 +7,6 @@ let localLikedPosts;
 window.onload = setupLS;
 
 function setupLS() {
-  console.log('run');
   (() => {
     let account = getLogInfo();
     if (!Object.keys(account).length) return null;
@@ -70,7 +70,7 @@ function checkIfLoggedIn() {
 
   let dif = Math.abs((nowTime - setTime) / 86400000); // difference in days (86400000 is the number of milli seconds in a day)
 
-  if (dif < 1.9) return true; // todo:: handle if new setting of expiry date of token
+  if (dif < 1.9) return true; 
   else {
     localStorage.clear();
     return false;

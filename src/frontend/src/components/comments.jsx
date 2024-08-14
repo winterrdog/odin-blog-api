@@ -1,6 +1,7 @@
 import { PropTypes } from "prop-types";
 import { baseURL, getLogInfo } from "./comsWithbackEnd";
 import { useEffect, useRef, useState } from "react";
+import DOMPurify from 'dompurify'
 
 import styles from '../styles/comments.module.css';
 import Comment from "./comment";
@@ -36,13 +37,12 @@ export default function Comments({ id, cbToClose }) {
     }
   }, [id, trigger]);
 
-  console.log('called');
 
   function handleSubmit() {
     if (!textareaRef.current.value) return;
 
     let tmp = {
-      body: String(textareaRef.current.value),
+      body: String(DOMPurify.sanitize(textareaRef.current.value)),
     }
 
     fetch(`${baseURL}/api/v1/post-comments/${id}/comments/`, {
