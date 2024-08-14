@@ -12,7 +12,6 @@ export default function MyAccount() {
 
   function handleSubmit(e) {
     e.preventDefault();
-    console.log(e);
   
     let body = {name: e.target[0].value};
 
@@ -31,7 +30,6 @@ export default function MyAccount() {
         //
         showMessage('Changed succesfully, reloading', true);
         setUserNameOnly(body.name);
-        // todo: reload page
       } else {
         showMessage('Failed! try again later', false);
       }

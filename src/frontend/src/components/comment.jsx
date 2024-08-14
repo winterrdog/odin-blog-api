@@ -3,6 +3,8 @@ import styles from '../styles/comment.module.css';
 import PropTypes from 'prop-types';
 import { addToLLC, baseURL, checkLLC, decodeHTML, getLogInfo, removeFromLLC } from './comsWithbackEnd';
 
+import DOMPurify from 'dompurify';
+
 export default function Comment({ data, postId, allComs, cbToTrigger}) {
   const [likeordis, setlikeordis] = useState(checkLLC(data.id) ? {like: true, dislike: false} : {like: false, dislike: false});
   const [replying, setReplying] = useState(false);
@@ -18,7 +20,7 @@ export default function Comment({ data, postId, allComs, cbToTrigger}) {
     if (!textareaRef.current.value) return;
 
     let tmp = {
-      body: String(textareaRef.current.value),
+      body: DOMPurify.sanitize(textareaRef.current.value),
     }
 
     fetch(`${baseURL}/api/v1/post-comments/${postId}/comments/${data.id}/replies`, {
@@ -112,7 +114,7 @@ export default function Comment({ data, postId, allComs, cbToTrigger}) {
         <div className={styles.account}>{data.user[0]}</div>
         <div>
           <span>{data.user}</span>
-          <span>{data.dateUpdated.split('T')[0]}</span>
+          <span>{data.dateUpdated.split('T')[0]}, {data.dateUpdated.split('T')[1].substr(0, 5)}</span>
         </div>
       </div>
       <main>{`${decodeHTML(data.body)}`}</main>

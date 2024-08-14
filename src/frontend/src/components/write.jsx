@@ -15,11 +15,9 @@ export default function Write() {
   const inputRef = useRef();
 
   const location = useLocation();
-  console.log(location);
 
   if (location.state && !content.length) {
     
-    console.log('in func');
     let tmp = [];
     tmp.push({
       val: `${decodeHTML(location.state.title)}`,
@@ -50,7 +48,7 @@ export default function Write() {
     }, '');
 
     if (inputRef.current.value !== '') {
-      data.body += `${inputRef.current.value}\n`;
+      data.body += `${DOMPurify.sanitize(inputRef.current.value)}\n`;
     }
 
     if (location.state) {
@@ -63,7 +61,6 @@ export default function Write() {
         },
         body: JSON.stringify(data),
       }).then((res) => {
-        console.log(res);
         let result = {};
   
         if (res.status === 200) result.message = 'Updated Successfully';
@@ -71,7 +68,6 @@ export default function Write() {
         
         result.status = true;
         result.code = res.status;
-        console.log(result);
         setPublished(result);
         
       }).catch((err) => {
@@ -137,7 +133,6 @@ export default function Write() {
           {
             content.map((obj) => {
               if (obj.clicked) {
-                console.log(obj.val);
                 if (obj.key == 1) {
                   return (
                     <textarea key={obj.key} name='title' id="title"
