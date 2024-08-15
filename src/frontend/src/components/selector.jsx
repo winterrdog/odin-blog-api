@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { baseURL, decodeHTML, getLogInfo } from './comsWithbackEnd';
 import { useNavigate } from 'react-router-dom';
 import Loading from './loading';
+import { convertToUserTimezone } from '../utils';
 
 export default function Selector() {
   const [selected, setSelected] = useState('r');
@@ -49,7 +50,7 @@ export default function Selector() {
           if (selected === 'yp') {
             return {
               title: obj.title,
-              dateUpdated: obj.dateUpdated.split('T')[0],
+              dateUpdated: convertToUserTimezone(obj.dateUpdated),
               id: obj.id,
               likes: obj.numOfLikes,
               dislikes: obj.numOfDislikes,
@@ -72,7 +73,7 @@ export default function Selector() {
         let coms = res.comments.map((com) => {
           return {
             user: com.user,
-            dateUpdated: com.dateUpdated.split('T')[0],
+            dateUpdated: convertToUserTimezone(com.dateUpdated),
             parent: com.parentComment ? true : false,
             body: com.body,
             numOfDislikes: com.numOfDislikes,

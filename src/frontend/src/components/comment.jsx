@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { addToLLC, baseURL, checkLLC, decodeHTML, getLogInfo, removeFromLLC } from './comsWithbackEnd';
 
 import DOMPurify from 'dompurify';
+import { convertToUserTimezone } from '../utils';
 
 export default function Comment({ data, postId, allComs, cbToTrigger}) {
   const [likeordis, setlikeordis] = useState(checkLLC(data.id) ? {like: true, dislike: false} : {like: false, dislike: false});
@@ -22,6 +23,7 @@ export default function Comment({ data, postId, allComs, cbToTrigger}) {
     let tmp = {
       body: DOMPurify.sanitize(textareaRef.current.value),
     }
+    textareaRef.current.value = '';
 
     fetch(`${baseURL}/api/v1/post-comments/${postId}/comments/${data.id}/replies`, {
       method: 'POST',
@@ -33,7 +35,6 @@ export default function Comment({ data, postId, allComs, cbToTrigger}) {
     }).then((res) => {
       if (res.status != 201) throw new Error('problem sending reply');
       else {
-        textareaRef.current.value = '';
         setReplying(false);
         cbToTrigger();
       }
@@ -114,7 +115,7 @@ export default function Comment({ data, postId, allComs, cbToTrigger}) {
         <div className={styles.account}>{data.user[0]}</div>
         <div>
           <span>{data.user}</span>
-          <span>{data.dateUpdated.split('T')[0]}, {data.dateUpdated.split('T')[1].substr(0, 5)}</span>
+          <span>{ convertToUserTimezone(data.dateUpdated)}</span>
         </div>
       </div>
       <main>{`${decodeHTML(data.body)}`}</main>

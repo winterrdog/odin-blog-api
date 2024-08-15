@@ -34,3 +34,5 @@ function convertToUserTimezone(utcTimestamp) {
 // Example usage -- uncomment to run
 // const utcTimestamp = "2024-08-15T14:27:58.351Z";
 // console.log(convertToUserTimezone(utcTimestamp));
+
+export { convertToUserTimezone };

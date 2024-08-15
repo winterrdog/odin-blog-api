@@ -5,6 +5,7 @@ import { baseURL, checkIfLoggedIn, decodeHTML, shortCutToSignIn } from './comsWi
 import { useEffect, useState } from 'react';
 
 import Loading from './loading.jsx';
+import { convertToUserTimezone } from '../utils.js';
 
 export default function Posts() {
   const [posts, setPosts] = useState(null);
@@ -38,7 +39,7 @@ export default function Posts() {
         return {
           author: obj.author,
           title: obj.title,
-          dateUpdated: `${obj.dateUpdated.split('T')[0]}, ${obj.dateUpdated.split('T')[1].substr(0, 5)}`,
+          dateUpdated: convertToUserTimezone(obj.dateUpdated),
           id: obj.id,
           likes: obj.numOfLikes,
           dislikes: obj.numOfDislikes,

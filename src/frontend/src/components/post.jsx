@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { addToLLP, baseURL, checkLLP, decodeHTML, getLogInfo, removeFromLLP } from "./comsWithbackEnd";
 import Comments from "./comments";
 import Loading from "./loading";
+import { convertToUserTimezone } from "../utils";
 
 
 export default function Post() {
@@ -135,7 +136,7 @@ export default function Post() {
               <div className={styles.account}>{data.author[0]}</div>
               <div>
                 <span>{data.author}</span>
-                <span>{data.dateUpdated.split('T')[0]}, {data.dateUpdated.split('T')[1].substr(0, 5)}</span>
+                <span>{convertToUserTimezone(data.dateUpdated)}</span>
               </div>
             </div>
             <div className={styles.likesgoa}>
