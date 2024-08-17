@@ -47,7 +47,7 @@ export default function Comments({ id, cbToClose }) {
     }
 
     textareaRef.current.value = '';
-    
+
     fetch(`${baseURL}/api/v1/post-comments/${id}/comments/`, {
       method: 'POST',
       headers: {
@@ -88,9 +88,9 @@ export default function Comments({ id, cbToClose }) {
         <button type='button' ref={buttonRef}  onClick={handleSubmit}>Respond</button>
       </div>
       {
-        data ? data.map((obj, i) => {
+        data ? data.map((obj) => {
           return obj.parentComment ? null :
-          <Comment data={obj} key={i} postId={id} allComs={data} cbToTrigger={ () => {setTrigger((prev) => prev + 1)} }/>
+          <Comment data={obj} key={obj.id} postId={id} allComs={data} cbToTrigger={ () => {setTrigger((prev) => prev + 1)} }/>
         }) : null
       }
     </div>

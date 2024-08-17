@@ -146,9 +146,9 @@ export default function Comment({ data, postId, allComs, cbToTrigger}) {
         <button type='button' className={`${replying ? null : styles.off} ${styles.repres}`} ref={buttonRef} onClick={handleReply} >Respond</button>
 
         {
-          allComs ? allComs.map((obj, i) => {
+          allComs ? allComs.map((obj) => {
             if (obj.parentComment === data.id) {
-              return <Comment data={obj} key={i} postId={postId} allComs={allComs} cbToTrigger={cbToTrigger} />
+              return <Comment data={obj} key={obj.id} postId={postId} allComs={allComs} cbToTrigger={cbToTrigger} />
             } else return null;
           }) : null
         }

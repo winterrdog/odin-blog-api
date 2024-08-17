@@ -71,9 +71,9 @@ export default function Posts() {
           posts && posts.error ? <div className={styles.posterror}>There are no posts currently!</div> :
           <>
             {
-              posts ? posts.posts.map((obj, i) => {
+              posts ? posts.posts.map((obj) => {
                 return (
-                  <div key={i} className={styles.post} onClick={() => {
+                  <div key={obj.id} className={styles.post} onClick={() => {
                     if (checkIfLoggedIn()) {
                       navigate('/post', {
                         state: {id: obj.id, summary: obj.sample},

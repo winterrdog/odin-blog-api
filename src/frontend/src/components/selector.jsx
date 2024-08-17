@@ -148,9 +148,9 @@ export default function Selector() {
                   {
                     // show data here
                     data.posts ? 
-                    data.posts.map((obj, i) => {
+                    data.posts.map((obj) => {
                       return (
-                        <div key={i} className={styles.post}>
+                        <div key={obj.id} className={styles.post}>
                           {
                             selected == 'yp' ? null :
                             <span>{obj.author}</span>
