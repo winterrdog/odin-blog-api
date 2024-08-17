@@ -17,11 +17,12 @@ export default function Comment({ data, postId, allComs, cbToTrigger}) {
   const account = getLogInfo();
 
   function handleReply() {
+    let str = textareaRef.current.value.trim();
 
-    if (!textareaRef.current.value) return;
+    if (!str) return;
 
     let tmp = {
-      body: DOMPurify.sanitize(textareaRef.current.value),
+      body: DOMPurify.sanitize(str),
     }
     textareaRef.current.value = '';
 

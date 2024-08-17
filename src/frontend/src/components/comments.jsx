@@ -39,12 +39,15 @@ export default function Comments({ id, cbToClose }) {
 
 
   function handleSubmit() {
-    if (!textareaRef.current.value) return;
+    let str = textareaRef.current.value.trim();
+    if (!str) return;
 
     let tmp = {
-      body: String(DOMPurify.sanitize(textareaRef.current.value)),
+      body: String(DOMPurify.sanitize(str)),
     }
 
+    textareaRef.current.value = '';
+    
     fetch(`${baseURL}/api/v1/post-comments/${id}/comments/`, {
       method: 'POST',
       headers: {
@@ -55,7 +58,6 @@ export default function Comments({ id, cbToClose }) {
     }).then((res) => {
       if (res.status !== 201) throw new Error('failed to post comment!');
       else {
-        textareaRef.current.value = '';
         setTrigger((prev) =>  prev + 1);
       }
     }).catch((err) => {
