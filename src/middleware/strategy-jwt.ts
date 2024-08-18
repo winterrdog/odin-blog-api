@@ -17,6 +17,12 @@ const verifyJwtCb = async (payload: JwtPayload, cb: any) => {
       return cb(null, false);
     }
 
+    // is the token version in the payload the same as the one in the db?
+    if (user.tokenVersion != payload.data.version) {
+      logger.error(`user token version mismatch for jwt: ${payload.data.sub}`);
+      return cb(null, false);
+    }
+
     logger.info(`user found for jwt: ${payload.data.sub}`);
     (user as any)["data"] = payload;
     return cb(null, user);

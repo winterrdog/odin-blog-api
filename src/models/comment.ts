@@ -57,6 +57,7 @@ const CommentSchema = new Schema(
 
 // indexes
 CommentSchema.index({ user: 1 });
+CommentSchema.index({ post: 1 });
 
 // hooks
 CommentSchema.pre(

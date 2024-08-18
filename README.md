@@ -66,6 +66,7 @@ It has `16+` endpoints i.e.:
 - `POST /api/v1/users/sign-in` - _for logging in a user_
 - `PATCH /api/v1/users/update` - _for updating a user details_
 - `DELETE /api/v1/users/delete` - _for deleting a user_
+- `PATCH /api/v1/users/log-out` - _for logging out a user_
 
 ### Post Endpoints
 
@@ -178,6 +179,19 @@ The server will respond with:
 
 ```json
     HTTP/1.1 204 No Content
+```
+
+#### Log out a user
+
+```sh
+curl -X PATCH -H "Authorization: Bearer eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InN1YiI6IjY2MjY1NWMxYTJlMjkxYjg0NjM1ODlmZSIsInJvbGUiOiJhdXRob3IifSwiaWF0IjoxNzEzNzg4MzUzLCJleHAiOjE3MTM5NjExNTN9.8oc3DOAR6SqaWUBynMZlAvHJr202cTXbtiq80EVyO5RSXMJrdGJ-aWdZF_lfR1p4" http://localhost:3000/api/v1/users/log-out
+```
+
+The server will respond with:
+
+```json
+HTTP/1.1 204 No Content
+
 ```
 
 ### Post Requests

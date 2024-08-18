@@ -18,4 +18,7 @@ usersRouter.delete("/delete", auth.authenticateJwt, userController.deleteUser);
 logger.info("attaching controllers to 'user' route: /update ...");
 usersRouter.patch("/update", auth.authenticateJwt, userController.updateUser);
 
+logger.info("attaching controllers to 'user' route: /logout ...");
+usersRouter.patch("/log-out", auth.authenticateJwt, userController.logout);
+
 export default usersRouter;
