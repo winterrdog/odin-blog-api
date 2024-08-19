@@ -43,7 +43,12 @@ function logoutHandler() {
 
       // increment token version
       const updateCb: TransactionCallback<void> = async (session) => {
-        user.tokenVersion = user.tokenVersion! + 1;
+        // does the user have a token version yet?
+        if (!user.tokenVersion) {
+          user.tokenVersion = 0;
+        }
+
+        user.tokenVersion++;
         await user.save({ session });
       };
 
