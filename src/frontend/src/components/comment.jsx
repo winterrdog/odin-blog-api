@@ -17,11 +17,12 @@ export default function Comment({ data, postId, allComs, cbToTrigger}) {
   const account = getLogInfo();
 
   function handleReply() {
+    let str = textareaRef.current.value.trim();
 
-    if (!textareaRef.current.value) return;
+    if (!str) return;
 
     let tmp = {
-      body: DOMPurify.sanitize(textareaRef.current.value),
+      body: DOMPurify.sanitize(str),
     }
     textareaRef.current.value = '';
 
@@ -145,9 +146,9 @@ export default function Comment({ data, postId, allComs, cbToTrigger}) {
         <button type='button' className={`${replying ? null : styles.off} ${styles.repres}`} ref={buttonRef} onClick={handleReply} >Respond</button>
 
         {
-          allComs ? allComs.map((obj, i) => {
+          allComs ? allComs.map((obj) => {
             if (obj.parentComment === data.id) {
-              return <Comment data={obj} key={i} postId={postId} allComs={allComs} cbToTrigger={cbToTrigger} />
+              return <Comment data={obj} key={obj.id} postId={postId} allComs={allComs} cbToTrigger={cbToTrigger} />
             } else return null;
           }) : null
         }

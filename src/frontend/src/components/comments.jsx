@@ -39,11 +39,14 @@ export default function Comments({ id, cbToClose }) {
 
 
   function handleSubmit() {
-    if (!textareaRef.current.value) return;
+    let str = textareaRef.current.value.trim();
+    if (!str) return;
 
     let tmp = {
-      body: String(DOMPurify.sanitize(textareaRef.current.value)),
+      body: String(DOMPurify.sanitize(str)),
     }
+
+    textareaRef.current.value = '';
 
     fetch(`${baseURL}/api/v1/post-comments/${id}/comments/`, {
       method: 'POST',
@@ -55,7 +58,6 @@ export default function Comments({ id, cbToClose }) {
     }).then((res) => {
       if (res.status !== 201) throw new Error('failed to post comment!');
       else {
-        textareaRef.current.value = '';
         setTrigger((prev) =>  prev + 1);
       }
     }).catch((err) => {
@@ -86,9 +88,9 @@ export default function Comments({ id, cbToClose }) {
         <button type='button' ref={buttonRef}  onClick={handleSubmit}>Respond</button>
       </div>
       {
-        data ? data.map((obj, i) => {
+        data ? data.map((obj) => {
           return obj.parentComment ? null :
-          <Comment data={obj} key={i} postId={id} allComs={data} cbToTrigger={ () => {setTrigger((prev) => prev + 1)} }/>
+          <Comment data={obj} key={obj.id} postId={id} allComs={data} cbToTrigger={ () => {setTrigger((prev) => prev + 1)} }/>
         }) : null
       }
     </div>
