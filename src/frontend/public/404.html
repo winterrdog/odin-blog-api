@@ -6,10 +6,12 @@
   <title>rerouting</title>
 </head>
 <body style="display: flex; height: 100%; width: 100%; justify-content: center; align-items: center;">
-  <h1 style="font-family: sans-serif;">Re-Routing!</h1>
+  <h1 style="font-family: sans-serif;">Re-Routing to home!</h1>
   <script type="text/javascript">
     (function() {
-      window.location.replace("/odin-blog-api");
+      setTimeout(()=>{
+        window.location.replace("/odin-blog-api");
+      }, 1000);
     }())
   </script>
 </body>
