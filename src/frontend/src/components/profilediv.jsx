@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import styles from '../styles/profilediv.module.css';
-import { clearMemory, getLogInfo } from './comsWithbackEnd';
+import { baseURL, clearMemory, getLogInfo } from './comsWithbackEnd';
 
 import PropTypes from 'prop-types';
 import { Link, useNavigate } from 'react-router-dom';
@@ -25,6 +25,18 @@ export default function ProfileDiv({ cb, parentRef }) {
 
   function signouthandler(e) {
     e.stopPropagation();
+
+    fetch(`${baseURL}/api/v1/users/log-out`, {
+      method: 'PATCH',
+      headers: {
+        'Content-type': 'application/json',
+        Authorization: `Bearer ${account.token}`,
+      }
+    }).then((res) => {
+      if (res.status !== 204) throw new Error('failed to log out');
+    }).catch((err) => {
+      console.error(err);
+    })
 
     clearMemory();
     cb(false);
