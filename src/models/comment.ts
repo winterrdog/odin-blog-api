@@ -52,7 +52,7 @@ const CommentSchema = new Schema(
     strictQuery: "throw",
     strict: "throw",
     toJSON: { transform: toJsonHandler, flattenObjectIds: true },
-  }
+  },
 );
 
 // indexes
@@ -66,7 +66,7 @@ CommentSchema.pre(
     this.clone().populate({ path: "user", select: "name" });
 
     return next();
-  }
+  },
 );
 CommentSchema.pre("save", async function (this: Document) {
   try {
@@ -79,7 +79,7 @@ CommentSchema.pre("save", async function (this: Document) {
   } catch (e) {
     console.error(
       "error during post middleware on saving a comment",
-      e as Error
+      e as Error,
     );
   }
 });

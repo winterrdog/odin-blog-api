@@ -8,7 +8,7 @@ const logger = startLogger(__filename);
 export function authenticateUserPass(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   // note: if u used "failureRedirect", that route better be
   // a GET route otherwise, opt for maximum control thru a callback
@@ -16,12 +16,12 @@ export function authenticateUserPass(
     err: any,
     user?: Express.User | false | null,
     info?: object | string | Array<string | undefined>,
-    status?: number | Array<number | undefined>
+    status?: number | Array<number | undefined>,
   ): any => {
     if (err) {
       info &&
         logger.error(
-          `error happened in user-pass auth: ${JSON.stringify(info)}`
+          `error happened in user-pass auth: ${JSON.stringify(info)}`,
         );
       return next(err);
     }
@@ -30,8 +30,8 @@ export function authenticateUserPass(
       info &&
         logger.warn(
           `something not nice happened in user-pass auth: ${JSON.stringify(
-            info
-          )}`
+            info,
+          )}`,
         );
       const message = "invalid or corrupted or NO user logins were provided";
       if (typeof status === "number") {
@@ -50,7 +50,7 @@ export function authenticateUserPass(
 export function authenticateJwt(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   // note: if u used "failureRedirect", that route better be
   // a GET route otherwise, opt for maximum control thru a callback
@@ -58,7 +58,7 @@ export function authenticateJwt(
     err: any,
     user?: Express.User | false | null,
     info?: object | string | Array<string | undefined>,
-    status?: number | Array<number | undefined>
+    status?: number | Array<number | undefined>,
   ): any => {
     if (err) {
       info && logger.error(`error happened in JWT auth: ${info.toString()}`);
@@ -68,7 +68,7 @@ export function authenticateJwt(
     if (!user) {
       info &&
         logger.warn(
-          `something not nice happened in JWT auth: ${info.toString()}`
+          `something not nice happened in JWT auth: ${info.toString()}`,
         );
       const message = "invalid or corrupted or NO jwt was provided";
       if (typeof status === "number") {

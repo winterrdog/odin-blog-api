@@ -20,7 +20,7 @@ const UserSchema = new Schema(
     strictQuery: "throw",
     strict: "throw",
     toJSON: { transform: toJsonHandler },
-  }
+  },
 );
 
 // indexes
