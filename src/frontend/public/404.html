@@ -9,7 +9,8 @@
   <h1 style="font-family: sans-serif;">Re-Routing!</h1>
   <script type="text/javascript">
     (function() {
-      window.location.replace('/');
+      var pathname = window.location.pathname;
+      window.location.replace("/index.html" + pathname);
     }())
   </script>
 </body>
