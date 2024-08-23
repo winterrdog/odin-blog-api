@@ -20,12 +20,55 @@ const userController = {
   signIn: signInHandler(),
   deleteUser: deleteUserHandler(),
   updateUser: updateUserHandler(),
+  logout: logoutHandler(),
 };
+
+function logoutHandler() {
+  const handler = async function (req: Request, res: Response): Promise<any> {
+    try {
+      const currUserId = Utility.extractUserIdFromToken(req);
+      logger.info(`logging out user with id: ${currUserId}...`);
+
+      const cb: TransactionCallback<UserDocument | null> = async (session) => {
+        return await UserModel.findById(currUserId, null, { session });
+      };
+
+      const user = await Utility.runOperationInTransaction(cb);
+      if (!user) {
+        logger.error(
+          `user with id: ${currUserId} not found hence cannot be logged out`
+        );
+        return res.status(404).json({ message: "user not found" });
+      }
+
+      // increment token version
+      const updateCb: TransactionCallback<void> = async (session) => {
+        // does the user have a token version yet?
+        if (!user.tokenVersion) {
+          user.tokenVersion = 0;
+        }
+
+        user.tokenVersion++;
+        await user.save({ session });
+      };
+
+      await Utility.runOperationInTransaction(updateCb);
+      logger.info(`user with id: ${currUserId} logged out successfully!`);
+
+      return res.status(204).end();
+    } catch (e) {
+      logger.error(e, "error occurred during logging out");
+      Utility.handle500Status(res, <Error>e);
+    }
+  };
+
+  return handler;
+}
 
 function signUpHandler() {
   const signupUser = async function (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       // collect details
@@ -37,7 +80,7 @@ function signUpHandler() {
         logger.info("checking if user with name already exists...");
 
         const cb: TransactionCallback<UserDocument | null> = async (
-          session,
+          session
         ) => {
           return await UserModel.findOne({ name }, null, { session });
         };
@@ -63,13 +106,11 @@ function signUpHandler() {
       const createdUser = await Utility.runOperationInTransaction(cb);
 
       // craft jwt and send it back
-      const jwtPayload: JwtPayload = {
-        data: { sub: createdUser.id, role },
-      };
+      const jwtPayload = createJwtPayload(createdUser);
 
       const token = await Utility.generateJwtPayload(jwtPayload);
       logger.info(
-        `user with name: ${name} signed up successfully with role: ${role} -- token: ${token}`,
+        `user with name: ${name} signed up successfully with role: ${role} -- token: ${token}`
       );
       return res.status(201).json({
         message: "User created successfully",
@@ -93,7 +134,7 @@ function signUpHandler() {
 function signInHandler() {
   const signInUser = async function (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       const { name, pass: password } = req.body;
@@ -120,13 +161,11 @@ function signInHandler() {
       }
 
       // craft jwt and send it back
-      const jwtPayload: JwtPayload = {
-        data: { sub: user.id, role: user.role! },
-      };
+      const jwtPayload = createJwtPayload(user);
       const token = await Utility.generateJwtPayload(jwtPayload);
 
       logger.info(
-        `user with name: ${name} and role: ${user.role} signed in successfully -- token: ${token}`,
+        `user with name: ${name} and role: ${user.role} signed in successfully -- token: ${token}`
       );
 
       return res.status(200).json({
@@ -163,7 +202,7 @@ function deleteUserHandler() {
       const user = await Utility.runOperationInTransaction(cb);
       if (!user) {
         logger.error(
-          `user with id: ${currUserId} not found hence cannot be deleted`,
+          `user with id: ${currUserId} not found hence cannot be deleted`
         );
         return res.status(404).json({ message: "User not found" });
       }
@@ -188,7 +227,7 @@ function deleteUserHandler() {
 function updateUserHandler() {
   const editUserDetails = async function (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       const currUserId = Utility.extractUserIdFromToken(req);
@@ -202,7 +241,7 @@ function updateUserHandler() {
       let user = await Utility.runOperationInTransaction(cb);
       if (!user) {
         logger.error(
-          `user with id: ${currUserId} not found hence cannot be updated`,
+          `user with id: ${currUserId} not found hence cannot be updated`
         );
         return res.status(404).json({ message: "User not found" });
       }
@@ -224,6 +263,22 @@ function updateUserHandler() {
   ];
 
   return handlers;
+}
+
+function createJwtPayload(user: UserDocument): JwtPayload {
+  let tokenVersion: number;
+
+  if (user.tokenVersion) {
+    tokenVersion = user.tokenVersion;
+  } else {
+    tokenVersion = 0;
+  }
+
+  const payload = {
+    data: { sub: user.id, role: user.role!, version: tokenVersion },
+  };
+
+  return payload;
 }
 
 export default userController;

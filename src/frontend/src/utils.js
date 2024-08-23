@@ -25,10 +25,13 @@ function convertToUserTimezone(utcTimestamp) {
   const year = date.getFullYear(),
     month = months[date.getMonth()],
     day = date.getDate(),
-    hours = String(date.getHours()).padStart(2, "0"),
-    minutes = String(date.getMinutes()).padStart(2, "0");
+    time = date.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "numeric",
+      hour12: false,
+    });
 
-  return `${hours}:${minutes} on ${month} ${day}, '${year % 2000}`;
+  return `${time} on ${month} ${day}, '${year % 2000}`;
 }
 
 // Example usage -- uncomment to run

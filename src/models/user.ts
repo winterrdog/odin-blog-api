@@ -5,6 +5,7 @@ export interface UserModelShape {
   name: string;
   passwordHash: string;
   role?: string;
+  tokenVersion?: number;
 }
 export interface UserDocument extends UserModelShape, Document {}
 const UserSchema = new Schema(
@@ -12,6 +13,7 @@ const UserSchema = new Schema(
     name: { type: String, required: true, maxLength: 64 },
     passwordHash: { type: String, required: true },
     role: { type: String, enum: roles, default: "reader" },
+    tokenVersion: { type: Number, default: 0 },
   },
   {
     timestamps: true,
@@ -32,6 +34,7 @@ function toJsonHandler(_doc: any, ret: any) {
   delete ret.passwordHash;
   delete ret.createdAt;
   delete ret.updatedAt;
+  delete ret.tokenVersion;
   delete ret._id;
   delete ret.__v;
 
