@@ -113,7 +113,7 @@ export default function Comment({ data, postId, allComs, cbToTrigger}) {
   return (
     <div className={styles.comment}>
       <div>
-        <div className={styles.account}>{data.user[0]}</div>
+        <div className={styles.account}>{data.user ? data.user[0] : null}</div>
         <div>
           <span>{data.user}</span>
           <span>{ convertToUserTimezone(data.dateUpdated)}</span>
