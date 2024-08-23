@@ -6,38 +6,35 @@ import { startLogger } from "../logging";
 const commentsRouter = Router();
 const logger = startLogger(__filename);
 
+commentsRouter.use(auth.authenticateJwt);
+
 logger.info("attaching controllers to 'comment' route: /:postId/comments ...");
 commentsRouter
   .route("/:postId/comments")
   .get(commentController.getComments)
-  .post(auth.authenticateJwt, commentController.createComment);
+  .post(commentController.createComment);
 
-commentsRouter.get(
-  "/user-comments",
-  auth.authenticateJwt,
-  commentController.getUserComments,
-);
+commentsRouter.get("/user-comments", commentController.getUserComments);
 
 commentsRouter.get(
   "/user-liked-comments",
-  auth.authenticateJwt,
-  commentController.getUserLikedComments,
+  commentController.getUserLikedComments
 );
 
 logger.info(
-  "attaching controllers to 'comment' route: /:postId/comments/:id ...",
+  "attaching controllers to 'comment' route: /:postId/comments/:id ..."
 );
 commentsRouter
   .route("/:postId/comments/:id")
   .get(commentController.getCommentById)
-  .patch(auth.authenticateJwt, commentController.updateComment)
-  .delete(auth.authenticateJwt, commentController.deleteComment);
+  .patch(commentController.updateComment)
+  .delete(commentController.deleteComment);
 
 // to update a Reply, just hit the 'updateComment' endpoint above
 logger.info(
-  "attaching controllers to 'comment' route: /:postId/comments/:id/replies ...",
+  "attaching controllers to 'comment' route: /:postId/comments/:id/replies ..."
 );
-commentsRouter.use("/:postId/comments/:id/replies", auth.authenticateJwt);
+commentsRouter.use("/:postId/comments/:id/replies");
 commentsRouter
   .route("/:postId/comments/:id/replies")
   .get(commentController.findReplies)
@@ -47,10 +44,10 @@ commentsRouter
   .delete(commentController.deleteReply);
 
 logger.info(
-  "attaching controllers to 'comment' route: /:postId/comments/:id/likes and /:postId/comments/:id/dislikes ...",
+  "attaching controllers to 'comment' route: /:postId/comments/:id/likes and /:postId/comments/:id/dislikes ..."
 );
-commentsRouter.use("/:postId/comments/:id/likes", auth.authenticateJwt);
-commentsRouter.use("/:postId/comments/:id/dislikes", auth.authenticateJwt);
+commentsRouter.use("/:postId/comments/:id/likes");
+commentsRouter.use("/:postId/comments/:id/dislikes");
 commentsRouter
   .route("/:postId/comments/:id/likes")
   .patch(commentController.likeComment)

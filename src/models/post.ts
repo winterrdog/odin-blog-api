@@ -32,7 +32,7 @@ const PostSchema = new Schema(
     strictQuery: "throw",
     strict: "throw",
     toJSON: { transform: toJsonHandler, flattenObjectIds: true },
-  },
+  }
 );
 
 // indexes
@@ -70,18 +70,18 @@ function toJsonHandler(doc: Document, ret: any) {
   ret.dateCreated = ret.createdAt;
   ret.dateUpdated = ret.lastModified;
 
-  if (ret.author && ret.author.name) {
+  if (!!ret.author && ret.author.name) {
     ret.author = ret.author.name;
   }
-  if (ret.views && Array.isArray(ret.views)) {
+  if (!!ret.views && Array.isArray(ret.views)) {
     ret.numOfViewers = ret.views.length;
     delete ret.views;
   }
-  if (ret.likes && Array.isArray(ret.likes)) {
+  if (!!ret.likes && Array.isArray(ret.likes)) {
     ret.numOfLikes = ret.likes.length;
     delete ret.likes;
   }
-  if (ret.dislikes && Array.isArray(ret.dislikes)) {
+  if (!!ret.dislikes && Array.isArray(ret.dislikes)) {
     ret.numOfDislikes = ret.dislikes.length;
     delete ret.dislikes;
   }

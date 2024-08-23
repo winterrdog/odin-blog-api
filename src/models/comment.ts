@@ -52,7 +52,7 @@ const CommentSchema = new Schema(
     strictQuery: "throw",
     strict: "throw",
     toJSON: { transform: toJsonHandler, flattenObjectIds: true },
-  },
+  }
 );
 
 // indexes
@@ -66,9 +66,9 @@ CommentSchema.pre(
     this.clone().populate({ path: "user", select: "name" });
 
     return next();
-  },
+  }
 );
-CommentSchema.pre("save", async function (this: Document) {
+CommentSchema.post("save", async function (this: Document) {
   try {
     const session = this.$session();
     if (!session) {
@@ -79,7 +79,7 @@ CommentSchema.pre("save", async function (this: Document) {
   } catch (e) {
     console.error(
       "error during post middleware on saving a comment",
-      e as Error,
+      e as Error
     );
   }
 });
@@ -90,14 +90,14 @@ function toJsonHandler(doc: Document, ret: any) {
   ret.dateCreated = ret.createdAt;
   ret.dateUpdated = ret.lastModified;
 
-  if (ret.user && ret.user.name) {
+  if (!!ret.user && ret.user.name) {
     ret.user = ret.user.name;
   }
-  if (ret.likes && Array.isArray(ret.likes)) {
+  if (!!ret.likes && Array.isArray(ret.likes)) {
     ret.numOfLikes = ret.likes.length;
     delete ret.likes;
   }
-  if (ret.dislikes && Array.isArray(ret.dislikes)) {
+  if (!!ret.dislikes && Array.isArray(ret.dislikes)) {
     ret.numOfDislikes = ret.dislikes.length;
     delete ret.dislikes;
   }

@@ -12,26 +12,13 @@ postsRouter
   .get(postController.getPosts)
   .post(auth.authenticateJwt, auth.isAuthor, postController.createPost);
 
-postsRouter.get(
-  "/user-posts",
-  auth.authenticateJwt,
-  postController.getUserPosts,
-);
+postsRouter.use(auth.authenticateJwt);
 
-postsRouter.get(
-  "/liked-posts",
-  auth.authenticateJwt,
-  postController.getLikedPosts,
-);
-
-postsRouter.get(
-  "/recently-viewed",
-  auth.authenticateJwt,
-  postController.getRecentlyViewedPosts,
-);
+postsRouter.get("/user-posts", postController.getUserPosts);
+postsRouter.get("/liked-posts", postController.getLikedPosts);
+postsRouter.get("/recently-viewed", postController.getRecentlyViewedPosts);
 
 logger.info("attaching controllers to 'post' route: /:id ...");
-postsRouter.use("/:id", auth.authenticateJwt);
 postsRouter
   .route("/:id")
   .get(postController.getPostById)
@@ -39,7 +26,7 @@ postsRouter
   .delete(auth.isAuthor, postController.deletePost);
 
 logger.info(
-  "attaching controllers to 'post' route: /:id/likes & /:id/dislikes ...",
+  "attaching controllers to 'post' route: /:id/likes & /:id/dislikes ..."
 );
 postsRouter
   .route("/:id/likes")
