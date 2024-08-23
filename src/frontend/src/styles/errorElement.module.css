@@ -27,3 +27,13 @@
 .errorelem > :nth-child(3) a {
   text-decoration: none;
 }
+
+@media (max-width: 600px) {
+  .errorelem {
+    font-size: 0.7em;
+  }
+
+  .errorelem > p {
+    text-align: center;
+  }
+}
