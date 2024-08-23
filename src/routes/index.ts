@@ -3,7 +3,7 @@ import usersRouter from "./user";
 import commentsRouter from "./comment";
 import postsRouter from "./post";
 import { startLogger } from "../logging";
-import { auth } from "middleware";
+import { auth } from "../middleware";
 
 const indexRouter = Router();
 const logger = startLogger(__filename);

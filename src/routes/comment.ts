@@ -6,13 +6,13 @@ const commentsRouter = Router();
 const logger = startLogger(__filename);
 
 logger.info("attaching controllers to 'comment' route: /:postId/comments ...");
+
 commentsRouter
   .route("/:postId/comments")
   .get(commentController.getComments)
   .post(commentController.createComment);
 
 commentsRouter.get("/user-comments", commentController.getUserComments);
-
 commentsRouter.get(
   "/user-liked-comments",
   commentController.getUserLikedComments
@@ -21,6 +21,7 @@ commentsRouter.get(
 logger.info(
   "attaching controllers to 'comment' route: /:postId/comments/:id ..."
 );
+
 commentsRouter
   .route("/:postId/comments/:id")
   .get(commentController.getCommentById)
@@ -31,7 +32,7 @@ commentsRouter
 logger.info(
   "attaching controllers to 'comment' route: /:postId/comments/:id/replies ..."
 );
-commentsRouter.use("/:postId/comments/:id/replies");
+
 commentsRouter
   .route("/:postId/comments/:id/replies")
   .get(commentController.findReplies)
@@ -43,8 +44,7 @@ commentsRouter
 logger.info(
   "attaching controllers to 'comment' route: /:postId/comments/:id/likes and /:postId/comments/:id/dislikes ..."
 );
-commentsRouter.use("/:postId/comments/:id/likes");
-commentsRouter.use("/:postId/comments/:id/dislikes");
+
 commentsRouter
   .route("/:postId/comments/:id/likes")
   .patch(commentController.likeComment)
