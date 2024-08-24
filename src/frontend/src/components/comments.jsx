@@ -36,7 +36,7 @@ export default function Comments({ id, cbToClose }) {
     return () => {
 
     }
-  }, [id, trigger]);
+  }, [account.token, id, trigger]);
 
 
   function handleSubmit() {
