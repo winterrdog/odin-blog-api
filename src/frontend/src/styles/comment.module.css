@@ -29,6 +29,11 @@
 
 }
 
+.deletedacc {
+  opacity: 0.7;
+  font-style: italic;
+}
+
 .comment > :nth-child(1) {
   display: flex;
   align-items: center;
