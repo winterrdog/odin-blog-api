@@ -13,6 +13,7 @@ export default function Write() {
   const formRef = useRef();
   const [published, setPublished] = useState({message: null, status: false});
   const inputRef = useRef();
+  const mainRef = useRef();
 
   const location = useLocation();
 
@@ -37,18 +38,56 @@ export default function Write() {
   const acc = getLogInfo();
 
   function publish() {
+    console.log(mainRef.current);
+
     let data = {};
-    data.title = content[0].val;
-    data.body = content.reduce((prev, obj) => {
-      if (obj.key == 1) return '';
-      else {
-        if (obj.val[obj.val.length - 1] !== '\n') obj.val += '\n';
-        return prev + obj.val;
+    data.body = '';
+
+    /**
+     * previous techique
+     * 
+     * 
+      // data.title = content[0].val;
+      // data.body = content.reduce((prev, obj) => {
+      //   if (obj.key == 1) return '';
+      //   else {
+      //     if (obj.val[obj.val.length - 1] !== '\n') obj.val += '\n';
+      //     return prev + obj.val;
+      //   }
+      // }, '');
+
+      // if (inputRef.current.value !== '') {
+      //   data.body += `${DOMPurify.sanitize(inputRef.current.value)}\n`;
+      // }
+      *
+      *
+     */
+    //
+    
+    let temp = mainRef.current.children;
+
+    for (let i = 0; i < temp.length; ++i) {
+      let str;
+      if (temp[i].tagName === 'TEXTAREA') {
+        str = temp[i].value;
+      } else {
+        str = temp[i].textContent;
       }
-    }, '');
+
+      str = DOMPurify.sanitize(str.replace(/(\r\n|\n|\r)/gm, ' ').trim());
+
+      if (str) {
+        if (!i) data.title = str;
+        else {
+          data.body += (str + '\n');
+        }
+      }
+
+    }
 
     if (inputRef.current.value !== '') {
-      data.body += `${DOMPurify.sanitize(inputRef.current.value)}\n`;
+      let str = DOMPurify.sanitize(inputRef.current.value.replace(/(\r\n|\n|\r)/gm, ' ').trim());
+      data.body += (str + '\n');
     }
 
     if (location.state) {
@@ -129,7 +168,7 @@ export default function Write() {
           }
         </div>
         :
-        <main>
+        <main ref={mainRef}>
           {
             content.map((obj) => {
               if (obj.clicked) {
