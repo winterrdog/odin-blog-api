@@ -113,9 +113,9 @@ export default function Comment({ data, postId, allComs, cbToTrigger}) {
   return (
     <div className={styles.comment}>
       <div>
-        <div className={styles.account}>{data.user[0]}</div>
+        <div className={data.user ? styles.account : `${styles.account} ${styles.deletedacc}`}>{data.user ? data.user[0] : null}</div>
         <div>
-          <span>{data.user}</span>
+          <span className={data.user ? '' : styles.deletedacc}>{data.user ? data.user : 'deleted'}</span>
           <span>{ convertToUserTimezone(data.dateUpdated)}</span>
         </div>
       </div>
@@ -133,7 +133,7 @@ export default function Comment({ data, postId, allComs, cbToTrigger}) {
           <span>{nod}</span>
         </div>
 
-        <button className={styles.replybutton} onClick={() => {setReplying((prev) => prev ? false : true)}}>Reply</button>
+        <button className={styles.replybutton} disabled={data.user ? false : true} onClick={() => {setReplying((prev) => prev ? false : true)}}>Reply</button>
       </div>
 
       <div className={styles.replies}>

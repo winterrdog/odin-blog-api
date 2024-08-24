@@ -19,7 +19,8 @@ export default function Comments({ id, cbToClose }) {
       mode: 'cors',
       method: 'GET',
       headers: {
-        'Content-type': 'application/json'
+        'Content-type': 'application/json',
+        Authorization: `Bearer ${account.token}`,
       }
     }).then((res) => {
       if (res.status !== 200) throw new Error('failed to fetch comments');
@@ -35,7 +36,7 @@ export default function Comments({ id, cbToClose }) {
     return () => {
 
     }
-  }, [id, trigger]);
+  }, [account.token, id, trigger]);
 
 
   function handleSubmit() {
