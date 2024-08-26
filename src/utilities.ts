@@ -32,7 +32,7 @@ export default class Utility {
       };
 
       const jwtSignOptions: jwt.SignOptions = {
-        expiresIn: "2d",
+        expiresIn: "3d",
         algorithm: "HS384",
       };
 
@@ -40,7 +40,7 @@ export default class Utility {
         payload,
         <string>process.env.JWT_SECRET,
         jwtSignOptions,
-        jwtSignCb,
+        jwtSignCb
       );
     });
   }
@@ -48,7 +48,7 @@ export default class Utility {
   static validateRequest(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
   ): void {
     logger.info("validating and sanitizing request body, query, and params...");
 
@@ -138,12 +138,12 @@ export default class Utility {
   static isCurrUserSameAsCreator(
     req: Request,
     res: Response,
-    dbUserId: string,
+    dbUserId: string
   ): boolean {
     const currUserId = Utility.extractUserIdFromToken(req);
 
     logger.info(
-      `checking if user with id, ${currUserId}, is the author of the resource...`,
+      `checking if user with id, ${currUserId}, is the author of the resource...`
     );
 
     if (currUserId !== dbUserId) {
@@ -158,10 +158,61 @@ export default class Utility {
     return true;
   }
 
+  static extractTokenFromCookie(req: Request): string | null {
+    if (req.cookies && req.cookies["token"]) {
+      return req.cookies["token"];
+    }
+    return null;
+  }
+
+  static setCookieGeneric(
+    res: Response,
+    cookieName: string,
+    cookieValue: string
+  ): void {
+    const backendDomain = process.env.BACKEND_DOMAIN;
+    if (!backendDomain) {
+      throw new Error(
+        "backend domain is missing from the environment variables"
+      );
+    }
+
+    const threeDays = 1000 * 60 * 60 * 24 * 3;
+    res.cookie(cookieName, cookieValue, {
+      domain: backendDomain,
+      path: "/",
+      httpOnly: true,
+      sameSite: "none",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: threeDays,
+    });
+  }
+
+  static setTokenCookie(res: Response, token: string): void {
+    Utility.setCookieGeneric(res, "token", token);
+  }
+
+  static clearCookie(res: Response, cookieName: string): void {
+    const backendDomain = process.env.BACKEND_DOMAIN;
+    if (!backendDomain) {
+      throw new Error(
+        "backend domain is missing from the environment variables"
+      );
+    }
+
+    res.clearCookie(cookieName, {
+      domain: backendDomain,
+      path: "/",
+      httpOnly: true,
+      sameSite: "none",
+      secure: process.env.NODE_ENV === "production",
+    });
+  }
+
   static updateUserReactions(
     req: Request,
     res: Response,
-    arr: Array<string>,
+    arr: Array<string>
   ): boolean {
     if (!req.user) {
       throw new Error("user's not authenticated thus user object is missing");
@@ -182,7 +233,7 @@ export default class Utility {
 
   static async runOperationInTransaction<T>(
     cb: TransactionCallback<T>,
-    connection: Connection = mongoose.connection,
+    connection: Connection = mongoose.connection
   ): Promise<T> {
     let session: ClientSession | null = null;
     let result: T;

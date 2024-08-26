@@ -6,13 +6,16 @@ import { rateLimit } from "express-rate-limit";
 import helmet from "helmet";
 import { startLogger } from "../logging";
 import { initialize as initPassport } from "./passport-auth";
+
+const cookieParser = require("cookie-parser");
+
 require("dotenv").config();
 
 const logger = startLogger(__filename);
 const customHeaders = (
   req: express.Request,
   res: express.Response,
-  next: express.NextFunction,
+  next: express.NextFunction
 ) => {
   res.setHeader("X-Powered-By", "some-shxt");
   return next();
@@ -33,8 +36,8 @@ export default function applyGeneralMiddleware(app: Express) {
       origin: string | undefined,
       callback: (
         err: Error | null,
-        origin?: string | boolean | RegExp | (string | boolean | RegExp)[],
-      ) => void,
+        origin?: string | boolean | RegExp | (string | boolean | RegExp)[]
+      ) => void
     ): void => {
       // allow mobile apps to access the API
       if (!origin) {
@@ -59,6 +62,7 @@ export default function applyGeneralMiddleware(app: Express) {
     // allow cross-origin requests
     app.use(cors({ origin: validateCORSOrigin, credentials: true }));
     app.disable("etag");
+    app.use(cookieParser());
     app.use(helmet()); // set security headers
     app.use(
       rateLimit({
@@ -67,7 +71,7 @@ export default function applyGeneralMiddleware(app: Express) {
         message:
           "Too many requests from this IP, please try again after 20 minutes. Like for real, chill out a bit.",
         statusCode: 429,
-      }),
+      })
     ); // limit repeated requests to avoid abuse of the API
   }
 
