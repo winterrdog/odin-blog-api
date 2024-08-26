@@ -47,6 +47,7 @@ export default function applyGeneralMiddleware(app: Express) {
       const originHost = new URL(origin).hostname;
       const allowedHosts = new Set([
         "muchubatactics.github.io",
+        "winterrdog.github.io",
         "localhost",
         "127.0.0.1",
       ]);
