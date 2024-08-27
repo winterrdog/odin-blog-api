@@ -179,7 +179,7 @@ export default class Utility {
 
     const threeDays = 1000 * 60 * 60 * 24 * 3;
     res.cookie(cookieName, cookieValue, {
-      // domain: backendDomain,
+      domain: backendDomain,
       path: "/",
       httpOnly: true,
       sameSite: "none",

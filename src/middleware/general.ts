@@ -61,7 +61,14 @@ export default function applyGeneralMiddleware(app: Express) {
     };
 
     // allow cross-origin requests
-    app.use(cors({ origin: validateCORSOrigin, credentials: true }));
+    app.use(
+      cors({
+        origin: validateCORSOrigin,
+        credentials: true,
+        methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+        optionsSuccessStatus: 204,
+      })
+    );
     app.disable("etag");
     app.use(cookieParser());
     app.use(helmet()); // set security headers
