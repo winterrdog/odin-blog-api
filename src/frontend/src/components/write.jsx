@@ -94,9 +94,10 @@ export default function Write() {
       fetch(`${baseURL}/api/v1/posts/${location.state.id}`, {
         method: 'PATCH',
         mode: 'cors',
+        credentials: 'include', // todo: test if it works
         headers: {
           'Content-type': 'application/json',
-          'Authorization': `Bearer ${acc.token}`,
+          // 'Authorization': `Bearer ${acc.token}`,
         },
         body: JSON.stringify(data),
       }).then((res) => {
@@ -116,9 +117,10 @@ export default function Write() {
       fetch(`${baseURL}/api/v1/posts/`, {
         method: 'POST',
         mode: 'cors',
+        credentials: 'include', // todo: test if it works
         headers: {
           'Content-type': 'application/json',
-          'Authorization': `Bearer ${acc.token}`,
+          // 'Authorization': `Bearer ${acc.token}`,
         },
         body: JSON.stringify(data),
       }).then((res) => {

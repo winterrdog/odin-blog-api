@@ -20,9 +20,10 @@ export default function MyAccount() {
     fetch(`${baseURL}/api/v1/users/update`, {
       method: 'PATCH',
       mode: 'cors',
+      credentials: 'include', // todo: test if it works
       headers: {
         'Content-type': 'application/json',
-        Authorization: `Bearer ${account.token}`,
+        // Authorization: `Bearer ${account.token}`,
       },
       body: JSON.stringify(body),
     }).then((res) => {
@@ -85,9 +86,10 @@ export default function MyAccount() {
             fetch(`${baseURL}/api/v1/users/delete`, {
               method: 'DELETE',
               mode: 'cors',
+              credentials: 'include', // todo: test if it works
               headers: {
                 'Content-type': 'application/json',
-                Authorization: `Bearer ${account.token}`,
+                // Authorization: `Bearer ${account.token}`,
               }
             }).then((res) => {
               if(res.status === 204) {

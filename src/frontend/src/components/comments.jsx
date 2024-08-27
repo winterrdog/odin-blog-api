@@ -18,9 +18,10 @@ export default function Comments({ id, cbToClose }) {
     fetch(`${baseURL}/api/v1/post-comments/${id}/comments/`, {
       mode: 'cors',
       method: 'GET',
+      credentials: 'include', // todo: test if it works
       headers: {
         'Content-type': 'application/json',
-        Authorization: `Bearer ${account.token}`,
+        // Authorization: `Bearer ${account.token}`,
       }
     }).then((res) => {
       if (res.status !== 200) throw new Error('failed to fetch comments');
@@ -51,9 +52,11 @@ export default function Comments({ id, cbToClose }) {
 
     fetch(`${baseURL}/api/v1/post-comments/${id}/comments/`, {
       method: 'POST',
+      mode: 'cors',
+      credentials: 'include', // todo: test if it works
       headers: {
         'Content-type': 'application/json',
-        'Authorization': `Bearer ${account.token}`,
+        // 'Authorization': `Bearer ${account.token}`,
       },
       body: JSON.stringify(tmp),
     }).then((res) => {

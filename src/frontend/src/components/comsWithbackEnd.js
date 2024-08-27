@@ -38,11 +38,12 @@ function setupLS() {
     if (!Object.keys(account).length) return null;
   
     return fetch(`${baseURL}/api/v1/posts/liked-posts`, {
-      mode: 'cors',
       method: 'GET',
+      mode: 'cors',
+      credentials: 'include', // todo: test if it works
       headers: {
         'Content-type': 'application/json',
-        Authorization: `Bearer ${account.token}`,
+        // Authorization: `Bearer ${account.token}`,
       }
     }).then((res) => {
       if (res.status === 200) return res.json();
