@@ -3,7 +3,7 @@ import * as express from "express";
 import { URL } from "url";
 import * as cors from "cors";
 import { rateLimit } from "express-rate-limit";
-import helmet from "helmet";
+// import helmet from "helmet";
 import { startLogger } from "../logging";
 import { initialize as initPassport } from "./passport-auth";
 
