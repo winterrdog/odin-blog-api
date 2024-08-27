@@ -3,7 +3,7 @@ import * as express from "express";
 import { URL } from "url";
 import * as cors from "cors";
 import { rateLimit } from "express-rate-limit";
-// import helmet from "helmet";
+import helmet from "helmet";
 import { startLogger } from "../logging";
 import { initialize as initPassport } from "./passport-auth";
 
@@ -32,8 +32,6 @@ export default function applyGeneralMiddleware(app: Express) {
   app.use(express.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
 
   if (process.env.NODE_ENV === "production") {
-    app.use(cookieParser());
-
     const validateCORSOrigin = (
       origin: string | undefined,
       callback: (
@@ -72,7 +70,8 @@ export default function applyGeneralMiddleware(app: Express) {
       })
     );
     app.disable("etag");
-    // app.use(helmet()); // set security headers
+    app.use(cookieParser());
+    app.use(helmet()); // set security headers
     app.use(
       rateLimit({
         windowMs: 20 * 60 * 1000, // 20 minutes
