@@ -32,6 +32,8 @@ export default function applyGeneralMiddleware(app: Express) {
   app.use(express.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
 
   if (process.env.NODE_ENV === "production") {
+    app.use(cookieParser());
+
     const validateCORSOrigin = (
       origin: string | undefined,
       callback: (
@@ -70,8 +72,7 @@ export default function applyGeneralMiddleware(app: Express) {
       })
     );
     app.disable("etag");
-    app.use(cookieParser());
-    app.use(helmet()); // set security headers
+    // app.use(helmet()); // set security headers
     app.use(
       rateLimit({
         windowMs: 20 * 60 * 1000, // 20 minutes
