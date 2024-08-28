@@ -25,7 +25,7 @@ export default function applyGeneralMiddleware(app: Express) {
 
   // used to trust the first proxy in front of the server
   // since the app is behind a reverse proxy i.e. nginx or railway
-  app.set("trust proxy", true /* number of proxies between user and server */);
+  app.set("trust proxy", 1 /* number of proxies between user and server */);
 
   app.use(customHeaders);
   app.use(express.json()); // parse application/json
