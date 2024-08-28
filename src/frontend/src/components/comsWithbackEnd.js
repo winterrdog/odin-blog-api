@@ -12,7 +12,7 @@ function setupLS() {
     if (!Object.keys(account).length) return null;
   
     return fetch(`${baseURL}/api/v1/post-comments/user-liked-comments`, {
-      mode: 'cors',
+      // mode: 'cors',
       method: 'GET',
       credentials: 'include', // todo: test if it works
       headers: {

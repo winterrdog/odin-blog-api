@@ -27,7 +27,7 @@ export default function Selector() {
     let url = `${baseURL}/api/v1/${reference[selected]}`;
 
     fetch(url, {
-      mode: 'cors',
+      // mode: 'cors',
       method: 'GET',
       credentials: 'include', // todo: test if it works
       headers: {
