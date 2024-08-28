@@ -34,7 +34,6 @@ function convertToUserTimezone(utcTimestamp) {
   return `${time} on ${month} ${day}, '${year % 2000}`;
 }
 
-// add a function that shows the time past since the timestamp based on the user's local timezone
 function timeSince(utcTimestamp) {
   const date = new Date(utcTimestamp),
     currentDate = new Date(),
