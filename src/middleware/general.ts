@@ -45,14 +45,14 @@ export default function applyGeneralMiddleware(app: Express) {
       }
 
       const originHost = new URL(origin).hostname;
-      const allowedHosts = new Set([
+      const allowedHosts = [
         "muchubatactics.github.io",
         "winterrdog.github.io",
         "localhost",
         "127.0.0.1",
-      ]);
+      ];
 
-      const isHostAllowed = allowedHosts.has(originHost);
+      const isHostAllowed = allowedHosts.includes(originHost);
       if (!isHostAllowed) {
         return callback(new Error("not allowed by CORS"));
       }

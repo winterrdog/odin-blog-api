@@ -181,7 +181,7 @@ export default class Utility {
     res.cookie(cookieName, cookieValue, {
       domain: backendDomain,
       path: "/",
-      httpOnly: true,
+      // httpOnly: true,
       sameSite: "none",
       secure: process.env.NODE_ENV === "production",
       maxAge: threeDays,
@@ -203,7 +203,7 @@ export default class Utility {
     res.clearCookie(cookieName, {
       domain: backendDomain,
       path: "/",
-      httpOnly: true,
+      // httpOnly: true,
       sameSite: "none",
       secure: process.env.NODE_ENV === "production",
     });
