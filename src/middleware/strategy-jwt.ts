@@ -1,9 +1,8 @@
 import { TokenExpiredError } from "jsonwebtoken";
-import { Strategy } from "passport-jwt";
+import { ExtractJwt, Strategy } from "passport-jwt";
 import { JwtPayload } from "./interfaces";
 import { UserModel } from "../models/user";
 import { startLogger } from "../logging";
-import Utility from "../utilities";
 
 require("dotenv").config();
 
@@ -40,7 +39,7 @@ const verifyJwtCb = async (payload: JwtPayload, cb: any) => {
 };
 
 const options = {
-  jwtFromRequest: Utility.extractTokenFromCookie,
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   ignoreExpiration: false,
   secretOrKey: process.env.JWT_SECRET!,
 };
