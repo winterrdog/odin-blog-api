@@ -8,6 +8,8 @@ import { startLogger } from "../logging";
 import { initialize as initPassport } from "./passport-auth";
 
 const cookieParser = require("cookie-parser");
+const session = require("express-session");
+const MemoryStore = require("memorystore")(session);
 
 require("dotenv").config();
 
@@ -30,6 +32,7 @@ export default function applyGeneralMiddleware(app: Express) {
   app.use(customHeaders);
   app.use(express.json()); // parse application/json
   app.use(express.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
+  initializeSession(app);
 
   if (process.env.NODE_ENV === "production") {
     const validateCORSOrigin = (
@@ -85,3 +88,41 @@ export default function applyGeneralMiddleware(app: Express) {
 
   initPassport(app); // set up passport
 }
+
+function initializeSession(app: Express) {
+  const twoDays = 3_600_000 * 24 * 2;
+
+  app.use(
+    session({
+      store: new MemoryStore({
+        checkPeriod: 2 * 24 * 3_600_000, // prune expired entries every 2 days
+        ttl: twoDays,
+      }),
+      secret: process.env.JWT_SECRET!,
+      name: "session_id",
+      resave: false,
+      saveUninitialized: true,
+      cookie: {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "none",
+        maxAge: twoDays,
+      },
+    })
+  );
+}
+
+// import Tokens from "csrf";
+// interface XsrfToken {
+//   token: string;
+//   secret: string;
+// }
+
+// async function generateCsrfToken(): Promise<XsrfToken> {
+//   const tokens = new Tokens();
+
+//   const secret = await tokens.secret();
+//   const token = tokens.create(secret);
+
+//   return { token, secret };
+// }

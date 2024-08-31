@@ -24,10 +24,9 @@ export default function Post() {
     fetch(`${baseURL}/api/v1/posts/${location.state.id}/`, {
       method: 'GET',
       mode: 'cors',
-      credentials: 'include', // todo: test if it works
       headers: {
         'Content-type': 'application/json',
-        // 'Authorization': `Bearer ${account.token}`,
+        'Authorization': `Bearer ${account.token}`,
       }
     }).then((res) => {
       if (res.status !== 200) throw new Error('could not fetch post!');
@@ -51,9 +50,8 @@ export default function Post() {
     fetch(`${baseURL}/api/v1/posts/${location.state.id}/likes`, {
       method: likeordis.like ? 'DELETE' : 'PATCH',
       mode: 'cors',
-      credentials: 'include', // todo: test if it works
       headers: {
-        // 'Authorization': `Bearer ${account.token}`,
+        'Authorization': `Bearer ${account.token}`,
       },
     }).then((res) => {
       if (res.status !== 200 && res.status !== 204) {
@@ -89,9 +87,8 @@ export default function Post() {
     fetch(`${baseURL}/api/v1/posts/${location.state.id}/dislikes`, {
       method: likeordis.dislike ? 'DELETE' : 'PATCH',
       mode: 'cors',
-      credentials: 'include', // todo: test if it works
       headers: {
-        // 'Authorization': `Bearer ${account.token}`,
+        'Authorization': `Bearer ${account.token}`,
       },
     }).then((res) => {
       if (res.status !== 200 && res.status !== 204) {

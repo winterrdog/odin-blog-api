@@ -29,10 +29,9 @@ export default function ProfileDiv({ cb, parentRef }) {
     fetch(`${baseURL}/api/v1/users/log-out`, {
       method: 'PATCH',
       mode: 'cors',
-      credentials: 'include', // todo: test if it works
       headers: {
         'Content-type': 'application/json',
-        // Authorization: `Bearer ${account.token}`,
+        Authorization: `Bearer ${account.token}`,
       }
     }).then((res) => {
       if (res.status !== 204) throw new Error('failed to log out');

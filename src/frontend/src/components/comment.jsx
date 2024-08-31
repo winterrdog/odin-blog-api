@@ -29,10 +29,9 @@ export default function Comment({ data, postId, allComs, cbToTrigger}) {
     fetch(`${baseURL}/api/v1/post-comments/${postId}/comments/${data.id}/replies`, {
       method: 'POST',
       mode: 'cors',
-      credentials: 'include', // todo: test if it works
       headers: {
         'Content-type': 'application/json',
-        // Authorization: `Bearer ${account.token}`,
+        Authorization: `Bearer ${account.token}`,
       },
       body: JSON.stringify(tmp),
     }).then((res) => {
@@ -51,9 +50,8 @@ export default function Comment({ data, postId, allComs, cbToTrigger}) {
     fetch(`${baseURL}/api/v1/post-comments/${postId}/comments/${data.id}/likes`, {
       method: likeordis.like ? 'DELETE' : 'PATCH',
       mode: 'cors',
-      credentials: 'include', // todo: test if it works
       headers: {
-        // 'Authorization': `Bearer ${account.token}`,
+        'Authorization': `Bearer ${account.token}`,
       },
     }).then((res) => {
       if (res.status !== 200 && res.status !== 204) {
@@ -89,9 +87,8 @@ export default function Comment({ data, postId, allComs, cbToTrigger}) {
     fetch(`${baseURL}/api/v1/post-comments/${postId}/comments/${data.id}/dislikes`, {
       method: likeordis.dislike ? 'DELETE' : 'PATCH',
       mode: 'cors',
-      credentials: 'include', // todo: test if it works
       headers: {
-        // 'Authorization': `Bearer ${account.token}`,
+        'Authorization': `Bearer ${account.token}`,
       },
     }).then((res) => {
       if (res.status !== 200 && res.status !== 204) {

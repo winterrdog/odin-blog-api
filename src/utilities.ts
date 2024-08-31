@@ -170,16 +170,9 @@ export default class Utility {
     cookieName: string,
     cookieValue: string
   ): void {
-    const backendDomain = process.env.BACKEND_DOMAIN;
-    if (!backendDomain) {
-      throw new Error(
-        "backend domain is missing from the environment variables"
-      );
-    }
-
     const threeDays = 1000 * 60 * 60 * 24 * 3;
+
     res.cookie(cookieName, cookieValue, {
-      // domain: backendDomain,
       path: "/",
       httpOnly: true,
       sameSite: "none",
@@ -193,15 +186,7 @@ export default class Utility {
   }
 
   static clearCookie(res: Response, cookieName: string): void {
-    const backendDomain = process.env.BACKEND_DOMAIN;
-    if (!backendDomain) {
-      throw new Error(
-        "backend domain is missing from the environment variables"
-      );
-    }
-
     res.clearCookie(cookieName, {
-      // domain: backendDomain,
       path: "/",
       httpOnly: true,
       sameSite: "none",

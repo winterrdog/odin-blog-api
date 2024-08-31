@@ -55,9 +55,6 @@ function logoutHandler() {
       await Utility.runOperationInTransaction(updateCb);
       logger.info(`user with id: ${currUserId} logged out successfully!`);
 
-      Utility.clearCookie(res, "token");
-      logger.info("token cleared from cookie");
-
       return res.status(204).end();
     } catch (e) {
       logger.error(e, "error occurred during logging out");
@@ -116,10 +113,10 @@ function signUpHandler() {
         `user with name: ${name} signed up successfully with role: ${role} -- token: ${token}`
       );
 
-      Utility.setTokenCookie(res, token);
-      logger.info("token set in cookie");
-
-      return res.status(201).json({ message: "User created successfully" });
+      return res.status(201).json({
+        message: "User created successfully",
+        token,
+      });
     } catch (e) {
       logger.error(e, "error during signing up");
       Utility.handle500Status(res, <Error>e);
@@ -172,10 +169,10 @@ function signInHandler() {
         `user with name: ${name} and role: ${user.role} signed in successfully -- token: ${token}`
       );
 
-      Utility.setTokenCookie(res, token);
-      logger.info("token set in cookie");
-
-      return res.status(200).json({ message: "User signed in successfully" });
+      return res.status(200).json({
+        message: "User signed in successfully",
+        token,
+      });
     } catch (e) {
       logger.error(e, "error occurred during signing in");
       Utility.handle500Status(res, <Error>e);

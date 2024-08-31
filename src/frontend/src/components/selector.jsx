@@ -29,10 +29,9 @@ export default function Selector() {
     fetch(url, {
       mode: 'cors',
       method: 'GET',
-      credentials: 'include', // todo: test if it works
       headers: {
         'Content-type': 'application/json',
-        // Authorization: `Bearer ${account.token}`,
+        Authorization: `Bearer ${account.token}`,
       }
     }).then((res) => {
       if (res.status !== 200) {
@@ -101,10 +100,9 @@ export default function Selector() {
     fetch(`${baseURL}/api/v1/posts/${id}`, {
       method: 'DELETE',
       mode: 'cors',
-      credentials: 'include', // todo: test if it works
       headers: {
         'Content-type': 'application/json',
-        // Authorization: `Bearer ${account.token}`,
+        Authorization: `Bearer ${account.token}`,
       }
     }).then((res) => {
       if (res.status !== 204) throw new Error('could not delete');
