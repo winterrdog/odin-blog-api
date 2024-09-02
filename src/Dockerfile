@@ -2,7 +2,7 @@
 # build stage
 ####################
 
-FROM node:21.7-alpine3.19@sha256:6d0f18a1c67dc218c4af50c21256616286a53c09e500fadf025b6d342e1c90ae AS builder
+FROM node:latest as builder
 
 # set app directory
 ARG APP_DIR=/usr/src/app
@@ -28,7 +28,7 @@ RUN  npm run compile
 # runtime stage - final image
 ##############################
 
-FROM node:21.7-alpine3.19@sha256:6d0f18a1c67dc218c4af50c21256616286a53c09e500fadf025b6d342e1c90ae
+FROM node:22.7.0-alpine3.20@sha256:ed9736a13b88ba55cbc08c75c9edac8ae7f72840482e40324670b299336680c1
 
 LABEL author="winterrdog"
 LABEL description="A blog REST api exercise from The Odin Project"
