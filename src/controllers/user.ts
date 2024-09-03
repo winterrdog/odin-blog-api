@@ -82,7 +82,9 @@ function signUpHandler() {
         const cb: TransactionCallback<UserDocument | null> = async (
           session
         ) => {
-          return await UserModel.findOne({ name }, null, { session });
+          return await UserModel.findOne({ name: { $eq: name } }, null, {
+            session,
+          });
         };
 
         const user = await Utility.runOperationInTransaction(cb);
@@ -143,7 +145,9 @@ function signInHandler() {
       logger.info(`signing in user with name: ${name}...`);
 
       const cb: TransactionCallback<UserDocument | null> = async (session) => {
-        return await UserModel.findOne({ name }, null, { session });
+        return await UserModel.findOne({ name: { $eq: name } }, null, {
+          session,
+        });
       };
       const user = await Utility.runOperationInTransaction(cb);
       if (!user) {
