@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { addToLLC, baseURL, checkLLC, decodeHTML, getLogInfo, removeFromLLC } from './comsWithbackEnd';
 
 import DOMPurify from 'dompurify';
-import { convertToUserTimezone } from '../utils';
+import { timeSince } from '../utils';
 
 export default function Comment({ data, postId, allComs, cbToTrigger}) {
   const [likeordis, setlikeordis] = useState(checkLLC(data.id) ? {like: true, dislike: false} : {like: false, dislike: false});
@@ -119,7 +119,7 @@ export default function Comment({ data, postId, allComs, cbToTrigger}) {
         <div className={data.user ? styles.account : `${styles.account} ${styles.deletedacc}`}>{data.user ? data.user[0] : null}</div>
         <div>
           <span className={data.user ? '' : styles.deletedacc}>{data.user ? data.user : 'deleted'}</span>
-          <span>{ convertToUserTimezone(data.dateUpdated)}</span>
+          <span>{ timeSince(data.dateUpdated)}</span>
         </div>
       </div>
       <main>{`${decodeHTML(data.body)}`}</main>
