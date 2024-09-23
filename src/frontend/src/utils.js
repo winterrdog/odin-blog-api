@@ -34,6 +34,17 @@ function convertToUserTimezone(utcTimestamp) {
   return `${time} on ${month} ${day}, '${year % 2000}`;
 }
 
+function roundToNplaces(num, n) {
+  return Number(num.toFixed(n));
+}
+
+function isInteger(value) {
+  if (value === undefined || value === null) {
+    return false;
+  }
+  return value % 1 == 0;
+}
+
 function timeSince(utcTimestamp) {
   const date = new Date(utcTimestamp),
     currentDate = new Date(),
@@ -59,6 +70,10 @@ function timeSince(utcTimestamp) {
   const parseSeconds = function (seconds) {
     let result = "";
 
+    if (!isInteger(seconds)) {
+      seconds = roundToNplaces(seconds, 1);
+    }
+
     if (seconds === 30) {
       result = "about half a minute ago";
     } else if (seconds === 1) {
@@ -75,9 +90,15 @@ function timeSince(utcTimestamp) {
   const parseMinutes = function (minutes) {
     let result = "";
 
+    if (!isInteger(minutes)) {
+      minutes = roundToNplaces(minutes, 1);
+    }
+
     // if time difference is exactly 30 minutes, set to "half an hour ago"
     if (minutes === 30) {
       result = "half an hour ago";
+    } else if (minutes < 1) {
+      result = parseSeconds(timeDiffInMinutes * 60);
     } else {
       const plural = minutes > 1 ? "s" : "";
       result = `${minutes} minute${plural} ago`;
@@ -89,12 +110,21 @@ function timeSince(utcTimestamp) {
   const parseHours = function (hours) {
     let result = "";
 
+    if (!isInteger(hours)) {
+      hours = roundToNplaces(hours, 1);
+    }
+
     // if time difference is exactly 12 hours, set to "half a day ago"
     if (hours === 12) {
       result = "half a day ago";
+    } else if (hours < 1) {
+      result = parseMinutes(timeDiffInHours * 60);
     } else {
-      const plural = hours > 1 ? "s" : "";
-      result = `${hours} hour${plural} ago`;
+      if (hours > 1) {
+        result = `${hours} hours ago`;
+      } else {
+        result = `${hours} hour ago`;
+      }
     }
 
     return result;
@@ -103,10 +133,16 @@ function timeSince(utcTimestamp) {
   const parseDays = function (days) {
     let result = "";
 
+    if (!isInteger(days)) {
+      days = roundToNplaces(days, 1);
+    }
+
     // if time difference is more 24 hours, set to yesterday
     if (days === 1) {
       result = "yesterday";
-    } else if (days > 1) {
+    } else if (days < 1) {
+      result = parseHours(timeDiffInDays * 24);
+    } else {
       result = `${days} days ago`;
     }
 
@@ -116,10 +152,16 @@ function timeSince(utcTimestamp) {
   const parseWeeks = function (weeks) {
     let result = "";
 
+    if (!isInteger(weeks)) {
+      weeks = roundToNplaces(weeks, 1);
+    }
+
     if (weeks === 1) {
       result = "about a week ago";
     } else if (weeks === 2) {
       result = "about half a month ago";
+    } else if (weeks < 1) {
+      result = parseDays(timeDiffInWeeks * 7);
     } else {
       result = `about ${weeks} weeks ago`;
     }
@@ -130,10 +172,16 @@ function timeSince(utcTimestamp) {
   const parseMonths = function (months) {
     let result = "";
 
+    if (!isInteger(months)) {
+      months = roundToNplaces(months, 1);
+    }
+
     if (months === 1) {
       result = "almost a month ago";
     } else if (months === 6) {
       result = "almost half a year ago";
+    } else if (months < 1) {
+      result = parseWeeks(timeDiffInMonths * 4);
     } else {
       result = `almost ${months} months ago`;
     }
@@ -150,6 +198,8 @@ function timeSince(utcTimestamp) {
       result = "almost half a decade ago";
     } else if (years === 10) {
       result = "almost a decade ago";
+    } else if (years < 1) {
+      result = parseMonths(timeDiffInYears * 12);
     } else {
       result = `almost ${years} years ago`;
     }
