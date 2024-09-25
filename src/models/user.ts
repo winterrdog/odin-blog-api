@@ -1,13 +1,16 @@
 import { Document, Schema, model } from "mongoose";
 
 export const roles = ["author", "reader"];
+
 export interface UserModelShape {
   name: string;
   passwordHash: string;
   role?: string;
   tokenVersion?: number;
 }
+
 export interface UserDocument extends UserModelShape, Document {}
+
 const UserSchema = new Schema(
   {
     name: { type: String, required: true, maxLength: 64 },
@@ -20,12 +23,17 @@ const UserSchema = new Schema(
     strictQuery: "throw",
     strict: "throw",
     toJSON: { transform: toJsonHandler },
-  },
+  }
 );
 
 // indexes
 UserSchema.index({ name: 1 });
 
+// consider using "export default"
+export const UserModelName = "User";
+export const UserModel = model(UserModelName, UserSchema);
+
+// *********************************************************
 function toJsonHandler(_doc: any, ret: any) {
   ret.id = ret._id;
   ret.dateCreated = ret.createdAt;
@@ -40,7 +48,3 @@ function toJsonHandler(_doc: any, ret: any) {
 
   return ret;
 }
-
-// consider using "export default"
-export const UserModelName = "User";
-export const UserModel = model(UserModelName, UserSchema);

@@ -21,6 +21,7 @@ export interface CommentModelShape {
   dislikes?: string[];
   likes?: string[];
 }
+
 export interface CommentDocument extends CommentModelShape, Document {}
 
 const CommentModelName = "Comment";
@@ -68,6 +69,7 @@ CommentSchema.pre(
     return next();
   }
 );
+
 CommentSchema.post("save", async function (this: Document) {
   try {
     const session = this.$session();
@@ -84,6 +86,9 @@ CommentSchema.post("save", async function (this: Document) {
   }
 });
 
+export const CommentModel = model(CommentModelName, CommentSchema);
+
+// *********************************************************
 function toJsonHandler(doc: Document, ret: any) {
   // NOTE: never mark this function as 'async'
   ret.id = ret._id;
@@ -109,5 +114,3 @@ function toJsonHandler(doc: Document, ret: any) {
 
   return ret;
 }
-
-export const CommentModel = model(CommentModelName, CommentSchema);

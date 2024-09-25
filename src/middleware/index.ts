@@ -6,6 +6,7 @@ import {
   initialize,
 } from "./passport-auth";
 import applyErrorHandlers from "./errors";
+
 const auth = {
   initialize,
   authenticateUserPass,
@@ -13,4 +14,5 @@ const auth = {
   isAuthor,
   isReader,
 };
+
 export { auth, applyGeneralMiddleware, applyErrorHandlers };

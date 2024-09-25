@@ -14,15 +14,13 @@ const MemoryStore = require("memorystore")(session);
 require("dotenv").config();
 
 const logger = startLogger(__filename);
-const customHeaders = (
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction
-) => {
-  res.setHeader("X-Powered-By", "some-shxt");
-  return next();
-};
-export default function applyGeneralMiddleware(app: Express) {
+
+export default applyGeneralMiddleware;
+
+// ****************************************************
+//            FUNCTION IMPLEMENTATIONS
+// ****************************************************
+function applyGeneralMiddleware(app: Express) {
   logger.info("starting app middleware...");
 
   // used to trust the first proxy in front of the server
@@ -35,13 +33,13 @@ export default function applyGeneralMiddleware(app: Express) {
   initializeSession(app);
 
   if (process.env.NODE_ENV === "production") {
-    const validateCORSOrigin = (
+    const validateCORSOrigin = function validateCORSOrigin(
       origin: string | undefined,
       callback: (
         err: Error | null,
         origin?: string | boolean | RegExp | (string | boolean | RegExp)[]
       ) => void
-    ): void => {
+    ): void {
       // allow mobile apps to access the API
       if (!origin) {
         return callback(null, true);
@@ -87,6 +85,15 @@ export default function applyGeneralMiddleware(app: Express) {
   }
 
   initPassport(app); // set up passport
+}
+
+function customHeaders(
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) {
+  res.setHeader("X-Powered-By", "some-shxt");
+  return next();
 }
 
 function initializeSession(app: Express) {

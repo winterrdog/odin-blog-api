@@ -11,7 +11,9 @@ export interface PostModelShape {
   likes?: string[];
   dislikes?: string[];
 }
+
 export interface PostDocument extends PostModelShape, Document {}
+
 const PostSchema = new Schema(
   {
     author: {
@@ -65,6 +67,11 @@ PostSchema.pre("save", async function (next) {
   }
 });
 
+export const PostModelName = "Post";
+export const PostModel = model(PostModelName, PostSchema);
+
+// *********************************************************
+
 function toJsonHandler(doc: Document, ret: any) {
   ret.id = ret._id;
   ret.dateCreated = ret.createdAt;
@@ -93,6 +100,3 @@ function toJsonHandler(doc: Document, ret: any) {
 
   return ret;
 }
-
-export const PostModelName = "Post";
-export const PostModel = model(PostModelName, PostSchema);

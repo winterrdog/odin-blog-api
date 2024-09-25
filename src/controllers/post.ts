@@ -29,6 +29,12 @@ const postController = {
   removeDislike: removeDislikeHandler(),
 };
 
+export default postController;
+
+// ****************************************************
+//             FUNCTION IMPLEMENTATIONS
+// ****************************************************
+
 function getUserPostsHandler() {
   const fetchUserPosts = async (req: Request, res: Response): Promise<any> => {
     try {
@@ -652,5 +658,3 @@ function extractPostIdFromReq(req: Request, res: Response): string {
   const { id } = sanitizedData;
   return Utility.validateObjectId(id, res) ? id : "";
 }
-
-export default postController;

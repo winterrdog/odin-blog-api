@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { startLogger } from "../logging";
 
 const logger = startLogger(__filename);
+
 export function isAuthor(req: Request, res: Response, next: NextFunction) {
   logger.info(`checking if user is an author...`);
 
@@ -16,6 +17,7 @@ export function isAuthor(req: Request, res: Response, next: NextFunction) {
   logger.info("user is an author hence proceeding to access resource");
   return next();
 }
+
 export function isReader(req: Request, res: Response, next: NextFunction) {
   logger.info(`checking if user is a reader...`);
 

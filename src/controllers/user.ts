@@ -23,6 +23,12 @@ const userController = {
   logout: logoutHandler(),
 };
 
+export default userController;
+
+// ****************************************************
+//             FUNCTION IMPLEMENTATIONS
+// ****************************************************
+
 function logoutHandler() {
   const handler = async function (req: Request, res: Response): Promise<any> {
     try {
@@ -285,5 +291,3 @@ function createJwtPayload(user: UserDocument): JwtPayload {
 
   return payload;
 }
-
-export default userController;

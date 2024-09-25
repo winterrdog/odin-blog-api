@@ -12,24 +12,24 @@ import { startLogger } from "../logging";
 const logger = startLogger(__filename);
 logger.info("starting application server...");
 
-/**
- * Get port from environment and store in Express.
- */
-
+// setting up the port
 const port = normalizePort(process.env.PORT! || "3000");
 app.set("port", port);
 
-/**
- * Create HTTP server.
- */
-
+// Create HTTP server.
 const server = http.createServer(app);
 let conn: mongoose.Connection | null = null;
+
+main();
+
+// ****************************************************
+//            FUNCTION IMPLEMENTATIONS
+// ****************************************************
 
 /**
  * Listen on provided port, on all network interfaces.
  */
-const main = async function () {
+async function main() {
   try {
     server.listen(port);
     logger.info("server started on port: " + port);
@@ -51,8 +51,7 @@ const main = async function () {
 
     process.exit(1);
   }
-};
-main();
+}
 
 /**
  * Normalize a port into a number, string, or false.
@@ -128,7 +127,7 @@ async function connectToDb() {
     await mongoose.connect(
       process.env.NODE_ENV === "production"
         ? process.env.MONGO_URI!
-        : process.env.DEV_MONGO_URI!,
+        : process.env.DEV_MONGO_URI!
     );
     logger.info("database connected successfully...");
     return mongoose.connection;
@@ -151,13 +150,13 @@ async function closeDb(conn: mongoose.Connection) {
 
 async function handleUncaughtExceptions(
   err: Error,
-  origin: NodeJS.UncaughtExceptionOrigin,
+  origin: NodeJS.UncaughtExceptionOrigin
 ) {
   logger.error(
     err,
     origin === "unhandledRejection"
       ? "an unhandled rejection occurred"
-      : "an uncaught exception occurred",
+      : "an uncaught exception occurred"
   );
 
   // close the database connection gracefully
@@ -165,7 +164,7 @@ async function handleUncaughtExceptions(
 
   const forceAnExit = () => {
     logger.fatal(
-      "server didn't close in time so forcing the process to exit...",
+      "server didn't close in time so forcing the process to exit..."
     );
     process.abort();
   };

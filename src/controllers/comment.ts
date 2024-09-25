@@ -38,10 +38,16 @@ const commentController = {
   removeDislike: removeDislikeFromCommentHandler(),
 };
 
+export default commentController;
+
+// ****************************************************
+//             FUNCTION IMPLEMENTATIONS
+// ****************************************************
+
 function getUserCommentsHandler() {
   const fetchUserComments = async (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> => {
     try {
       const userId: string = Utility.extractUserIdFromToken(req);
@@ -81,7 +87,7 @@ function getUserCommentsHandler() {
 function getUserLikedCommentsHandler() {
   const fetchUserLikedComments = async (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> => {
     try {
       const userId: string = Utility.extractUserIdFromToken(req);
@@ -90,7 +96,7 @@ function getUserLikedCommentsHandler() {
         const comments = await CommentModel.find(
           { likes: { $in: [userId] } },
           null,
-          { session, sort: { lastModified: -1 } },
+          { session, sort: { lastModified: -1 } }
         );
 
         return comments as unknown as CommentDocument[];
@@ -120,7 +126,7 @@ function getUserLikedCommentsHandler() {
 function removeDislikeFromCommentHandler() {
   const removeDislikeFromComment = async function (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       let comment = await findCommentByIdAndPostId(req, res);
@@ -180,7 +186,7 @@ function removeDislikeFromCommentHandler() {
 function dislikeCommentHandler() {
   const dislikeComment = async function (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       let comment = await findCommentByIdAndPostId(req, res);
@@ -193,7 +199,7 @@ function dislikeCommentHandler() {
       const updatedCommentDislikes = Utility.updateUserReactions(
         req,
         res,
-        comment.dislikes!,
+        comment.dislikes!
       );
       if (!updatedCommentDislikes) {
         return;
@@ -235,7 +241,7 @@ function dislikeCommentHandler() {
 function removeCommentLikeHandler() {
   const removeCommentLike = async function (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       let comment = await findCommentByIdAndPostId(req, res);
@@ -292,7 +298,7 @@ function removeCommentLikeHandler() {
 function likeCommentHandler() {
   const likeComment = async function (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       let comment = await findCommentByIdAndPostId(req, res);
@@ -303,7 +309,7 @@ function likeCommentHandler() {
       const updatedCommentLikes = Utility.updateUserReactions(
         req,
         res,
-        comment.likes!,
+        comment.likes!
       );
       if (!updatedCommentLikes) return;
 
@@ -343,7 +349,7 @@ function likeCommentHandler() {
 function deleteReplyToCommentHandler() {
   const deleteReplyToComment = async function (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       const parentComment = await findParentComment(req, res);
@@ -361,7 +367,7 @@ function deleteReplyToCommentHandler() {
       const deletedReply = await findCommentByIdAndParentId(
         replyId,
         parentComment.id,
-        res,
+        res
       );
       if (!deletedReply) {
         return;
@@ -371,7 +377,7 @@ function deleteReplyToCommentHandler() {
         Utility.isCurrUserSameAsCreator(
           req,
           res,
-          (<any>deletedReply.user).id,
+          (<any>deletedReply.user).id
         ) === false
       ) {
         return;
@@ -428,7 +434,7 @@ function deleteReplyToCommentHandler() {
 function createReplyToCommentHandler() {
   const createSubComment = async function (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       // find the parent comment first
@@ -449,7 +455,7 @@ function createReplyToCommentHandler() {
       // make sub comment / reply
       const currUserId = Utility.extractUserIdFromToken(req);
       logger.info(
-        `creating a sub-comment for comment,${parentCommentId}, by user with id, ${currUserId}...`,
+        `creating a sub-comment for comment,${parentCommentId}, by user with id, ${currUserId}...`
       );
 
       const replyCommentData: CommentModelShape = {
@@ -472,7 +478,7 @@ function createReplyToCommentHandler() {
       parentComment.childComments!.push(newReplyComment.id);
 
       const saveParentCommentCb: TransactionCallback<void> = async (
-        session,
+        session
       ) => {
         await parentComment.save({ session });
       };
@@ -502,7 +508,7 @@ function createReplyToCommentHandler() {
 function retrieveRepliesHandler() {
   const fetchReplies = async function (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       const parentComment = await findParentComment(req, res);
@@ -578,7 +584,7 @@ function retrieveRepliesHandler() {
 function deleteCommentHandler() {
   const deleteComment = async function (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       const storedComment = await findCommentByIdAndPostId(req, res);
@@ -590,7 +596,7 @@ function deleteCommentHandler() {
         Utility.isCurrUserSameAsCreator(
           req,
           res,
-          (<any>storedComment.user).id,
+          (<any>storedComment.user).id
         ) === false
       ) {
         return;
@@ -598,7 +604,7 @@ function deleteCommentHandler() {
 
       await markCommentAsDeleted(storedComment);
       logger.info(
-        `comment with id, ${storedComment.id}, deleted successfully!`,
+        `comment with id, ${storedComment.id}, deleted successfully!`
       );
 
       return res.status(204).end();
@@ -616,7 +622,7 @@ function deleteCommentHandler() {
 function modifyCommentHandler() {
   const handleUpdateComment = async function (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       let storedComment = await findCommentByIdAndPostId(req, res);
@@ -628,7 +634,7 @@ function modifyCommentHandler() {
         Utility.isCurrUserSameAsCreator(
           req,
           res,
-          (<any>storedComment.user).id,
+          (<any>storedComment.user).id
         ) === false
       ) {
         return;
@@ -638,11 +644,11 @@ function modifyCommentHandler() {
       newData["lastModified"] = new Date();
       storedComment = (await Utility.updateDoc(
         storedComment,
-        newData,
+        newData
       )) as CommentDocument;
 
       logger.info(
-        `comment with id, ${storedComment.id}, updated successfully!`,
+        `comment with id, ${storedComment.id}, updated successfully!`
       );
 
       return res.status(200).json({
@@ -668,7 +674,7 @@ function modifyCommentHandler() {
 function createCommentHandler() {
   const createComment = async function (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       const sanitizedData = matchedData(req);
@@ -685,7 +691,7 @@ function createCommentHandler() {
       } as const;
 
       logger.info(
-        `creating a comment for user with id, ${currUserId} and post id, ${postId}...`,
+        `creating a comment for user with id, ${currUserId} and post id, ${postId}...`
       );
 
       const cb: TransactionCallback<CommentDocument> = async (session) => {
@@ -695,7 +701,7 @@ function createCommentHandler() {
 
       const createdComment = await Utility.runOperationInTransaction(cb);
       logger.info(
-        `comment with id, ${createdComment.id}, created successfully!`,
+        `comment with id, ${createdComment.id}, created successfully!`
       );
 
       return res.status(201).json({
@@ -721,7 +727,7 @@ function createCommentHandler() {
 function getCommentsForPostHandler() {
   const fetchPostComments = async function (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       const storedComments = await findCommentsForPost(req, res);
@@ -753,7 +759,7 @@ function getCommentsForPostHandler() {
 function fetchCommentByIdHandler() {
   const handleCommentRetrieval = async function (
     req: Request,
-    res: Response,
+    res: Response
   ): Promise<any> {
     try {
       const storedComment = await findCommentByIdAndPostId(req, res);
@@ -830,14 +836,14 @@ async function markCommentAsDeleted(storedComment: any) {
 async function findCommentByIdAndParentId(
   id: string,
   parentId: string,
-  res: Response,
+  res: Response
 ) {
   try {
     const cb: TransactionCallback<CommentDocument | null> = async (session) => {
       const comment = await CommentModel.findOne(
         { _id: id, parentComment: parentId },
         null,
-        { session },
+        { session }
       );
 
       if (!comment) {
@@ -871,7 +877,7 @@ async function findCommentByIdAndPostId(req: Request, res: Response) {
     const sanitizedData = matchedData(req);
     const { postId, id: commentId } = sanitizedData;
     logger.info(
-      `searching for comment with id, ${commentId}, for post with id, ${postId}...`,
+      `searching for comment with id, ${commentId}, for post with id, ${postId}...`
     );
 
     if (
@@ -885,7 +891,7 @@ async function findCommentByIdAndPostId(req: Request, res: Response) {
       const comment = await CommentModel.findOne(
         { _id: commentId, post: postId },
         null,
-        { session },
+        { session }
       );
 
       if (!comment) {
@@ -919,7 +925,7 @@ async function findCommentsForPost(req: Request, res: Response) {
     }
 
     const cb: TransactionCallback<CommentDocument[] | null> = async (
-      session,
+      session
     ) => {
       const comments = await CommentModel.find({ post: postId }, null, {
         session,
@@ -963,5 +969,3 @@ function validateCommentFromDb(comment: any | null, res: Response) {
   res.status(404).json({ message: "comment not found" });
   return false;
 }
-
-export default commentController;

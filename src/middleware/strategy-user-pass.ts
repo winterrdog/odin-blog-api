@@ -4,14 +4,26 @@ import { UserModel } from "../models/user";
 import { startLogger } from "../logging";
 
 const logger = startLogger(__filename);
+
 const options = {
   usernameField: "name",
   passwordField: "pass",
   session: false,
 };
-const isPasswordValid = async function (
+
+logger.info("setting up user-password passport strategy...");
+
+const userPassStrategy = new LocalStrategy(options, verifyUserCb);
+
+export default userPassStrategy;
+
+// *********************************************************
+//           FUNCTION IMPLEMENTATIONS
+// *********************************************************
+
+async function isPasswordValid(
   password: string,
-  storedHash: string,
+  storedHash: string
 ): Promise<boolean> {
   try {
     return await argon.verify(storedHash, password);
@@ -19,11 +31,12 @@ const isPasswordValid = async function (
     logger.error(err, "error occured during password verification");
     return false;
   }
-};
-const verifyUserCb = async function (
+}
+
+async function verifyUserCb(
   username: string,
   password: string,
-  cb: any,
+  cb: any
 ): Promise<void> {
   try {
     logger.info(`verifying user: ${username}...`);
@@ -31,7 +44,7 @@ const verifyUserCb = async function (
 
     if (!user) {
       logger.error(
-        `user with name, ${username}, was not found thus cannot login`,
+        `user with name, ${username}, was not found thus cannot login`
       );
       return cb(null, false, {
         message: `user with name, ${username}, was not found`,
@@ -40,11 +53,11 @@ const verifyUserCb = async function (
 
     const isPasswordCorrect = await isPasswordValid(
       password,
-      user.passwordHash,
+      user.passwordHash
     );
     if (!isPasswordCorrect) {
       logger.error(
-        `password is incorrect for user: ${username} hence cannot login`,
+        `password is incorrect for user: ${username} hence cannot login`
       );
       return cb(null, false, {
         message: `password, ${password}, is incorrect`,
@@ -57,8 +70,4 @@ const verifyUserCb = async function (
     logger.error(err, `error occured during verification of user: ${username}`);
     return cb(err);
   }
-};
-logger.info("setting up user-password passport strategy...");
-const userPassStrategy = new LocalStrategy(options, verifyUserCb);
-
-export default userPassStrategy;
+}
