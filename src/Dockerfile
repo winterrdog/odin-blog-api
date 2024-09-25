@@ -1,5 +1,5 @@
 ####################
-# build stage
+#   BUILD STAGE
 ####################
 
 FROM node:latest as builder
@@ -13,7 +13,9 @@ WORKDIR ${APP_DIR}
 
 # install dependencies
 COPY --chown=node:node package* ./
-RUN npm i -g typescript && npm ci
+
+RUN npm i -g typescript && \
+    npm ci --include=dev
 
 # copy code into container as 'node' user
 COPY --chown=node:node . ${APP_DIR}
@@ -21,11 +23,16 @@ COPY --chown=node:node . ${APP_DIR}
 # transpile ts to js
 RUN  npm run compile
 
+# remove dev dependencies, install only production dependencies and clean cache
+RUN rm -rf node_modules && \
+    npm ci --omit=dev && \
+    npm cache clean --force
+
 
 
 
 ##############################
-# runtime stage - final image
+#   PRODUCTION STAGE
 ##############################
 
 FROM node:22.7.0-alpine3.20@sha256:ed9736a13b88ba55cbc08c75c9edac8ae7f72840482e40324670b299336680c1
@@ -51,10 +58,9 @@ WORKDIR ${APP_DIR}
 COPY --from=builder ${APP_DIR}/dist ./dist
 COPY --from=builder ${APP_DIR}/node_modules ./node_modules
 
-EXPOSE 3000
-
 # set non-root user
 USER node
 
-# entry point
+EXPOSE 3000
+
 ENTRYPOINT [ "node", "./dist/bin/www.js" ]
