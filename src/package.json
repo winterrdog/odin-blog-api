@@ -32,7 +32,7 @@
     "pino-pretty": "^13.0.0"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.18",
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.2",
     "@types/jest": "^29.5.14",
     "@types/morgan": "^1.9.9",
