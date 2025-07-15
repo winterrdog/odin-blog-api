@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@types/lodash": "^4.17.20",
-    "argon2": "^0.43.0",
+    "argon2": "^0.43.1",
     "cookie-parser": "~1.4.7",
     "cors": "^2.8.5",
     "csrf": "^3.1.0",
