@@ -67,7 +67,5 @@ func CreateInteractionIndexes(ctx context.Context, coll *qmgo.Collection) error 
 			Key: []string{"user", "type", "-createdAt"},
 		},
 	}
-
-	var err = coll.CreateIndexes(ctx, indexes)
-	return err
+	return coll.CreateIndexes(ctx, indexes)
 }

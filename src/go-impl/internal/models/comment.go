@@ -43,7 +43,7 @@ func (c *Comment) BeforeInsert(ctx context.Context) error {
 func (c *Comment) BeforeUpdate(ctx context.Context) error {
 	now := time.Now()
 	c.UpdatedAt = now
-	
+
 	return nil
 }
 
@@ -69,6 +69,5 @@ func CreateCommentIndexes(ctx context.Context, coll *qmgo.Collection) error {
 			Key: []string{"post", "parentComment", "-createdAt"},
 		},
 	}
-	var err = coll.CreateIndexes(ctx, indexes)
-	return err
+	return coll.CreateIndexes(ctx, indexes)
 }

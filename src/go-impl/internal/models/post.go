@@ -53,7 +53,5 @@ func CreatePostIndexes(ctx context.Context, coll *qmgo.Collection) error {
 		{Key: []string{"deleted", "hidden"}},
 		{Key: []string{"-createdAt"}},
 	}
-
-	err := coll.CreateIndexes(ctx, indexes)
-	return err
+	return coll.CreateIndexes(ctx, indexes)
 }
