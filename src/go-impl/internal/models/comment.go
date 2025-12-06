@@ -52,7 +52,7 @@ func (c *Comment) IsRootComment() bool {
 	return c.ParentComment == nil
 }
 
-func CreateCommentIndexes(ctx context.Context, coll *qmgo.Collection) error {
+func CreateCommentIndexes(ctx *context.Context, coll *qmgo.Collection) error {
 	var indexes = []opts.IndexModel{
 		{Key: []string{"user"}},
 		{Key: []string{"post"}},
@@ -69,5 +69,5 @@ func CreateCommentIndexes(ctx context.Context, coll *qmgo.Collection) error {
 			Key: []string{"post", "parentComment", "-createdAt"},
 		},
 	}
-	return coll.CreateIndexes(ctx, indexes)
+	return coll.CreateIndexes(*ctx, indexes)
 }

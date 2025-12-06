@@ -46,7 +46,7 @@ func (i *Interaction) BeforeInsert(ctx context.Context) error {
 	return nil
 }
 
-func CreateInteractionIndexes(ctx context.Context, coll *qmgo.Collection) error {
+func CreateInteractionIndexes(ctx *context.Context, coll *qmgo.Collection) error {
 	var unique = true
 	var indexes = []opts.IndexModel{
 		{
@@ -67,5 +67,5 @@ func CreateInteractionIndexes(ctx context.Context, coll *qmgo.Collection) error 
 			Key: []string{"user", "type", "-createdAt"},
 		},
 	}
-	return coll.CreateIndexes(ctx, indexes)
+	return coll.CreateIndexes(*ctx, indexes)
 }

@@ -53,7 +53,7 @@ func (u *User) BeforeUpdate(ctx context.Context) error {
 }
 
 // CreateUserIndexes creates all indexes for the User collection
-func CreateUserIndexes(ctx context.Context, coll *qmgo.Collection) error {
+func CreateUserIndexes(ctx *context.Context, coll *qmgo.Collection) error {
 	var unique = true
 	var indexes = []opts.IndexModel{
 		{
@@ -65,5 +65,5 @@ func CreateUserIndexes(ctx context.Context, coll *qmgo.Collection) error {
 			IndexOptions: &options.IndexOptions{Unique: &unique},
 		},
 	}
-	return coll.CreateIndexes(ctx, indexes)
+	return coll.CreateIndexes(*ctx, indexes)
 }

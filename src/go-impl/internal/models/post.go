@@ -47,11 +47,11 @@ func (p *Post) BeforeUpdate(ctx context.Context) error {
 	return nil
 }
 
-func CreatePostIndexes(ctx context.Context, coll *qmgo.Collection) error {
+func CreatePostIndexes(ctx *context.Context, coll *qmgo.Collection) error {
 	var indexes = []opts.IndexModel{
 		{Key: []string{"author"}},
 		{Key: []string{"deleted", "hidden"}},
 		{Key: []string{"-createdAt"}},
 	}
-	return coll.CreateIndexes(ctx, indexes)
+	return coll.CreateIndexes(*ctx, indexes)
 }
