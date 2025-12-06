@@ -17,6 +17,48 @@ a blog api built with go, gin, and mongodb. supports posts, comments, threaded d
 - comments: threaded discussions on posts
 - interactions: likes/dislikes on posts and comments
 
+### data model architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         USER                                    │
+│  - ID (ObjectID)                                                │
+│  - Name (unique)                                                │
+│  - Email (unique)                                               │
+│  - Role (default: RoleReader)                                   │
+│  - CreatedAt, UpdatedAt                                         │
+└────────────┬────────────────────────────────────────────────────┘
+             │
+             │ (author)
+             │
+             ├──────────────────────────────────────────────────┐
+             │                                                  │
+             ▼                                                  ▼
+┌────────────────────────────┐                    ┌──────────────────────────┐
+│         POST               │                    │      INTERACTION         │
+│  - ID (ObjectID)           │◄───────────────────│  - ID (ObjectID)         │
+│  - Author (→ User)         │   (target)         │  - User (→ User)         │
+│  - Content                 │                    │  - Target (→ Post/Comment)│
+│  - Deleted, Hidden         │                    │  - TargetType            │
+│  - CreatedAt, UpdatedAt    │                    │  - Type (like/dislike)   │
+└────────────┬───────────────┘                    │  - CreatedAt, UpdatedAt  │
+             │                                    │                          │
+             │ (post)                             │  Unique: (user, target,  │
+             │                                    │   targetType, type)      │
+             ▼                                    └──────────────────────────┘
+┌────────────────────────────┐                               ▲
+│        COMMENT             │                               │
+│  - ID (ObjectID)           │───────────────────────────────┘
+│  - User (→ User)           │        (target)
+│  - Post (→ Post)           │
+│  - ParentComment (→ Comment) ◄──┐ (self-reference for threads)
+│  - Content                 │    │
+│  - Deleted                 │    │
+│  - CreatedAt, UpdatedAt    │────┘
+└────────────────────────────┘
+
+```
+
 ## requirements
 
 ### with docker (recommended)
