@@ -1,0 +1,29 @@
+services:
+  api: #app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: trie-api
+    ports:
+      - "8080:8080"
+    env_file:
+      - cmd/server/.env
+    environment:
+      MONGO_URI: "mongodb://mongodb:27017"
+    depends_on: # wait for mongodb to be ready before starting
+      - mongodb
+    restart: on-failure:2
+
+  mongodb: #db
+    image: mongo:7
+    container_name: trie-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: trie
+    restart: on-failure:2
+
+volumes:
+  mongodb_data:
