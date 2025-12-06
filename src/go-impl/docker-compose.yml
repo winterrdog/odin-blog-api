@@ -13,6 +13,8 @@ services:
     depends_on: # wait for mongodb to be ready before starting
       - mongodb
     restart: on-failure:2
+    networks:
+      - trie-network
 
   mongodb: #db
     image: mongo:7
@@ -24,6 +26,12 @@ services:
     environment:
       MONGO_INITDB_DATABASE: trie
     restart: on-failure:2
+    networks:
+      - trie-network
 
 volumes:
   mongodb_data:
+
+networks:
+  trie-network:
+    driver: bridge
