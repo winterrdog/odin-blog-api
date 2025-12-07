@@ -8,6 +8,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/winterrdog/trie/internal/config"
 	"github.com/winterrdog/trie/internal/db"
+	"github.com/winterrdog/trie/internal/middleware"
 )
 
 func main() {
@@ -30,6 +31,9 @@ func main() {
 	defer db.Close(&ctx)
 
 	var r = gin.Default()
+
+	// middleware
+	middleware.ApplyCors(r, cfg)
 
 	// todo: add handlers here
 
