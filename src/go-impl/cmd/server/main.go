@@ -33,11 +33,8 @@ func main() {
 
 	var r = gin.Default()
 
-	// middleware
-	middleware.ApplyCors(r, cfg)
-
-	// todo: add handlers here
-	handlers.HealthCheck(r)
+	middleware.ApplyAllMiddleware(r, cfg)
+	handlers.AttachAllHandlers(r)
 
 	r.Run(":" + cfg.Port)
 }
