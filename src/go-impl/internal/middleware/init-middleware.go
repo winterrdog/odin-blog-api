@@ -6,6 +6,6 @@ import (
 )
 
 func ApplyAllMiddleware(r *gin.Engine, cfg *config.Config) {
-	SetupLogger(r)
+	ConfigureRequestLogger(r)
 	ApplyCors(r, cfg)
 }

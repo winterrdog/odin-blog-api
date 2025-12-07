@@ -7,9 +7,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupLogger(r *gin.Engine) {
+func ConfigureRequestLogger(r *gin.Engine) {
 	var formatter = func(param gin.LogFormatterParams) string {
-		return fmt.Sprintf(`{"time":"%s"|"status":%d|"method":"%s"|"path":"%s"|"latency":"%s"|"ip":"%s"|"user_agent":%q}`+"\n",
+		return fmt.Sprintf(`{"time":"%s","status":%d,"method":"%s","path":"%s","latency":"%s","ip":"%s","user_agent":%q}`+"\n",
 			param.TimeStamp.Format(time.RFC3339),
 			param.StatusCode,
 			param.Method,
