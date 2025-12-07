@@ -8,6 +8,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/winterrdog/trie/internal/config"
 	"github.com/winterrdog/trie/internal/db"
+	"github.com/winterrdog/trie/internal/handlers"
 	"github.com/winterrdog/trie/internal/middleware"
 )
 
@@ -36,6 +37,7 @@ func main() {
 	middleware.ApplyCors(r, cfg)
 
 	// todo: add handlers here
+	handlers.HealthCheck(r)
 
 	r.Run(":" + cfg.Port)
 }
