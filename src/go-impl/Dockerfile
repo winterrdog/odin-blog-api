@@ -1,3 +1,7 @@
+# #############
+# Build stage
+# #############
+
 FROM golang:1.25.5-alpine AS builder
 
 WORKDIR /app
@@ -11,7 +15,11 @@ COPY . .
 # build the server
 RUN go build -o bin/server ./cmd/server
 
-FROM alpine:latest
+# ############
+# Final stage
+# ############
+
+FROM alpine:latest AS final
 
 RUN addgroup -g 1000 api && \
     adduser -D -u 1000 -G api api
