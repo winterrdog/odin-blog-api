@@ -30,6 +30,16 @@ type User struct {
 	UpdatedAt       time.Time          `bson:"updatedAt" json:"dateUpdated"`
 }
 
+// we never want to update everything blindly, so we use a strict update struct
+type UserUpdate struct {
+	Name            *string `bson:"name,omitempty"`
+	Email           *string `bson:"email,omitempty"`
+	Role            *string `bson:"role,omitempty"`
+	IsEmailVerified *bool   `bson:"isEmailVerified,omitempty"`
+	IsActive        *bool   `bson:"isActive,omitempty"`
+	PasswordHash    *string `bson:"passwordHash,omitempty"`
+}
+
 // hook called before inserting
 func (u *User) BeforeInsert(ctx context.Context) error {
 	if u.ID.IsZero() {
