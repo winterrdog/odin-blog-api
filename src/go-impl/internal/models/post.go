@@ -55,3 +55,10 @@ func CreatePostIndexes(ctx *context.Context, coll *qmgo.Collection) error {
 	}
 	return coll.CreateIndexes(*ctx, indexes)
 }
+
+// PostUpdate defines fields that can be updated on a post
+type PostUpdate struct {
+	Title  *string `json:"title,omitempty"`
+	Body   *string `json:"body,omitempty"`
+	Hidden *bool   `json:"hidden,omitempty"`
+}

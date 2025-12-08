@@ -46,6 +46,11 @@ func (i *Interaction) BeforeInsert(ctx context.Context) error {
 	return nil
 }
 
+func (i *Interaction) BeforeUpdate(ctx context.Context) error {
+	i.UpdatedAt = time.Now()
+	return nil
+}
+
 func CreateInteractionIndexes(ctx *context.Context, coll *qmgo.Collection) error {
 	var unique = true
 	var indexes = []opts.IndexModel{

@@ -71,3 +71,9 @@ func CreateCommentIndexes(ctx *context.Context, coll *qmgo.Collection) error {
 	}
 	return coll.CreateIndexes(*ctx, indexes)
 }
+
+// CommentUpdate defines fields that can be updated on a comment
+type CommentUpdate struct {
+	Body *string `json:"body,omitempty"`
+	TLDR *string `json:"tldr,omitempty"`
+}
