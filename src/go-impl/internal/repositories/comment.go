@@ -124,6 +124,16 @@ func (r *commentRepository) Delete(ctx *context.Context, filter bson.M) error {
 
 // IncrementCount atomically increments a counter field on a comment
 func (r *commentRepository) IncrementCount(ctx *context.Context, filter bson.M, field string, delta int64) error {
+	// apply validation on field name if necessary
+	var allowedFields = map[string]bool{
+		"likesCount":    true,
+		"dislikesCount": true,
+	}
+
+	if !allowedFields[field] {
+		return errors.New("invalid field for increment:" + field)
+	}
+
 	var updateDoc = bson.M{"$inc": bson.M{field: delta}}
 	return r.coll.UpdateOne(*ctx, filter, updateDoc)
 }
