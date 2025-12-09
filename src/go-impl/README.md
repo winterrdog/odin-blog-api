@@ -61,23 +61,16 @@ a blog api built with go, gin, and mongodb. supports posts, comments, threaded d
 
 ## requirements
 
-### with docker (recommended)
-
 - docker
 - docker compose
-
-### without docker
-
-- go `1.23` or higher
-- mongodb `7.0` or higher
 
 ## setup
 
 ### 1. clone the repository
 
 ```bash
-git clone <this-repo>
-cd go-impl
+git clone https://github.com/winterrdog/odin-blog-api.git
+cd go-impl # might be changed later
 ```
 
 ### 2. create environment file
@@ -87,10 +80,10 @@ create a `.env` file at `cmd/server/.env`:
 ```bash
 PORT=8080
 DB_NAME=trie
-MONGO_URI=mongodb://localhost:27017
+ENV=development
+FRONTEND_URL=http://localhost:5000
+MONGO_URI=mongodb://mongodb:27017/trie
 ```
-
-> for docker, the MONGO_URI will be overridden automatically to use the container hostname.
 
 ### 3. run with docker
 
@@ -98,23 +91,7 @@ MONGO_URI=mongodb://localhost:27017
 ./run.sh
 ```
 
-or manually:
-
-```bash
-docker compose up --build
-```
-
 the api will be available at `http://localhost:8080`
-
-### 4. run without docker (optional)
-
-> make sure mongodb is running locally, then:
-
-```bash
-go mod download
-go build -o bin/server ./cmd/server
-cd cmd/server && ../../bin/server
-```
 
 ## project structure
 
@@ -184,7 +161,3 @@ to remove volumes as well:
 ```bash
 docker compose down -v
 ```
-
-### without docker
-
-press `ctrl+c` in the terminal running the server.
