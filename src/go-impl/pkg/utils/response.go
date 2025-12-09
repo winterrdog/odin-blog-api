@@ -10,7 +10,11 @@ import "github.com/gin-gonic/gin"
 //   - msg: A message string to include in the response
 //   - data: Any data to be serialized and included in the response body
 func Success(c *gin.Context, msg string, data any) {
-	c.JSON(200, gin.H{"success": true, "data": data, "message": msg})
+	var body = map[string]any{"success": true, "message": msg}
+	if data != nil {
+		body["data"] = data
+	}
+	c.JSON(200, body)
 }
 
 // Error sends a JSON error response to the client with the specified HTTP status code and message.
@@ -21,5 +25,5 @@ func Success(c *gin.Context, msg string, data any) {
 //   - code: the HTTP status code to return (e.g., 400, 404, 500)
 //   - msg: the error message to include in the response
 func Error(c *gin.Context, code int, msg string) {
-	c.JSON(code, gin.H{"success": false, "message": msg})
+	c.JSON(code, map[string]any{"success": false, "message": msg})
 }
