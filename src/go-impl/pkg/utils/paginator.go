@@ -14,7 +14,9 @@ type SimplePaginator struct {
 	page  int32
 }
 
-// why: page starts from 1 to avoid confusion and bugs
+// NewSimplePaginator creates and returns a new SimplePaginator instance with the given page and limit values.
+// If page is less than 1, it defaults to 1.
+// The limit is clamped between 1 and MAX_PAGE_SIZE to ensure valid pagination boundaries.
 func NewSimplePaginator(page, limit int32) *SimplePaginator {
 	if page < 1 {
 		page = 1
@@ -25,9 +27,11 @@ func NewSimplePaginator(page, limit int32) *SimplePaginator {
 		limit: ClampInt(limit, 1, MAX_PAGE_SIZE),
 	}
 }
+
 func (p *SimplePaginator) Limit() int32 {
 	return p.limit
 }
+
 func (p *SimplePaginator) Offset() int32 {
 	return (p.page - 1) * p.limit
 }
