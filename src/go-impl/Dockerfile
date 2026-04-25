@@ -2,7 +2,7 @@
 # Build stage
 # #############
 
-FROM golang:1.25.5-alpine AS builder
+FROM golang:1.26.2-alpine AS builder
 
 WORKDIR /app
 
@@ -13,7 +13,8 @@ RUN go mod download
 COPY . .
 
 # build the server
-RUN go build -o bin/server ./cmd/server
+# RUN go build -v -ldflags="-s -w -O2" -o bin/server ./cmd/server # has optimisation on but slower build time, good for production
+RUN go build -v -o bin/server ./cmd/server
 
 # ############
 # Final stage

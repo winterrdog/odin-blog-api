@@ -16,7 +16,6 @@ func Load() *Config {
 		mongoURI    = os.Getenv("MONGO_URI")
 		frontendURL = os.Getenv("FRONTEND_URL")
 	)
-
 	if port == "" {
 		panic("PORT environment variable is required")
 	}
@@ -29,7 +28,6 @@ func Load() *Config {
 	if frontendURL == "" {
 		panic("FRONTEND_URL environment variable is required")
 	}
-
 	return &Config{
 		Port:        port,
 		DbName:      dbName,

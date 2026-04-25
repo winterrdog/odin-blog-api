@@ -75,7 +75,7 @@ cd go-impl # might be changed later
 
 ### 2. create environment file
 
-create a `.env` file at `cmd/server/.env`:
+create a `.env` file at `cmd/server/.env` (all variables are required):
 
 ```bash
 PORT=8080
@@ -87,8 +87,15 @@ MONGO_URI=mongodb://mongodb:27017/trie
 
 ### 3. run with docker
 
+use `run.sh` to manage the server. if no command is given, it defaults to `start`.
+
 ```bash
-./run.sh
+./run.sh            # start in detached mode (default)
+./run.sh start      # build and start containers in detached mode
+./run.sh restart    # stop and restart containers
+./run.sh stop       # stop running containers
+./run.sh logs       # tail container logs
+./run.sh help       # show usage information
 ```
 
 the api will be available at `http://localhost:8080`
@@ -150,7 +157,13 @@ the application automatically creates the following indexes on startup:
 
 ## stopping the app
 
-### with docker
+### with run.sh
+
+```bash
+./run.sh stop
+```
+
+### with docker compose directly
 
 ```bash
 docker compose down

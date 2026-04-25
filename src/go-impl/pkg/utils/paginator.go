@@ -21,7 +21,6 @@ func NewSimplePaginator(page, limit int32) *SimplePaginator {
 	if page < 1 {
 		page = 1
 	}
-
 	return &SimplePaginator{
 		page:  page,
 		limit: ClampInt(limit, 1, MAX_PAGE_SIZE),

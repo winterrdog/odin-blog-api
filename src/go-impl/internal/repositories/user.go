@@ -34,14 +34,12 @@ func (r *userRepository) Create(ctx *context.Context, user *models.User) error {
 func (r *userRepository) FindOne(ctx *context.Context, filter bson.M) (*models.User, error) {
 	var user models.User
 	var err = r.coll.Find(*ctx, filter).One(&user)
-
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, nil
 		}
 		return nil, err
 	}
-
 	return &user, nil
 }
 

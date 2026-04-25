@@ -29,7 +29,6 @@ func InitDatabase(ctx *context.Context, cfg *config.Config) (*Database, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	var db = client.Database(cfg.DbName)
 	var database = &Database{
 		Client:       client,
@@ -55,8 +54,6 @@ func InitDatabase(ctx *context.Context, cfg *config.Config) (*Database, error) {
 	if err = models.CreateInteractionIndexes(ctx, database.Interactions); err != nil {
 		return nil, err
 	}
-
 	log.Println("+ successfully created all db indexes!")
-
 	return database, nil
 }
